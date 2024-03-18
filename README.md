@@ -12,7 +12,7 @@ Flappy Bird is a side-scroller where the player controls a bird, attempting to f
 
 ## Live Demo
 
-[Live Demo Link](https://blissful-wiles-7bf90a.netlify.app/)
+[Live Demo Link](https://flappy-bird.vercel.app/)
 
 ## Getting Started
 
@@ -50,7 +50,7 @@ npm run build
 ### Run Linters
 
 ```bash
-npm run lint 
+npm run lint
 ```
 
 ### Troubleshoot

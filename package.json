@@ -4,7 +4,8 @@
   "description": "FlappyBird clone",
   "private": true,
   "scripts": {
-    "start": "webpack serve --open",
+    "start": "serve dist",
+    "dev": "webpack serve --open",
     "build": "webpack",
     "webhint": "hint .",
     "stylelint": "stylelint \"**/*.{css,scss}\"",
@@ -48,6 +49,7 @@
   },
   "dependencies": {
     "phaser": "^3.55.2",
-    "phaser3-webfont-loader": "^1.0.0"
+    "phaser3-webfont-loader": "^1.0.0",
+    "serve": "^14.2.1"
   }
 }
