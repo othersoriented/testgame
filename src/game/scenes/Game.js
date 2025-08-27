@@ -42,6 +42,10 @@ const LINKTREE_URL   = 'https://linktr.ee/lostboyfound';
 const SHARE_TITLE    = 'How about...Flappy Bird but make it Christian';
 const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clone 🎶';
 const SHARE_URL      = 'https://yourdomain.com/game.html'; // or your dev URL
+const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 32';
+const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
+
+
 
 
 // timeline spawn config
@@ -88,6 +92,7 @@ export default class GameScene extends Phaser.Scene {
     this.scoreText = this.createScoreText();
     this.bestScoreText = this.createBestScoreText();
     this.createSocialButtons();
+    
 
 
     // Start button (READY only)
@@ -147,11 +152,92 @@ export default class GameScene extends Phaser.Scene {
     // Camera toggle UI (starts OFF)
     this.createCameraToggle();
 
-    
+    // Prefer timeline title if present; otherwise fallback
+const nowPlayingText = this._tl?.title || NOW_PLAYING_FALLBACK;
+this.createNowPlayingBanner(nowPlayingText);
+
 
     this.setReady();
   }
 
+  createNowPlayingBanner(text) {
+  // Text
+  const label = this.add.text(this.scale.width / 2, 10, text, {
+  fontFamily: 'Teko',
+  fontSize: '24px',
+  color: '#4da6ff',  // hyperlink-style color
+})
+  .setOrigin(0.5, 0)
+  .setDepth(3000)
+  .setScrollFactor(0)
+  .setStroke('#000000', 6)
+  .setShadow(0, 2, '#000000', 4, true, true)
+  .setInteractive({ useHandCursor: true }) // <-- clickable
+  .on('pointerdown', (e) => e?.event?.stopPropagation())
+  .on('pointerup', (e) => {
+    e?.event?.stopPropagation();
+    window.open(SONG_URL, '_blank', 'noopener,noreferrer');
+  });
+
+// Hover effect (desktop)
+label.on('pointerover', () => label.setColor('#82c6ff'));
+label.on('pointerout',  () => label.setColor('#4da6ff'));
+
+
+  // Background pill (graphics)
+  const padX = 12;
+  const padY = 3;
+  const bg = this.add.graphics().setDepth(2999).setScrollFactor(0);
+  const drawBg = () => {
+    bg.clear();
+    const w = label.width + padX * 2;
+    const h = label.height + padY * 2;
+    const x = (this.scale.width - w) / 2;
+    const y = 4; // top margin
+    bg.fillStyle(0x000000, 0.35);
+    bg.fillRoundedRect(x, y, w, h, 10);
+  };
+  drawBg();
+
+  // Subtle animation (alpha pulse)
+  this.tweens.add({
+    targets: label,
+    alpha: { from: 0.85, to: 1 },
+    duration: 1200,
+    yoyo: true,
+    repeat: -1,
+    ease: 'Sine.easeInOut',
+  });
+
+  // Keep positioned nicely on resize
+  this.scale.on('resize', () => {
+    label.x = this.scale.width / 2;
+    label.y = 10;
+    drawBg();
+  });
+
+  // Expose so you can update weekly if you want
+  this.nowPlayingLabel = label;
+  this.nowPlayingBg = bg;
+}
+
+updateNowPlaying(text) {
+  if (!this.nowPlayingLabel) return;
+  this.nowPlayingLabel.setText(text);
+  // Redraw background to fit new width
+  if (this.nowPlayingBg) {
+    const padX = 12, padY = 6;
+    const w = this.nowPlayingLabel.width + padX * 2;
+    const h = this.nowPlayingLabel.height + padY * 2;
+    const x = (this.scale.width - w) / 2;
+    const y = 6;
+    this.nowPlayingBg.clear();
+    this.nowPlayingBg.fillStyle(0x000000, 0.35);
+    this.nowPlayingBg.fillRoundedRect(x, y, w, h, 10);
+  }
+}
+
+  
   createSocialButtons() {
   const { width, height } = this.scale;
   const yBase = height * 0.78;
@@ -178,8 +264,8 @@ export default class GameScene extends Phaser.Scene {
 
   const cx = width * 0.55;
   this.btnIG       = mkBtn('Follow on Instagram', cx - 110, () => this.openExternal(IG_PROFILE_URL));
-  this.btnShare    = mkBtn('Share',               cx,        () => this.shareScore());
-  this.btnLinktree = mkBtn('Linktree',            cx + 110,  () => this.openExternal(LINKTREE_URL));
+  this.btnShare    = mkBtn('Share',               cx, 0,       () => this.shareScore());
+  this.btnLinktree = mkBtn('Our Music',            cx + 100,  () => this.openExternal(LINKTREE_URL));
 
   this.setSocialButtonsVisible(false);
 }
