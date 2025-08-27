@@ -277,7 +277,7 @@ updateNowPlaying(text) {
 
   const cx = width * 0.55;
   this.btnIG       = mkBtn('Follow on Instagram', cx - 110, () => this.openExternal(IG_PROFILE_URL));
-  this.btnShare    = mkBtn('Share',               cx, 0,       () => this.shareScore());
+  this.btnShare    = mkBtn('Share',               cx,       () => this.shareScore());
   this.btnLinktree = mkBtn('Our Music',            cx + 100,  () => this.openExternal(LINKTREE_URL));
 
   this.setSocialButtonsVisible(false);
