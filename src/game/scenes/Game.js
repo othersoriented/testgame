@@ -19,16 +19,16 @@ import { loadTrack, play, getTime, resumeOnGesture } from '../audio.js';
 
 const FLAP = 'flap';
 const PIPE_HEIGHT = 320;
-const PIPE_GAP_HEIGHT = 100;
+const PIPE_GAP_HEIGHT = 105;
 const PIPE_GAP_LENGTH = 180;
-const PIPE_PAIRS = 1;
-const GROUND_HEIGHT = 100;
+const PIPE_PAIRS = 2;
+const GROUND_HEIGHT = 112;
 const FRAME_RATE = 5;
 const BIRD_GRAVITY = 1000;
-const BIRD_VELOCITY = -360;
-const GAME_SPEED = 2;
+const BIRD_VELOCITY = -320;
+const GAME_SPEED = 3;
 const ELEVATION_ANGLE = 25;
-const FALL_ANGLE = 100;
+const FALL_ANGLE = 90;
 const DECLINE_ANGLE_DELTA = 2;
 const MIN_PIPE_HEIGHT = -PIPE_HEIGHT * 0.7;
 const READY_STATE = 'ready-state';
@@ -41,7 +41,7 @@ const IG_PROFILE_URL = 'https://www.instagram.com/christianaiband/';
 const LINKTREE_URL   = 'https://linktr.ee/lostboyfound';
 const SHARE_TITLE    = 'How about...Flappy Bird but make it Christian';
 const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clone 🎶';
-const SHARE_URL      = 'https://yourdomain.com/game.html'; // or your dev URL
+const SHARE_URL      = 'https://christianaiband.com/game.html'; // or your dev URL
 const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 32';
 const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
 
@@ -52,7 +52,7 @@ const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
 const LOOKAHEAD = 1.6;
 
 // webcam bubble
-const CAMERA_BUBBLE_SIZE = 55;
+const CAMERA_BUBBLE_SIZE = 75;
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -247,7 +247,7 @@ updateNowPlaying(text) {
       fontFamily: 'Teko',
       fontSize: '15px',
       color: '#ffffff',
-      backgroundColor: '#13ad28ff',
+      backgroundColor: 'rgba(37, 78, 214, 1)',
       padding: { x: 6, y: 3 }
     })
       .setOrigin(0.5)
@@ -257,8 +257,8 @@ updateNowPlaying(text) {
       .on('pointerup',   (e) => { e?.event?.stopPropagation(); onClick(); });
 
     // subtle hover on desktop
-    t.on('pointerover', () => t.setStyle({ backgroundColor: 'rgba(37, 206, 32, 1)' }));
-    t.on('pointerout',  () => t.setStyle({ backgroundColor: 'hsla(318, 58%, 34%, 1.00)' }));
+    t.on('pointerover', () => t.setStyle({ backgroundColor: 'rgba(19, 121, 15, 1)' }));
+    t.on('pointerout',  () => t.setStyle({ backgroundColor: 'hsla(337, 97%, 49%, 1.00)' }));
     return t;
   };
 
@@ -482,7 +482,7 @@ shareScore() {
 
   createBackground() {
     const { width, height } = this.scale;
-    this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.5).refreshBody();
+    this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.7).refreshBody();
   }
 
   createPlayer() {
@@ -630,15 +630,19 @@ shareScore() {
   addScore(n) { this.score += n; this.updateScoreText(); }
 
   // ---------------- camera UI & controls (DOM) ----------------
-  createCameraToggle() {
-    // Bottom-left toggle button; visible in READY
-    this.camBtn = this.add.text(10, this.scale.height - 38, 'Enable Camera 😆', {
+   createCameraToggle() {
+    // Position relative to Start button if available
+    const btnX = this.startBtn ? this.startBtn.x : 10 + 90;
+    const btnY = this.startBtn ? this.startBtn.y + 90 : this.scale.height - 38;
+
+    this.camBtn = this.add.text(btnX, btnY, 'Enable Camera 😆', {
       fontFamily: 'Teko',
       fontSize: '20px',
       color: '#ffffff',
       backgroundColor: '#e7157eff',
       padding: { x: 8, y: 4 }
     })
+      .setOrigin(0.5) // center under Start
       .setScrollFactor(0)
       .setDepth(1000)
       .setInteractive({ useHandCursor: true })
@@ -648,9 +652,17 @@ shareScore() {
         if (!this.cameraEnabled) await this.enableWebcamDom();
         else this.disableWebcamDom();
       });
+
+    // keep under Start if resized
+    this.scale.on('resize', () => {
+      if (this.startBtn && this.camBtn) {
+        this.camBtn.x = this.startBtn.x;
+        this.camBtn.y = this.startBtn.y + 50;
+      }
+    });
   }
 
-  async enableWebcamDom() {
+   async enableWebcamDom() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 300 }, height: { ideal: 300 } },
@@ -671,6 +683,8 @@ shareScore() {
       video.style.zIndex = '9999';
       video.style.transform = 'translate(-50%, -50%)';
       video.style.border = '5px solid white';
+      // optional glow for contrast
+      video.style.boxShadow = '0 0 8px rgba(255,255,255,0.85)';
 
       document.body.appendChild(video);
 
@@ -681,7 +695,7 @@ shareScore() {
       this.cameraEnabled = true;
       this.camBtn?.setText('Disable Camera');
 
-      // Optional: hide the bird if you want the face to replace it
+      // Replace the sprite visually
       this.player.setVisible(false);
     } catch (err) {
       console.warn('Webcam error:', err);
@@ -703,7 +717,7 @@ shareScore() {
     this.cameraEnabled = false;
     this.camBtn?.setText('Enable Camera');
 
-    // If you hid the bird on enable, show it again
-    // this.player.setVisible(true);
+    // Show the sprite again if you hid it
+    this.player.setVisible(true);
   }
 }
