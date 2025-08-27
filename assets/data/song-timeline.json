@@ -1,0 +1,6 @@
+{
+  "song": "example",
+  "timeline": [
+    { "time": 0, "event": "start" }
+  ]
+}
