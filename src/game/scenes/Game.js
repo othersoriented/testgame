@@ -44,6 +44,8 @@ const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clon
 const SHARE_URL      = 'https://christianaiband.com/game.html'; // or your dev URL
 const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 32';
 const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
+const SOUND_HINT_MS = 2200; // how long to show the “check volume” hint
+
 
 
 
@@ -79,6 +81,12 @@ export default class GameScene extends Phaser.Scene {
 
     // Debug anchor dot
     this._camDebug = null;
+
+    // Sound Button
+    this.soundBtn = null;
+    this.isMuted = false;   // Phaser’s global mute mirror
+    this._soundHint = null; // transient hint text
+
   }
 
   create() {
@@ -92,6 +100,8 @@ export default class GameScene extends Phaser.Scene {
     this.scoreText = this.createScoreText();
     this.bestScoreText = this.createBestScoreText();
     this.createSocialButtons();
+    this.createSoundToggle();
+
     
 
 
@@ -216,6 +226,9 @@ label.on('pointerout',  () => label.setColor('#4da6ff'));
     drawBg();
   });
 
+
+
+
   // Expose so you can update weekly if you want
   this.nowPlayingLabel = label;
   this.nowPlayingBg = bg;
@@ -273,6 +286,100 @@ updateNowPlaying(text) {
 setSocialButtonsVisible(v) {
   [this.btnIG, this.btnShare, this.btnLinktree].forEach(b => b && b.setVisible(v));
 }
+
+createSoundToggle() {
+  // Top-right corner
+  const x = this.scale.width - 10;
+  const y = 8;
+
+  this.soundBtn = this.add.text(x, y, this.isMuted ? '🔇' : '🔊', {
+    fontFamily: 'Teko',
+    fontSize: '28px',
+    color: '#ffffff',
+  })
+    .setOrigin(1, 0)           // right/top align
+    .setDepth(3001)
+    .setScrollFactor(0)
+    .setStroke('#000000', 6)
+    .setShadow(0, 2, '#000000', 4, true, true)
+    .setInteractive({ useHandCursor: true })
+    .on('pointerdown', (e) => e?.event?.stopPropagation())
+    .on('pointerup', async (e) => {
+      e?.event?.stopPropagation();
+      await this.toggleSound();
+    });
+
+  // Keep in the corner on resize
+  this.scale.on('resize', () => {
+    if (!this.soundBtn) return;
+    this.soundBtn.x = this.scale.width - 10;
+    this.soundBtn.y = 8;
+  });
+}
+
+async toggleSound() {
+  // Always unlock audio on explicit user gesture
+  try { await resumeOnGesture(); } catch {}
+  try { this.sound.unlock(); } catch {}
+
+  this.isMuted = !this.isMuted;
+  this.sound.mute = this.isMuted;        // Phaser global mute
+  if (this.soundBtn) this.soundBtn.setText(this.isMuted ? '🔇' : '🔊');
+
+  // If unmuted while game is playing, ensure track is actually started/resumed
+  if (!this.isMuted && this.state === 'playing-state' && this._tl?.audio) {
+    try { play(); } catch {}
+  }
+
+  // Optional: show a brief hint if still silent (OS mute/volume)
+  if (!this.isMuted) {
+    this.showSoundHint('If you still can’t hear audio,\nflip your mute switch or raise volume.');
+  }
+}
+
+showSoundHint(msg) {
+  // One at a time
+  if (this._soundHint) { this._soundHint.destroy(); this._soundHint = null; }
+
+  const label = this.add.text(this.scale.width / 2, 64, msg, {
+    fontFamily: 'Teko',
+    fontSize: '18px',
+    color: '#ffffff',
+    align: 'center',
+  })
+    .setOrigin(0.5, 0)
+    .setDepth(3000)
+    .setScrollFactor(0)
+    .setStroke('#000000', 6)
+    .setShadow(0, 2, '#000000', 4, true, true)
+    .setAlpha(0);
+
+  this._soundHint = label;
+
+  // Fade in, wait, fade out
+  this.tweens.add({
+    targets: label,
+    alpha: { from: 0, to: 1 },
+    duration: 200,
+    onComplete: () => {
+      this.time.delayedCall(SOUND_HINT_MS, () => {
+        this.tweens.add({
+          targets: label,
+          alpha: { from: 1, to: 0 },
+          duration: 250,
+          onComplete: () => { label.destroy(); if (this._soundHint === label) this._soundHint = null; }
+        });
+      });
+    }
+  });
+
+  // Recenter on resize
+  this.scale.on('resize', () => {
+    if (!this._soundHint) return;
+    this._soundHint.x = this.scale.width / 2;
+  });
+}
+
 
 openExternal(url) {
   // open in a new tab safely
