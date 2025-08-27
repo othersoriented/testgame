@@ -22,11 +22,11 @@ const PIPE_HEIGHT = 320;
 const PIPE_GAP_HEIGHT = 100;
 const PIPE_GAP_LENGTH = 180;
 const PIPE_PAIRS = 1;
-const GROUND_HEIGHT = 112;
+const GROUND_HEIGHT = 100;
 const FRAME_RATE = 5;
 const BIRD_GRAVITY = 1000;
 const BIRD_VELOCITY = -360;
-const GAME_SPEED = 3;
+const GAME_SPEED = 2;
 const ELEVATION_ANGLE = 25;
 const FALL_ANGLE = 100;
 const DECLINE_ANGLE_DELTA = 2;
@@ -36,12 +36,19 @@ const PLAYING_STATE = 'playing-state';
 const GAME_OVER_STATE = 'gameover-state';
 const DIGIT_WIDTH = 24;
 const BEST_SCORE_KEY = 'best-score';
+// --- Social links (edit to yours) ---
+const IG_PROFILE_URL = 'https://www.instagram.com/christianaiband/';
+const LINKTREE_URL   = 'https://linktr.ee/lostboyfound';
+const SHARE_TITLE    = 'How about...Flappy Bird but make it Christian';
+const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clone 🎶';
+const SHARE_URL      = 'https://yourdomain.com/game.html'; // or your dev URL
+
 
 // timeline spawn config
 const LOOKAHEAD = 1.6;
 
 // webcam bubble
-const CAMERA_BUBBLE_SIZE = 50;
+const CAMERA_BUBBLE_SIZE = 55;
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -80,6 +87,8 @@ export default class GameScene extends Phaser.Scene {
     this.gameoverMessage = this.createGameOverMessage();
     this.scoreText = this.createScoreText();
     this.bestScoreText = this.createBestScoreText();
+    this.createSocialButtons();
+
 
     // Start button (READY only)
     const { width, height } = this.scale;
@@ -143,6 +152,65 @@ export default class GameScene extends Phaser.Scene {
     this.setReady();
   }
 
+  createSocialButtons() {
+  const { width, height } = this.scale;
+  const yBase = height * 0.78;
+
+  const mkBtn = (label, x, onClick) => {
+    const t = this.add.text(x, yBase, label, {
+      fontFamily: 'Teko',
+      fontSize: '15px',
+      color: '#ffffff',
+      backgroundColor: '#13ad28ff',
+      padding: { x: 6, y: 3 }
+    })
+      .setOrigin(0.5)
+      .setDepth(2000)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', (e) => e?.event?.stopPropagation())
+      .on('pointerup',   (e) => { e?.event?.stopPropagation(); onClick(); });
+
+    // subtle hover on desktop
+    t.on('pointerover', () => t.setStyle({ backgroundColor: 'rgba(37, 206, 32, 1)' }));
+    t.on('pointerout',  () => t.setStyle({ backgroundColor: 'hsla(318, 58%, 34%, 1.00)' }));
+    return t;
+  };
+
+  const cx = width * 0.55;
+  this.btnIG       = mkBtn('Follow on Instagram', cx - 110, () => this.openExternal(IG_PROFILE_URL));
+  this.btnShare    = mkBtn('Share',               cx,        () => this.shareScore());
+  this.btnLinktree = mkBtn('Linktree',            cx + 110,  () => this.openExternal(LINKTREE_URL));
+
+  this.setSocialButtonsVisible(false);
+}
+
+setSocialButtonsVisible(v) {
+  [this.btnIG, this.btnShare, this.btnLinktree].forEach(b => b && b.setVisible(v));
+}
+
+openExternal(url) {
+  // open in a new tab safely
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+shareScore() {
+  const scoreMsg = `My score: ${this.score}`;
+  const data = {
+    title: SHARE_TITLE,
+    text: `${SHARE_TEXT} ${scoreMsg}`,
+    url: SHARE_URL
+  };
+
+  if (navigator.share) {
+    navigator.share(data).catch(() => {});
+  } else {
+    // Fallback: copy to clipboard + open Instagram profile (or Linktree)
+    navigator.clipboard?.writeText(`${data.text} ${data.url}`).catch(() => {});
+    this.openExternal(IG_PROFILE_URL);
+  }
+}
+
+  
   update() {
     // core loop
     this.animate();
@@ -155,6 +223,8 @@ export default class GameScene extends Phaser.Scene {
 
       if (this._tl?.duration && getTime() >= this._tl.duration) {
         this.setGameOver();
+        this.setSocialButtonsVisible(true);
+
       }
     }
 
@@ -218,6 +288,8 @@ export default class GameScene extends Phaser.Scene {
     this.gameoverMessage.visible = false;
     this.bestScoreText.visible = false;
     this.restartButton.visible = false;
+    if (this.btnIG) this.setSocialButtonsVisible(false);
+    
 
     this.player.body.allowGravity = false;
     this.player.anims.play(FLAP, true);
@@ -256,6 +328,9 @@ export default class GameScene extends Phaser.Scene {
       this.hitSound.play();
       this.player.anims.stop();
 
+      // NEW: show socials when game actually ends (collision or song end)
+    this.setSocialButtonsVisible(true);
+
       const currentBest = localStorage.getItem(BEST_SCORE_KEY) || 0;
       const bestScore = Math.max(currentBest, this.score);
       localStorage.setItem(BEST_SCORE_KEY, Math.max(this.score, bestScore));
@@ -285,6 +360,7 @@ export default class GameScene extends Phaser.Scene {
     this._nextNoteIdx = 0;
     this._nextCoinAt = 0;
     this.notesCollected = 0;
+    this.setSocialButtonsVisible(false);
 
     // optional: turn off camera on restart
     // this.disableWebcamDom();
@@ -470,11 +546,11 @@ export default class GameScene extends Phaser.Scene {
   // ---------------- camera UI & controls (DOM) ----------------
   createCameraToggle() {
     // Bottom-left toggle button; visible in READY
-    this.camBtn = this.add.text(10, this.scale.height - 28, 'Enable Camera', {
+    this.camBtn = this.add.text(10, this.scale.height - 38, 'Enable Camera 😆', {
       fontFamily: 'Teko',
       fontSize: '20px',
       color: '#ffffff',
-      backgroundColor: '#2d3436',
+      backgroundColor: '#e7157eff',
       padding: { x: 8, y: 4 }
     })
       .setScrollFactor(0)
