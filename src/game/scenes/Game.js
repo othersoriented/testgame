@@ -15,6 +15,9 @@ import {
   START_BUTTON,
 } from './shared.js';
 
+// NEW: audio helpers (create src/audio.js as provided earlier)
+import { loadTrack, play, getTime, resumeOnGesture } from '../audio.js';
+
 const FLAP = 'flap';
 const PIPE_HEIGHT = 320;
 const PIPE_GAP_HEIGHT = 100;
@@ -24,7 +27,7 @@ const GROUND_HEIGHT = 112;
 const FRAME_RATE = 10;
 const BIRD_GRAVITY = 1000;
 const BIRD_VELOCITY = -360;
-const GAME_SPEED = 2;
+const GAME_SPEED = 2; // world scroll speed in px/frame (pipes/ground are moved manually)
 const ELEVATION_ANGLE = 25;
 const FALL_ANGLE = 90;
 const DECLINE_ANGLE_DELTA = 2;
@@ -35,13 +38,23 @@ const GAME_OVER_STATE = 'gameover-state';
 const DIGIT_WIDTH = 24;
 const BEST_SCORE_KEY = 'best-score';
 
+// NEW: timeline spawn config
+const LOOKAHEAD = 1.6; // seconds to spawn items ahead of current song time
+
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super(GAME_SCENE_KEY);
     this.score = 0;
+
+    // NEW: timeline/runtime fields
+    this._tl = null;
+    this._nextNoteIdx = 0;
+    this._nextCoinAt = 0;
+    this.notesCollected = 0;
   }
 
   create() {
+    // --- WORLD SETUP (unchanged base) --------------------------------------
     this.createBackground();
 
     this.pipes = this.createPipes();
@@ -79,13 +92,60 @@ export default class GameScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
+    // --- NEW: collectibles groups ------------------------------------------
+    this.coinsGroup = this.physics.add.group(); // timeline coins
+    this.notesGroup = this.physics.add.group(); // 12 milestone notes
+    // coins/notes should not fall with gravity; we move them manually with the world
+    this.coinsGroup.children.iterate((c) => { if (c?.body) c.body.allowGravity = false; });
+    this.notesGroup.children.iterate((n) => { if (n?.body) n.body.allowGravity = false; });
+
+    // collisions for collectibles
+    this.physics.add.overlap(this.player, this.coinsGroup, (_, coin) => {
+      coin.destroy();
+      const now = getTime();
+      const chorus = this._tl?.chorusWindows?.find((w) => now >= w.start && now <= w.end);
+      const mult = chorus ? (chorus.multiplier || 2) : 1;
+      // coins add smaller points; keep pipe pass as your main score mechanic
+      this.addScore(1 * mult);
+    });
+
+    this.physics.add.overlap(this.player, this.notesGroup, (_, note) => {
+      note.destroy();
+      this.notesCollected += 1;
+      // make notes feel valuable
+      this.addScore(5);
+    });
+
+    // --- NEW: fetch timeline JSON & preload audio buffer --------------------
+    this._tl = this.cache.json.get('timeline') || null;
+    if (this._tl?.audio) {
+      loadTrack(this._tl.audio).catch((e) => console.warn('Audio failed to load:', e));
+    }
+    this._nextNoteIdx = 0;
+    this._nextCoinAt = 0;
+    this.notesCollected = 0;
+
+    // Start state
     this.setReady();
   }
 
   update() {
     this.animate();
     this.handleInputs();
+
+    // NEW: when playing, move collectibles with the world & spawn by timeline
+    if (this.state === PLAYING_STATE) {
+      this.moveCollectibles();
+      this.cleanupCollectibles();
+      this.updateTimelineSpawns();
+      // Optional: end automatically at song end if duration is defined
+      if (this._tl?.duration && getTime() >= this._tl.duration) {
+        this.setGameOver();
+      }
+    }
   }
+
+  // --- ORIGINAL FLOW --------------------------------------------------------
 
   animate() {
     switch (this.state) {
@@ -153,11 +213,19 @@ export default class GameScene extends Phaser.Scene {
     this.isPlayerFlapping = false;
   }
 
-  setPlaying() {
+  async setPlaying() {
     this.birdFlying.stop();
     this.readyMessage.visible = false;
     this.player.body.allowGravity = true;
     this.state = PLAYING_STATE;
+
+    // NEW: start music on first play (iOS requires user gesture resume)
+    try {
+      await resumeOnGesture();
+      if (this._tl?.audio) play(0);
+    } catch (e) {
+      // ignore; game still plays without music
+    }
   }
 
   setGameOver() {
@@ -209,6 +277,14 @@ export default class GameScene extends Phaser.Scene {
 
   restart() {
     this.clearScore();
+    // clear collectibles
+    this.coinsGroup.clear(true, true);
+    this.notesGroup.clear(true, true);
+    // reset timeline cursors
+    this._nextNoteIdx = 0;
+    this._nextCoinAt = 0;
+    this.notesCollected = 0;
+
     this.scene.restart();
     this.setReady();
   }
@@ -238,6 +314,22 @@ export default class GameScene extends Phaser.Scene {
   movePipes() {
     this.pipes.topPipes.incX(-GAME_SPEED);
     this.pipes.bottomPipes.incX(-GAME_SPEED);
+  }
+
+  // NEW: move collectibles with the same world speed
+  moveCollectibles() {
+    this.coinsGroup.getChildren().forEach((c) => { c.x -= GAME_SPEED; });
+    this.notesGroup.getChildren().forEach((n) => { n.x -= GAME_SPEED; });
+  }
+
+  // NEW: clean up off-screen coins/notes
+  cleanupCollectibles() {
+    this.coinsGroup.getChildren().forEach((c) => {
+      if (c.getBounds().right < 0) c.destroy();
+    });
+    this.notesGroup.getChildren().forEach((n) => {
+      if (n.getBounds().right < 0) n.destroy();
+    });
   }
 
   createRestartButton() {
@@ -390,5 +482,64 @@ export default class GameScene extends Phaser.Scene {
       }
       this.updateScore(centerX, index);
     });
+  }
+
+  // --- NEW: timeline-driven spawns -----------------------------------------
+
+  updateTimelineSpawns() {
+    if (!this._tl) return;
+
+    const now = getTime();
+
+    // Spawn milestone notes (12) at their scheduled times
+    const notes = this._tl.noteMilestones || [];
+    while (this._nextNoteIdx < notes.length && notes[this._nextNoteIdx].t <= now + LOOKAHEAD) {
+      const evt = notes[this._nextNoteIdx++];
+      const yClamped = Phaser.Math.Clamp(evt.y ?? 240, 80, this.scale.height - 140);
+      // spawn just off the right edge to scroll in with the world
+      this.spawnNote(this.scale.width + 40, yClamped);
+    }
+
+    // Spawn coins at a rate; surge during chorus windows
+    const inChorus = (this._tl.chorusWindows || []).some((w) => now >= w.start && now <= w.end);
+    const chorusWin = inChorus
+      ? (this._tl.chorusWindows || []).find((w) => now >= w.start && now <= w.end)
+      : null;
+
+    const rate = inChorus
+      ? (chorusWin.coinRate || 3.0)
+      : (this._tl.ambientCoins?.rate || 0.7);
+
+    if (now >= this._nextCoinAt) {
+      const range = this._tl.ambientCoins?.yRange || [140, 360];
+      this.spawnCoinCluster(!!inChorus, range);
+      const baseGap = Math.max(this._tl.ambientCoins?.minGap || 1.0, 1.0 / rate);
+      this._nextCoinAt = now + baseGap;
+    }
+  }
+
+  spawnCoin(x, y) {
+    const c = this.coinsGroup.create(x, y, 'coin');
+    if (c?.body) c.body.allowGravity = false;
+    return c;
+  }
+
+  spawnNote(x, y) {
+    const n = this.notesGroup.create(x, y, 'note');
+    if (n?.body) n.body.allowGravity = false;
+    return n;
+  }
+
+  spawnCoinCluster(inChorus, yRange) {
+    const rows = inChorus ? 3 : 1;
+    for (let i = 0; i < rows; i += 1) {
+      const y = Phaser.Math.Between(yRange[0], yRange[1]);
+      this.spawnCoin(this.scale.width + 40 + i * 18, y);
+    }
+  }
+
+  addScore(n) {
+    this.score += n;
+    this.updateScoreText();
   }
 }

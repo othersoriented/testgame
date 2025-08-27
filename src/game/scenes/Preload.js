@@ -50,8 +50,11 @@ export default class PreloadScene extends Phaser.Scene {
 
   preload() {
     const { width, height } = this.scale;
-    const loadingText = this.add.text(width * 0.5, height * 0.5, 'Loading...', { fontSize: '25px' }).setOrigin(0.5);
+    const loadingText = this.add
+      .text(width * 0.5, height * 0.5, 'Loading...', { fontSize: '25px' })
+      .setOrigin(0.5);
 
+    // --- Existing art/sfx ---------------------------------------------------
     this.load.image(GROUND, Base);
     this.load.image(BACKGROUND, Background);
     this.load.image(PIPE, Pipe);
@@ -74,12 +77,40 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.audio(SWOOSH_SOUND, [SwooshOgg, SwooshWav]);
     this.load.audio(HIT_SOUND, [HitSoundOgg, HitSoundWav]);
     this.load.audio(DIE_SOUND, [DieSoundOgg, DieSoundWav]);
-    this.load.webfont('Teko', 'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap');
+    this.load.webfont(
+      'Teko',
+      'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap'
+    );
 
+    // --- NEW: music timeline JSON for spawning notes/coins ------------------
+    // Place your file at: assets/data/song-timeline.json
+    this.load.json('timeline', 'assets/data/song-timeline.json');
+
+    // --- Progress UI --------------------------------------------------------
     this.load.on('progress', (progress) => {
-      const percent = progress * 100;
-      loadingText.setText(`Loading... ${Math.round(percent)}%`);
+      loadingText.setText(`Loading... ${Math.round(progress * 100)}%`);
     });
-    this.load.on('complete', () => this.scene.start(GAME_SCENE_KEY));
+
+    this.load.on('complete', () => {
+      // --- NEW: generate simple textures for coin/note if you don't have sprites
+      // Doing this here avoids adding extra image assets just to test.
+      const g = this.make.graphics({ x: 0, y: 0, add: false });
+
+      // coin (yellow circle)
+      g.clear();
+      g.fillStyle(0xffff00, 1);
+      g.fillCircle(8, 8, 8);
+      g.generateTexture('coin', 16, 16);
+
+      // note (blue square)
+      g.clear();
+      g.fillStyle(0x66ccff, 1);
+      g.fillRect(0, 0, 16, 16);
+      g.generateTexture('note', 16, 16);
+
+      g.destroy();
+
+      this.scene.start(GAME_SCENE_KEY);
+    });
   }
 }

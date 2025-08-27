@@ -1,6 +1,25 @@
 {
-  "song": "example",
-  "timeline": [
-    { "time": 0, "event": "start" }
-  ]
+  "title": "Demo Song",
+  "audio": "assets/audio/track.mp3",
+  "duration": 60,
+  "notesToCollect": 12,
+  "noteMilestones": [
+    { "t": 5.0,  "x": 620, "y": 220, "label": "L1" },
+    { "t": 10.0, "x": 620, "y": 300, "label": "L2" },
+    { "t": 15.0, "x": 620, "y": 180, "label": "L3" },
+    { "t": 20.0, "x": 620, "y": 240, "label": "L4" },
+    { "t": 25.0, "x": 620, "y": 320, "label": "L5" },
+    { "t": 30.0, "x": 620, "y": 200, "label": "L6" },
+    { "t": 35.0, "x": 620, "y": 280, "label": "L7" },
+    { "t": 40.0, "x": 620, "y": 180, "label": "L8" },
+    { "t": 45.0, "x": 620, "y": 260, "label": "L9" },
+    { "t": 50.0, "x": 620, "y": 320, "label": "L10" },
+    { "t": 55.0, "x": 620, "y": 220, "label": "L11" },
+    { "t": 58.0, "x": 620, "y": 300, "label": "L12" }
+  ],
+  "chorusWindows": [
+    { "start": 22.0, "end": 32.0, "coinRate": 3.0, "multiplier": 2 }
+  ],
+  "ambientCoins": { "rate": 0.7, "yRange": [140, 360], "minGap": 1.2 },
+  "powerUps": []
 }
