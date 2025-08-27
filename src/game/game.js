@@ -12,46 +12,23 @@ const config = {
   width: GAME_WIDTH,
   height: GAME_HEIGHT,
   backgroundColor: '#1e272e',
-
-  // Mobile-friendly scaling
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     expandParent: true,
   },
-
-  // Keep pixel art crisp and movement stable
   render: {
-    pixelArt: true,       // no smoothing on sprites
-    roundPixels: true,    // avoid subpixel blurring
+    pixelArt: true,
+    roundPixels: true,
   },
-
   physics: {
     default: 'arcade',
-    arcade: {
-      gravity: { y: 200 },
-      // debug: true,
-    },
+    arcade: { gravity: { y: 200 } },
   },
-
-  input: {
-    activePointers: 3, // allow multi-touch if needed
-  },
-
-  fps: {
-    target: 60,
-    forceSetTimeOut: false,
-  },
-
   scene: [PreloadScene, GameScene],
-
   plugins: {
     global: [
-      {
-        key: 'WebFontLoader',
-        plugin: WebFontLoaderPlugin,
-        start: true,
-      },
+      { key: 'WebFontLoader', plugin: WebFontLoaderPlugin, start: true },
     ],
   },
 };
@@ -63,11 +40,7 @@ export function startGame() {
   return gameInstance;
 }
 
-// Auto-start when the page loads (as current flow uses game.html)
 window.addEventListener('load', startGame);
-
-// Also expose a manual starter for landing-page buttons if you prefer:
-// <button onclick="startGame()">Play</button>
 window.startGame = startGame;
 
 export default startGame;

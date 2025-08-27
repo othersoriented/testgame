@@ -1,12 +1,11 @@
 let ctx = null, buffer = null, src = null;
-let startAt = 0;      // ctx.currentTime when playback starts
-let pauseTime = 0;    // seconds into song when paused
+let startAt = 0;
+let pauseTime = 0;
 
 export async function loadTrack(url) {
   ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
   const res = await fetch(url);
   const arr = await res.arrayBuffer();
-  // decodeAudioData can be promise or callback depending on browser
   buffer = await new Promise((ok, err) => {
     const p = ctx.decodeAudioData(arr, ok, err);
     if (p && typeof p.then === 'function') p.then(ok).catch(err);
