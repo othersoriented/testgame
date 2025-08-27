@@ -27,8 +27,9 @@ import HitSoundOgg from '../assets/audio/hit.ogg';
 import DieSoundWav from '../assets/audio/die.wav';
 import DieSoundOgg from '../assets/audio/die.ogg';
 
-// NEW: import timeline JSON as data, then add to Phaser cache
+// ✅ import timeline JSON and the MP3 so Webpack emits a real URL
 import timelineData from '../assets/data/song-timeline.json';
+import trackUrl from '../assets/audio/track.mp3';
 
 import {
   PRELOAD_SCENE_KEY,
@@ -91,10 +92,14 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   create() {
-    // Put the imported JSON into Phaser's cache under key 'timeline'
-    if (timelineData) this.cache.json.add('timeline', timelineData);
+    // ✅ Put the imported JSON into the Phaser cache with the *emitted* MP3 URL
+    if (timelineData) {
+      const tl = { ...timelineData, audio: trackUrl };
+      this.cache.json.add('timeline', tl);
+      // Debug (optional): console.log('Timeline audio URL:', tl.audio);
+    }
 
-    // Generate simple textures for collectibles
+    // Minimal generated textures for collectibles
     const g = this.make.graphics({ x: 0, y: 0, add: false });
     g.clear(); g.fillStyle(0xffff00, 1); g.fillCircle(8, 8, 8); g.generateTexture('coin', 16, 16);
     g.clear(); g.fillStyle(0x66ccff, 1); g.fillRect(0, 0, 16, 16); g.generateTexture('note', 16, 16);

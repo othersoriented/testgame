@@ -11,20 +11,20 @@ module.exports = {
 
   output: {
     filename: '[name].[contenthash].js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist'), // v3 will serve from memory; this is for prod build
     clean: true,
   },
 
   devtool: 'source-map',
 
+  // ✅ v3 syntax
   devServer: {
-    static: [
-      { directory: path.resolve(__dirname, 'public') }, // optional extra static
-    ],
+    contentBase: path.resolve(__dirname, 'public'),
     port: 8080,
-    open: ['/game.html'],
+    open: true,       // (v3 doesn't support array form)
     hot: true,
-    liveReload: true,
+    overlay: true,    // show build errors in the browser (v3 feature)
+    historyApiFallback: false,
   },
 
   module: {
@@ -35,7 +35,6 @@ module.exports = {
         type: 'asset/resource',
         generator: { filename: 'assets/[name][ext]' },
       },
-      // Let JSON imports be normal JSON modules (default)
       { test: /\.json$/i, type: 'json' },
     ],
   },

@@ -21,14 +21,14 @@ const FLAP = 'flap';
 const PIPE_HEIGHT = 320;
 const PIPE_GAP_HEIGHT = 100;
 const PIPE_GAP_LENGTH = 180;
-const PIPE_PAIRS = 3;
+const PIPE_PAIRS = 1;
 const GROUND_HEIGHT = 112;
-const FRAME_RATE = 10;
+const FRAME_RATE = 5;
 const BIRD_GRAVITY = 1000;
 const BIRD_VELOCITY = -360;
-const GAME_SPEED = 2;
+const GAME_SPEED = 3;
 const ELEVATION_ANGLE = 25;
-const FALL_ANGLE = 90;
+const FALL_ANGLE = 100;
 const DECLINE_ANGLE_DELTA = 2;
 const MIN_PIPE_HEIGHT = -PIPE_HEIGHT * 0.7;
 const READY_STATE = 'ready-state';
@@ -40,6 +40,9 @@ const BEST_SCORE_KEY = 'best-score';
 // timeline spawn config
 const LOOKAHEAD = 1.6;
 
+// webcam bubble
+const CAMERA_BUBBLE_SIZE = 50;
+
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super(GAME_SCENE_KEY);
@@ -48,6 +51,23 @@ export default class GameScene extends Phaser.Scene {
     this._nextNoteIdx = 0;
     this._nextCoinAt = 0;
     this.notesCollected = 0;
+
+    // Camera state (DOM approach)
+    this.webcamStream = null;
+    this.domVideoEl = null;       // <video> element
+    this.domVideoSize = CAMERA_BUBBLE_SIZE;
+    this.cameraEnabled = false;
+    this.camBtn = null;
+
+    // (Phaser video fields kept in case you want to switch back later)
+    this.webcamVideo = null;
+    this.webcamMask = null;
+    this.webcamMaskG = null;
+
+    this.startBtn = null;
+
+    // Debug anchor dot
+    this._camDebug = null;
   }
 
   create() {
@@ -60,23 +80,40 @@ export default class GameScene extends Phaser.Scene {
     this.gameoverMessage = this.createGameOverMessage();
     this.scoreText = this.createScoreText();
     this.bestScoreText = this.createBestScoreText();
-    this.restartButton = this.createRestartButton();
 
+    // Start button (READY only)
+    const { width, height } = this.scale;
+    this.startBtn = this.add.image(width * 0.5, height * 0.7, START_BUTTON)
+      .setInteractive()
+      .on('pointerdown', (e) => e?.event?.stopPropagation())
+      .on('pointerup', async (e) => {
+        e?.event?.stopPropagation();
+        await this.setPlaying();
+      });
+
+    // Restart button (GAME OVER)
+    this.restartButton = this.add.image(width * 0.5, height * 0.8, START_BUTTON)
+      .setInteractive()
+      .setVisible(false)
+      .on('pointerdown', (e) => e?.event?.stopPropagation())
+      .on('pointerup', (e) => { e?.event?.stopPropagation(); this.restart(); });
+
+    // Sounds
     this.pointSound = this.sound.add(POINT_SOUND);
     this.flapSound = this.sound.add(FLAP_SOUND);
     this.swooshSound = this.sound.add(SWOOSH_SOUND);
     this.hitSound = this.sound.add(HIT_SOUND);
     this.dieSound = this.sound.add(DIE_SOUND);
 
+    // Colliders
     this.physics.add.existing(this.ground, true);
     this.physics.add.collider(this.player, this.ground, this.setGameOver, null, this);
     this.physics.add.collider(this.player, this.pipes.topPipes, this.setGameOver, this.handleFall, this);
     this.physics.add.collider(this.player, this.pipes.bottomPipes, this.setGameOver, this.handleFall, this);
-    this.restartButton.on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, this.restart, this);
 
     this.cursors = this.input.keyboard.createCursorKeys();
 
-    // NEW: collectibles
+    // Collectibles
     this.coinsGroup = this.physics.add.group();
     this.notesGroup = this.physics.add.group();
     this.physics.add.overlap(this.player, this.coinsGroup, (_, coin) => {
@@ -92,17 +129,22 @@ export default class GameScene extends Phaser.Scene {
       this.addScore(5);
     });
 
-    // NEW: timeline + audio
+    // Timeline + audio
     this._tl = this.cache.json.get('timeline') || null;
     if (this._tl?.audio) {
-      // If you want to import the mp3 as a module instead, adjust here.
       loadTrack(this._tl.audio).catch((e) => console.warn('Audio load failed:', e));
     }
+
+    // Camera toggle UI (starts OFF)
+    this.createCameraToggle();
+
+    
 
     this.setReady();
   }
 
   update() {
+    // core loop
     this.animate();
     this.handleInputs();
 
@@ -115,9 +157,33 @@ export default class GameScene extends Phaser.Scene {
         this.setGameOver();
       }
     }
+
+    // --- DOM camera bubble follow ---
+    if (this.domVideoEl && this.player) {
+      const canvas = this.game.canvas;
+      const rect = canvas.getBoundingClientRect();
+
+      // scale from game coords -> CSS pixels
+      const sx = rect.width / this.scale.gameSize.width;
+      const sy = rect.height / this.scale.gameSize.height;
+
+      const screenX = rect.left + this.player.x * sx;
+      const screenY = rect.top + this.player.y * sy;
+
+
+      this.domVideoEl.style.left = `${screenX}px`;
+      this.domVideoEl.style.top = `${screenY}px`;
+    }
+
+    // Move the debug dot EVERY frame
+    if (this._camDebug && this.player) {
+      this._camDebug.x = this.player.x;
+      this._camDebug.y = this.player.y - 22;
+      this._camDebug.setDepth(1000);
+    }
   }
 
-  // ---------------- original gameplay ----------------
+  // ---------------- gameplay loop ----------------
   animate() {
     switch (this.state) {
       case READY_STATE: this.moveGround(); break;
@@ -131,20 +197,20 @@ export default class GameScene extends Phaser.Scene {
   }
 
   handleInputs() {
-    if (this.isTapped()) {
-      switch (this.state) {
-        case READY_STATE: this.setPlaying(); break;
-        case PLAYING_STATE:
-          if (!this.isPlayerFlapping) { this.isPlayerFlapping = true; this.flap(); }
-          break;
-        default: break;
+    // Only Space starts in READY
+    if (this.state === READY_STATE) {
+      if (this.cursors.space.isDown) { this.setPlaying(); }
+    } else if (this.state === PLAYING_STATE) {
+      // Flap on tap/space while playing
+      if (this.cursors.space.isDown || this.input.activePointer.primaryDown) {
+        if (!this.isPlayerFlapping) { this.isPlayerFlapping = true; this.flap(); }
       }
+      if (this.isReleased() && this.isPlayerFlapping) this.isPlayerFlapping = false;
+    } else if (this.state === GAME_OVER_STATE) {
+      if (this.cursors.space.isDown && this.isAllowedToRestart) this.restart();
     }
-    if (this.state === GAME_OVER_STATE && this.cursors.space.isDown && this.isAllowedToRestart) this.restart();
-    if (this.isReleased() && this.isPlayerFlapping) this.isPlayerFlapping = false;
   }
 
-  isTapped() { return this.cursors.space.isDown || this.input.activePointer.primaryDown; }
   isReleased() { return this.cursors.space.isUp && !this.input.activePointer.primaryDown; }
 
   setReady() {
@@ -152,18 +218,27 @@ export default class GameScene extends Phaser.Scene {
     this.gameoverMessage.visible = false;
     this.bestScoreText.visible = false;
     this.restartButton.visible = false;
+
     this.player.body.allowGravity = false;
     this.player.anims.play(FLAP, true);
     this.state = READY_STATE;
     this.birdFlying = this.flyBirdWhileWaitingForPlayer();
     this.isPlayerFlapping = false;
+
+    if (this.startBtn) this.startBtn.setVisible(true);
+    if (this.camBtn) this.camBtn.setVisible(true);
   }
 
   async setPlaying() {
+    if (this.state === PLAYING_STATE) return;
+
     this.birdFlying.stop();
     this.readyMessage.visible = false;
     this.player.body.allowGravity = true;
     this.state = PLAYING_STATE;
+
+    if (this.startBtn) this.startBtn.setVisible(false);
+    // keep camBtn visible if you want mid-run toggling
 
     try {
       await resumeOnGesture();
@@ -211,6 +286,9 @@ export default class GameScene extends Phaser.Scene {
     this._nextCoinAt = 0;
     this.notesCollected = 0;
 
+    // optional: turn off camera on restart
+    // this.disableWebcamDom();
+
     this.scene.restart();
     this.setReady();
   }
@@ -238,11 +316,6 @@ export default class GameScene extends Phaser.Scene {
   cleanupCollectibles() {
     this.coinsGroup.getChildren().forEach((c) => { if (c.getBounds().right < 0) c.destroy(); });
     this.notesGroup.getChildren().forEach((n) => { if (n.getBounds().right < 0) n.destroy(); });
-  }
-
-  createRestartButton() {
-    const { width, height } = this.scale;
-    return this.add.image(width * 0.5, height * 0.8, START_BUTTON).setInteractive();
   }
 
   createBackground() {
@@ -362,7 +435,7 @@ export default class GameScene extends Phaser.Scene {
     // coins
     const inChorus = (this._tl.chorusWindows || []).some((w) => now >= w.start && now <= w.end);
     const chorusWin = inChorus ? (this._tl.chorusWindows || []).find((w) => now >= w.start && now <= w.end) : null;
-    const rate = inChorus ? (chorusWin.coinRate || 3.0) : (this._tl.ambientCoins?.rate || 0.7);
+    const rate = inChorus ? (chorusWin?.coinRate || 3.0) : (this._tl.ambientCoins?.rate || 0.7);
 
     if (now >= this._nextCoinAt) {
       const range = this._tl.ambientCoins?.yRange || [140, 360];
@@ -393,4 +466,82 @@ export default class GameScene extends Phaser.Scene {
   }
 
   addScore(n) { this.score += n; this.updateScoreText(); }
+
+  // ---------------- camera UI & controls (DOM) ----------------
+  createCameraToggle() {
+    // Bottom-left toggle button; visible in READY
+    this.camBtn = this.add.text(10, this.scale.height - 28, 'Enable Camera', {
+      fontFamily: 'Teko',
+      fontSize: '20px',
+      color: '#ffffff',
+      backgroundColor: '#2d3436',
+      padding: { x: 8, y: 4 }
+    })
+      .setScrollFactor(0)
+      .setDepth(1000)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', (e) => e?.event?.stopPropagation())
+      .on('pointerup', async (e) => {
+        e?.event?.stopPropagation();
+        if (!this.cameraEnabled) await this.enableWebcamDom();
+        else this.disableWebcamDom();
+      });
+  }
+
+  async enableWebcamDom() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 300 }, height: { ideal: 300 } },
+        audio: false
+      });
+
+      const video = document.createElement('video');
+      video.playsInline = true;
+      video.muted = true;
+      video.autoplay = true;
+      video.srcObject = stream;
+      video.style.position = 'absolute';
+      video.style.width = `${this.domVideoSize}px`;
+      video.style.height = `${this.domVideoSize}px`;
+      video.style.borderRadius = '50%';
+      video.style.objectFit = 'cover';
+      video.style.pointerEvents = 'none';
+      video.style.zIndex = '9999';
+      video.style.transform = 'translate(-50%, -50%)';
+      video.style.border = '5px solid white';
+
+      document.body.appendChild(video);
+
+      try { await video.play(); } catch {}
+
+      this.domVideoEl = video;
+      this.webcamStream = stream;
+      this.cameraEnabled = true;
+      this.camBtn?.setText('Disable Camera');
+
+      // Optional: hide the bird if you want the face to replace it
+      this.player.setVisible(false);
+    } catch (err) {
+      console.warn('Webcam error:', err);
+    }
+  }
+
+  disableWebcamDom() {
+    try {
+      if (this.domVideoEl) {
+        if (this.domVideoEl.parentNode) this.domVideoEl.parentNode.removeChild(this.domVideoEl);
+        this.domVideoEl.srcObject = null;
+        this.domVideoEl = null;
+      }
+      if (this.webcamStream) {
+        this.webcamStream.getTracks().forEach(t => t.stop());
+        this.webcamStream = null;
+      }
+    } catch {}
+    this.cameraEnabled = false;
+    this.camBtn?.setText('Enable Camera');
+
+    // If you hid the bird on enable, show it again
+    // this.player.setVisible(true);
+  }
 }
