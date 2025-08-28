@@ -1,8 +1,8 @@
 {
-  "title": "Demo Song",
-  "audio": "assets/audio/track.mp3",
-  "duration": 60,
-  "notesToCollect": 12,
+  "title": "Psalm 32",
+  "audio": "assets/audio/track.mp3?v=4", 
+  "duration":"220",
+  "notesToCollect": 112,
   "noteMilestones": [
     { "t": 5.0,  "x": 620, "y": 220, "label": "L1" },
     { "t": 10.0, "x": 620, "y": 300, "label": "L2" },
@@ -18,7 +18,9 @@
     { "t": 58.0, "x": 620, "y": 300, "label": "L12" }
   ],
   "chorusWindows": [
-    { "start": 22.0, "end": 32.0, "coinRate": 3.0, "multiplier": 2 }
+    { "start": 33.0, "end": 55.0, "coinRate": 7.0, "multiplier": 2 },
+    { "start": 93.0, "end": 118.0, "coinRate": 7.0, "multiplier": 2 },
+    { "start": 163.0, "end": 184.0, "coinRate": 7.0, "multiplier": 2 }
   ],
   "ambientCoins": { "rate": 0.7, "yRange": [140, 360], "minGap": 1.2 },
   "powerUps": []

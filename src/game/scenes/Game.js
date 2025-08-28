@@ -15,18 +15,20 @@ import {
   START_BUTTON,
 } from './shared.js';
 
-import { loadTrack, play, getTime, resumeOnGesture } from '../audio.js';
+import { loadTrack, play, pause, getTime, getDuration, resumeOnGesture } from '../audio.js';
+
+
 
 const FLAP = 'flap';
 const PIPE_HEIGHT = 320;
-const PIPE_GAP_HEIGHT = 100;
+const PIPE_GAP_HEIGHT = 120;
 const PIPE_GAP_LENGTH = 180;
 const PIPE_PAIRS = 1;
 const GROUND_HEIGHT = 100;
 const FRAME_RATE = 5;
 const BIRD_GRAVITY = 1000;
 const BIRD_VELOCITY = -360;
-const GAME_SPEED = 2;
+const GAME_SPEED = 3;
 const ELEVATION_ANGLE = 25;
 const FALL_ANGLE = 100;
 const DECLINE_ANGLE_DELTA = 2;
@@ -42,7 +44,7 @@ const IG_PROFILE_URL = 'https://www.instagram.com/christianaiband/';
 const LINKTREE_URL   = 'https://linktr.ee/lostboyfound';
 const SHARE_TITLE    = 'How about...Flappy Bird but make it Christian';
 const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clone 🎶';
-const SHARE_URL      = 'https://yourdomain.com/game.html';
+const SHARE_URL      = 'https://christianaiband.com/game.html';
 const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 32';
 const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
 
@@ -50,7 +52,7 @@ const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
 const LOOKAHEAD = 1.6;
 
 // webcam bubble
-const CAMERA_BUBBLE_SIZE = 55;
+const CAMERA_BUBBLE_SIZE = 65;
 
 // progress / award
 const SONG_BONUS_POINTS = 10000;
@@ -149,11 +151,29 @@ export default class GameScene extends Phaser.Scene {
       this.addScore(5);
     });
 
-    // Timeline + audio
-    this._tl = this.cache.json.get('timeline') || null;
-    if (this._tl?.audio) {
-      loadTrack(this._tl.audio).catch((e) => console.warn('Audio load failed:', e));
-    }
+// Timeline + audio
+this._tl = this.cache.json.get('timeline') || {};
+
+const declaredDur = Number(this._tl.duration) || 0;   // seconds from JSON (or 0/"auto")
+this._tl.duration = declaredDur;                      // set it NOW so UI uses it
+
+if (this._tl.audio) {
+  loadTrack(this._tl.audio)
+    .then(() => {
+      const audioDur = Math.round(getDuration()) || 0;
+      // If JSON omitted/0/"auto", fall back to decoded audio length
+      if (!this._tl.duration) this._tl.duration = audioDur;
+
+      console.log('[duration] json:', declaredDur,
+                  'audio:', audioDur, 'final:', this._tl.duration);
+
+      // Refresh UI once we know the final value
+      this.updateProgressUI(0, this._tl.duration);
+    })
+    .catch((e) => console.warn('Audio load failed:', e));
+}
+
+
 
     // Progress UI
     this.createProgressUI();
@@ -294,49 +314,50 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // ---------- Progress UI ----------
-  createProgressUI() {
-    this.progressBg = this.add.graphics().setDepth(2500).setScrollFactor(0);
+createProgressUI() {
+  this.progressBg   = this.add.graphics().setDepth(2500).setScrollFactor(0);
+  this.progressFill = this.add.graphics().setDepth(2501).setScrollFactor(0);
+
+  this.timeLeftLabel = this.add.text(this.scale.width - 10, 20, '0:00', {
+    fontFamily: 'Teko', fontSize: '20px', color: '#ffffff',
+  })
+    .setOrigin(1, 0)
+    .setStroke('#000000', 4)
+    .setShadow(0, 2, '#000000', 4, true, true)
+    .setDepth(2502)
+    .setScrollFactor(0);
+
+  const redraw = () => {
     this.progressBg.clear();
     this.progressBg.fillStyle(0x000000, 0.35);
     this.progressBg.fillRoundedRect(8, 40, this.scale.width - 16, PROGRESS_HEIGHT, 6);
+  };
+  redraw();
+  this.scale.on('resize', redraw);
 
-    this.progressFill = this.add.graphics().setDepth(2501).setScrollFactor(0);
+  // initialize bar against whatever duration we have right now
+  this.updateProgressUI(0, this._tl?.duration || 0);
+}
 
-    this.timeLeftLabel = this.add.text(this.scale.width - 10, 20, '0:00', {
-      fontFamily: 'Teko',
-      fontSize: '20px',
-      color: '#ffffff',
-    })
-      .setOrigin(1, 0)
-      .setStroke('#000000', 4)
-      .setShadow(0, 2, '#000000', 4, true, true)
-      .setDepth(2502)
-      .setScrollFactor(0);
+// *** Keep THIS one; remove the other definition ***
+updateProgressUI(nowSec = null, totalOverride = null) {
+  if (!this.progressFill) return;
 
-    this.scale.on('resize', () => {
-      this.progressBg.clear();
-      this.progressBg.fillStyle(0x000000, 0.35);
-      this.progressBg.fillRoundedRect(8, 40, this.scale.width - 16, PROGRESS_HEIGHT, 6);
-    });
-  }
+  const dur = totalOverride ?? (this._tl?.duration || 0);
+  const t   = Phaser.Math.Clamp(nowSec ?? getTime(), 0, dur);
+  const pct = dur > 0 ? t / dur : 0;
 
-  updateProgressUI() {
-    if (!this._tl?.duration || !this.progressFill) return;
+  const x = 8, y = 40, w = this.scale.width - 16;
+  const fillW = Math.max(0, Math.min(w * pct, w));
 
-    const dur = this._tl.duration;
-    const t   = Phaser.Math.Clamp(getTime(), 0, dur);
-    const pct = dur > 0 ? t / dur : 0;
+  this.progressFill.clear();
+  this.progressFill.fillStyle(0x22cc88, 0.9);
+  this.progressFill.fillRoundedRect(x, y, fillW, PROGRESS_HEIGHT, 6);
 
-    const x = 8, y = 40, w = this.scale.width - 16;
-    const fillW = Math.max(0, Math.min(w * pct, w));
+  const remaining = Math.max(0, Math.ceil(dur - t));
+  this.timeLeftLabel.setText(this.formatTime(remaining));
+}
 
-    this.progressFill.clear();
-    this.progressFill.fillStyle(0x22cc88, 0.9);
-    this.progressFill.fillRoundedRect(x, y, fillW, PROGRESS_HEIGHT, 6);
-
-    const remaining = Math.max(0, Math.ceil(dur - t));
-    this.timeLeftLabel.setText(this.formatTime(remaining));
-  }
 
   formatTime(s) {
     const m = Math.floor(s / 60);
@@ -391,7 +412,9 @@ export default class GameScene extends Phaser.Scene {
     this.handleInputs();
 
     // progress bar + countdown
-    this.updateProgressUI();
+    if (this.progressActive) {
+  this.updateProgressUI();   // uses current audio time
+}
 
     if (this.state === PLAYING_STATE) {
       this.moveCollectibles();
@@ -474,6 +497,11 @@ export default class GameScene extends Phaser.Scene {
 
     if (this.startBtn) this.startBtn.setVisible(true);
     if (this.camBtn) this.camBtn.setVisible(true);
+
+    this.progressActive = false;
+this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
+
+
   }
 
   async setPlaying() {
@@ -491,29 +519,33 @@ export default class GameScene extends Phaser.Scene {
       await resumeOnGesture();
       if (this._tl?.audio) play(0);
     } catch (_) {}
+    this.progressActive = true;  // start advancing the bar with the music
+
   }
 
   setGameOver() {
-    if (this.state !== GAME_OVER_STATE) {
-      this.state = GAME_OVER_STATE;
-      this.gameoverMessage.visible = true;
-      this.bestScoreText.visible = true;
-      this.restartButton.visible = true;
-      this.isAllowedToRestart = false;
-      this.hitSound.play();
-      this.player.anims.stop();
+  if (this.state !== GAME_OVER_STATE) {
+    this.state = GAME_OVER_STATE;
 
-      // show socials on any end
-      this.setSocialButtonsVisible(true);
+    try { pause(); } catch {}        // <-- freeze audio/progress
 
-      const currentBest = Number(localStorage.getItem(BEST_SCORE_KEY) || 0);
-      const bestScore = Math.max(currentBest, this.score);
-      localStorage.setItem(BEST_SCORE_KEY, bestScore);
-      this.bestScoreText.setText(`High Score : ${bestScore}`);
+    this.gameoverMessage.visible = true;
+    this.bestScoreText.visible = true;
+    this.restartButton.visible = true;
+    this.isAllowedToRestart = false;
+    this.hitSound.play();
+    this.player.anims.stop();
+    this.setSocialButtonsVisible(true);
 
-      this.slideStartButton();
-    }
+    const currentBest = Number(localStorage.getItem(BEST_SCORE_KEY) || 0);
+    const bestScore = Math.max(currentBest, this.score);
+    localStorage.setItem(BEST_SCORE_KEY, bestScore);
+    this.bestScoreText.setText(`High Score : ${bestScore}`);
+
+    this.slideStartButton();
   }
+}
+
 
   flyBirdWhileWaitingForPlayer() {
     return this.tweens.add({ targets: this.player, y: this.player.y + 5, duration: 300, yoyo: true, repeat: -1 });
@@ -537,6 +569,9 @@ export default class GameScene extends Phaser.Scene {
     this.notesCollected = 0;
     this._songFinishedAwarded = false;
     this.setSocialButtonsVisible(false);
+    this.progressActive = false;
+this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining again
+
 
     // optional: turn off camera on restart
     // this.disableWebcamDom();
