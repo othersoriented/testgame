@@ -13,6 +13,9 @@ module.exports = {
     filename: '[name].[contenthash].js',
     path: path.resolve(__dirname, 'dist'), // v3 will serve from memory; this is for prod build
     clean: true,
+    environment: {
+      dynamicImport: true,
+    },
   },
 
   devtool: 'source-map',
