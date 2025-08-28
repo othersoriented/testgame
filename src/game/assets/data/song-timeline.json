@@ -2,6 +2,12 @@
   "title": "Psalm 32",
   "audio": "assets/audio/track.mp3",
   "duration": 60,
+  "sections": [
+    { "type": "verse",  "start": 0,  "end": 22 },
+    { "type": "chorus", "start": 22, "end": 32 },
+    { "type": "verse",  "start": 32, "end": 60 }
+  ],
+  "preChorusLead": 3,
   "notesToCollect": 12,
   "noteMilestones": [
     { "t": 5.0,  "x": 620, "y": 220, "label": "L1" },

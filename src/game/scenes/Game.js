@@ -87,6 +87,18 @@ export default class GameScene extends Phaser.Scene {
     this.isMuted = false;   // Phaser’s global mute mirror
     this._soundHint = null; // transient hint text
 
+    // Rock mode / chorus extras
+    this.rockModeActive = false;
+    this.rockCountdownLabel = null;
+    this.rockCountdownTimer = null;
+    this.faceTracker = null;
+    this.faceLoopHandle = null;
+    this.snapshots = [];
+    this.maxSnapshotsPerChorus = 3;
+    this.snapshotCooldownMs = 800;
+    this.lastSnapshotAt = 0;
+    this.currentChorus = null;
+    this.sunglasses = null;
   }
 
   create() {
@@ -101,6 +113,11 @@ export default class GameScene extends Phaser.Scene {
     this.bestScoreText = this.createBestScoreText();
     this.createSocialButtons();
     this.createSoundToggle();
+
+    // chorus / rock-mode helpers
+    this.initSnapshotState();
+    this.createRockCountdownUI();
+    this.createSunglassesSticker();
 
     
 
@@ -409,12 +426,21 @@ shareScore() {
     this.animate();
     this.handleInputs();
 
+    const now = getTime();
+    this.maybeStartPreChorusCountdown(now);
+    if (this.rockModeActive && this.currentChorus && now >= this.currentChorus.end) {
+      this.exitRockMode();
+    }
+    if (this.rockModeActive) {
+      this.maybeTakeSnapshot(performance.now());
+    }
+
     if (this.state === PLAYING_STATE) {
       this.moveCollectibles();
       this.cleanupCollectibles();
       this.updateTimelineSpawns();
 
-      if (this._tl?.duration && getTime() >= this._tl.duration) {
+      if (this._tl?.duration && now >= this._tl.duration) {
         this.setGameOver();
         this.setSocialButtonsVisible(true);
 
@@ -522,7 +548,17 @@ shareScore() {
       this.player.anims.stop();
 
       // NEW: show socials when game actually ends (collision or song end)
-    this.setSocialButtonsVisible(true);
+      this.setSocialButtonsVisible(true);
+
+      const snapshotBonus = (this.snapshots?.length || 0) * 1000;
+      if (snapshotBonus > 0) {
+        this.addScore(snapshotBonus);
+        this.createGalleryOverlay();
+      } else if (!this.cameraEnabled) {
+        this.add.text(this.scale.width / 2, this.scale.height * 0.55, 'Enable camera during chorus for bonus points 📸', {
+          fontFamily: 'Teko', fontSize: '20px', color: '#ffffff', align: 'center'
+        }).setOrigin(0.5).setDepth(5000);
+      }
 
       const currentBest = localStorage.getItem(BEST_SCORE_KEY) || 0;
       const bestScore = Math.max(currentBest, this.score);
@@ -826,5 +862,190 @@ shareScore() {
 
     // Show the sprite again if you hid it
     this.player.setVisible(true);
+  }
+
+  // --------- rock mode helpers ---------
+
+  enterFullscreenCameraBackground() {
+    if (!this.domVideoEl) return;
+    const v = this.domVideoEl;
+    v.style.position = 'absolute';
+    v.style.top = '0';
+    v.style.left = '0';
+    v.style.width = '100vw';
+    v.style.height = '100vh';
+    v.style.objectFit = 'cover';
+    v.style.zIndex = '0';
+    const canvas = this.game.canvas;
+    canvas.style.zIndex = '1';
+  }
+
+  exitFullscreenCameraBackground() {
+    if (!this.domVideoEl) return;
+    const v = this.domVideoEl;
+    v.style.width = `${this.domVideoSize}px`;
+    v.style.height = `${this.domVideoSize}px`;
+    v.style.borderRadius = '50%';
+    v.style.zIndex = '9999';
+    const canvas = this.game.canvas;
+    canvas.style.zIndex = '';
+  }
+
+  initSnapshotState() {
+    this.snapshots = [];
+    this.lastSnapshotAt = 0;
+  }
+
+  maybeStartPreChorusCountdown(now) {
+    if (!this._tl?.sections) return;
+    const lead = this._tl.preChorusLead ?? 3;
+    const upcoming = this._tl.sections.find((s) => s.type === 'chorus' && now < s.start);
+    if (upcoming && upcoming.start - now <= lead && !this.rockCountdownTimer) {
+      this.showRockCountdown(Math.ceil(upcoming.start - now));
+      this.rockCountdownTimer = this.time.addEvent({
+        delay: 1000,
+        repeat: lead - 1,
+        callback: () => {
+          const remaining = Math.ceil(upcoming.start - getTime());
+          if (remaining > 0) this.showRockCountdown(remaining);
+          else {
+            this.hideRockCountdown();
+            this.enterRockMode(upcoming);
+            this.rockCountdownTimer?.remove(false);
+            this.rockCountdownTimer = null;
+          }
+        },
+      });
+    }
+  }
+
+  enterRockMode(section) {
+    this.rockModeActive = true;
+    this.currentChorus = section;
+    this.enterFullscreenCameraBackground();
+    this.initSnapshotState();
+    this.startFaceLoop();
+  }
+
+  exitRockMode() {
+    this.rockModeActive = false;
+    this.currentChorus = null;
+    this.stopFaceLoop();
+    this.exitFullscreenCameraBackground();
+  }
+
+  maybeTakeSnapshot(nowMs) {
+    if (!this.rockModeActive || !this.cameraEnabled || !this.domVideoEl) return;
+    if (this.snapshots.length >= this.maxSnapshotsPerChorus) return;
+    if (nowMs - this.lastSnapshotAt < this.snapshotCooldownMs) return;
+
+    const canvas = document.createElement('canvas');
+    const gameCanvas = this.game.canvas;
+    canvas.width = gameCanvas.width;
+    canvas.height = gameCanvas.height;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(this.domVideoEl, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      this.snapshots.push({ dataUrl, t: nowMs });
+      this.lastSnapshotAt = nowMs;
+    }
+  }
+
+  async initFaceTrackerIfNeeded() {
+    if (this.faceTracker) return;
+    try {
+      const vision = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.mjs');
+      const { FaceLandmarker, FilesetResolver } = vision;
+      const filesetResolver = await FilesetResolver.forVisionTasks();
+      this.faceTracker = await FaceLandmarker.createFromOptions(filesetResolver, {
+        baseOptions: { modelAssetPath: undefined },
+        numFaces: 1,
+        runningMode: 'video',
+      });
+    } catch (e) {
+      console.warn('Face tracker init failed', e);
+    }
+  }
+
+  startFaceLoop() {
+    if (this.faceLoopHandle || !this.domVideoEl) return;
+    this.initFaceTrackerIfNeeded();
+    const off = document.createElement('canvas');
+    off.width = 256;
+    off.height = 256;
+    const ctx = off.getContext('2d');
+    this.faceLoopHandle = setInterval(async () => {
+      if (!ctx || !this.faceTracker || !this.domVideoEl) return;
+      ctx.drawImage(this.domVideoEl, 0, 0, off.width, off.height);
+      try {
+        const res = await this.faceTracker.detectForVideo(this.domVideoEl, performance.now());
+        if (res?.landmarks?.[0]) {
+          this.positionSunglassesFromLandmarks(res.landmarks[0]);
+        }
+      } catch {}
+    }, 100);
+  }
+
+  stopFaceLoop() {
+    if (this.faceLoopHandle) {
+      clearInterval(this.faceLoopHandle);
+      this.faceLoopHandle = null;
+    }
+    if (this.sunglasses) this.sunglasses.setVisible(false);
+  }
+
+  createRockCountdownUI() {
+    const { width, height } = this.scale;
+    this.rockCountdownLabel = this.add.text(width / 2, height / 2, '', {
+      fontFamily: 'Teko',
+      fontSize: '48px',
+      color: '#ffffff',
+    }).setOrigin(0.5).setDepth(5000).setVisible(false);
+  }
+
+  showRockCountdown(n) {
+    if (this.rockCountdownLabel) {
+      this.rockCountdownLabel.setText(`GET READY TO ROCK ${n}`);
+      this.rockCountdownLabel.setVisible(true);
+    }
+  }
+
+  hideRockCountdown() {
+    this.rockCountdownLabel?.setVisible(false);
+  }
+
+  createSunglassesSticker() {
+    this.sunglasses = this.add.text(0, 0, '😎', {
+      fontSize: '48px',
+    }).setVisible(false).setDepth(4000);
+  }
+
+  positionSunglassesFromLandmarks(lm) {
+    if (!this.sunglasses || !lm) return;
+    const canvas = this.game.canvas;
+    const x = lm[0].x * canvas.width;
+    const y = lm[0].y * canvas.height;
+    this.sunglasses.setPosition(x, y);
+    this.sunglasses.setVisible(true);
+  }
+
+  createGalleryOverlay() {
+    if (!this.snapshots.length) return;
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.bottom = '10px';
+    div.style.left = '50%';
+    div.style.transform = 'translateX(-50%)';
+    this.snapshots.forEach((s) => {
+      const img = document.createElement('img');
+      img.src = s.dataUrl;
+      img.style.width = '60px';
+      img.style.height = '60px';
+      img.style.objectFit = 'cover';
+      img.style.margin = '0 4px';
+      div.appendChild(img);
+    });
+    document.body.appendChild(div);
   }
 }
