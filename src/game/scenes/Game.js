@@ -15,7 +15,7 @@ import {
   START_BUTTON,
 } from './shared.js';
 
-import { loadTrack, play, pause, getTime, getDuration, resumeOnGesture } from '../audio.js';
+import { play, pause, getTime, getDuration, resumeOnGesture } from '../audio.js';
 
 
 
@@ -152,26 +152,10 @@ export default class GameScene extends Phaser.Scene {
     });
 
 // Timeline + audio
-this._tl = this.cache.json.get('timeline') || {};
-
-const declaredDur = Number(this._tl.duration) || 0;   // seconds from JSON (or 0/"auto")
-this._tl.duration = declaredDur;                      // set it NOW so UI uses it
-
-if (this._tl.audio) {
-  loadTrack(this._tl.audio)
-    .then(() => {
-      const audioDur = Math.round(getDuration()) || 0;
-      // If JSON omitted/0/"auto", fall back to decoded audio length
-      if (!this._tl.duration) this._tl.duration = audioDur;
-
-      console.log('[duration] json:', declaredDur,
-                  'audio:', audioDur, 'final:', this._tl.duration);
-
-      // Refresh UI once we know the final value
-      this.updateProgressUI(0, this._tl.duration);
-    })
-    .catch((e) => console.warn('Audio load failed:', e));
-}
+    this._tl = this.cache.json.get('timeline') || {};
+    if (this._tl.audio && !this._tl.duration) {
+      this._tl.duration = Math.round(getDuration()) || 0;
+    }
 
 
 
