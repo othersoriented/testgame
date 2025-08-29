@@ -45,8 +45,8 @@ const LINKTREE_URL   = 'https://linktr.ee/lostboyfound';
 const SHARE_TITLE    = 'How about...Flappy Bird but make it Christian';
 const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clone 🎶';
 const SHARE_URL      = 'https://christianaiband.com/game.html';
-const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 32';
-const SONG_URL = 'https://youtu.be/nhCYQhJPPWo?si=DomJK051-IboPCYg';
+const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 150';
+const SONG_URL = 'https://christianaiband.com/game.html';
 
 // timeline spawn config
 const LOOKAHEAD = 1.6;
