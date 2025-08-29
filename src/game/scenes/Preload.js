@@ -30,6 +30,7 @@ import DieSoundOgg from '../assets/audio/die.ogg';
 // ✅ import timeline JSON and the MP3 so Webpack emits a real URL
 import timelineData from '../assets/data/song-timeline.json';
 import trackUrl from '../assets/audio/track.mp3';
+import { loadTrack, getDuration } from '../audio.js';
 
 import {
   PRELOAD_SCENE_KEY,
@@ -91,10 +92,13 @@ export default class PreloadScene extends Phaser.Scene {
     });
   }
 
-  create() {
+  async create() {
     // ✅ Put the imported JSON into the Phaser cache with the *emitted* MP3 URL
     if (timelineData) {
       const tl = { ...timelineData, audio: trackUrl };
+      await loadTrack(trackUrl);
+      const audioDur = Math.round(getDuration()) || 0;
+      if (!tl.duration) tl.duration = audioDur;
       this.cache.json.add('timeline', tl);
       // Debug (optional): console.log('Timeline audio URL:', tl.audio);
     }
