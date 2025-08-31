@@ -84,12 +84,20 @@ export default class GameScene extends Phaser.Scene {
 
     // Progress UI
     this.progressBg = null;
-    this.progressFill = null;
+    this.progressFillRect = null;
     this.timeLeftLabel = null;
     this._songFinishedAwarded = false;
 
     // Debug anchor dot
     this._camDebug = null;
+
+    // View metrics + throttles
+    this._viewRect = { left: 0, top: 0, width: 0, height: 0, sx: 1, sy: 1 };
+    this._lastDomUpdate = 0;
+    this._domUpdateMs = 16; // ~60fps DOM video follow
+    this._lastProgressUpdate = 0;
+    this._progressUpdateMs = 100; // ~10fps progress redraw
+    this._lastProgressDrawW = -1;
   }
 
   create() {
@@ -179,6 +187,10 @@ export default class GameScene extends Phaser.Scene {
 
     // Cleanup handlers
     this.events.once('shutdown', () => this.disableWebcamDom());
+
+    // Cache canvas metrics now and on resize
+    this.refreshViewMetrics();
+    this.scale.on('resize', () => this.refreshViewMetrics());
 
     this.setReady();
   }
@@ -311,7 +323,10 @@ export default class GameScene extends Phaser.Scene {
   // ---------- Progress UI ----------
 createProgressUI() {
   this.progressBg   = this.add.graphics().setDepth(2500).setScrollFactor(0);
-  this.progressFill = this.add.graphics().setDepth(2501).setScrollFactor(0);
+  this.progressFillRect = this.add.rectangle(8, 40, 0, PROGRESS_HEIGHT, 0x22cc88, 0.9)
+    .setOrigin(0, 0)
+    .setDepth(2501)
+    .setScrollFactor(0);
 
   this.timeLeftLabel = this.add.text(this.scale.width - 10, 20, '0:00', {
     fontFamily: 'Teko', fontSize: '20px', color: '#ffffff',
@@ -336,7 +351,7 @@ createProgressUI() {
 
 // *** Keep THIS one; remove the other definition ***
 updateProgressUI(nowSec = null, totalOverride = null) {
-  if (!this.progressFill) return;
+  if (!this.progressFillRect) return;
 
   const dur = totalOverride ?? (this._tl?.duration || 0);
   const t   = Phaser.Math.Clamp(nowSec ?? getTime(), 0, dur);
@@ -344,10 +359,14 @@ updateProgressUI(nowSec = null, totalOverride = null) {
 
   const x = 8, y = 40, w = this.scale.width - 16;
   const fillW = Math.max(0, Math.min(w * pct, w));
-
-  this.progressFill.clear();
-  this.progressFill.fillStyle(0x22cc88, 0.9);
-  this.progressFill.fillRoundedRect(x, y, fillW, PROGRESS_HEIGHT, 6);
+  if (Math.abs(fillW - this._lastProgressDrawW) >= 1) {
+    this._lastProgressDrawW = fillW;
+    this.progressFillRect.x = x;
+    this.progressFillRect.y = y;
+    // Resize rectangle without redrawing graphics
+    this.progressFillRect.setSize(fillW, PROGRESS_HEIGHT);
+    this.progressFillRect.setDisplaySize(fillW, PROGRESS_HEIGHT);
+  }
 
   const remaining = Math.max(0, Math.ceil(dur - t));
   this.timeLeftLabel.setText(this.formatTime(remaining));
@@ -413,10 +432,14 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     this.animate();
     this.handleInputs();
 
-    // progress bar + countdown
+    // progress bar + countdown (throttled)
     if (this.progressActive) {
-  this.updateProgressUI();   // uses current audio time
-}
+      const nowMs = this.time?.now || performance.now();
+      if (nowMs - this._lastProgressUpdate >= this._progressUpdateMs) {
+        this._lastProgressUpdate = nowMs;
+        this.updateProgressUI();   // uses current audio time
+      }
+    }
 
     if (this.state === PLAYING_STATE) {
       this.moveCollectibles();
@@ -433,24 +456,21 @@ updateProgressUI(nowSec = null, totalOverride = null) {
       }
     }
 
-    // --- DOM camera bubble follow + visibility ---
+    // --- DOM camera bubble follow + visibility (throttled, cached metrics) ---
     if (this.domVideoEl && this.player) {
-      const canvas = this.game.canvas;
-      const rect = canvas.getBoundingClientRect();
-
-      const sx = rect.width / this.scale.gameSize.width;
-      const sy = rect.height / this.scale.gameSize.height;
-
-      // Show bubble in READY and PLAYING, hide in GAME_OVER
+      const rect = this._viewRect;
       const shouldShow = (this.state !== GAME_OVER_STATE) && this.cameraEnabled;
       this.domVideoEl.style.display = shouldShow ? 'block' : 'none';
       if (shouldShow) {
-        // Clamp within canvas rect to avoid drifting off-screen
-        const localX = Phaser.Math.Clamp(this.player.x * sx, 0, rect.width);
-        const localY = Phaser.Math.Clamp(this.player.y * sy, 0, rect.height);
-        const screenX = rect.left + localX;
-        const screenY = rect.top + localY;
-        this.domVideoEl.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%)`;
+        const nowMs = this.time?.now || performance.now();
+        if (nowMs - this._lastDomUpdate >= this._domUpdateMs) {
+          this._lastDomUpdate = nowMs;
+          const localX = Phaser.Math.Clamp(this.player.x * rect.sx, 0, rect.width);
+          const localY = Phaser.Math.Clamp(this.player.y * rect.sy, 0, rect.height);
+          const screenX = rect.left + localX;
+          const screenY = rect.top + localY;
+          this.domVideoEl.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%)`;
+        }
       }
     }
 
@@ -528,6 +548,12 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     } catch (_) {}
     this.progressActive = true;  // start advancing the bar with the music
     if (this.cameraEnabled && this.setDomVideoVisible) this.setDomVideoVisible(true);
+
+    // Smooth out initial spawns for the first half-second
+    try {
+      const now = getTime();
+      this._nextCoinAt = Math.max(this._nextCoinAt, now + 0.4);
+    } catch {}
 
   }
 
@@ -906,6 +932,22 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     }).setOrigin(0.5).setDepth(3001).setScrollFactor(0);
     this.camStatusText = t;
     this.tweens.add({ targets: t, alpha: { from: 1, to: 0 }, y: '+=8', duration: 1800, ease: 'Cubic.easeOut', onComplete: () => { t.destroy(); this.camStatusText = null; } });
+  }
+
+  refreshViewMetrics() {
+    try {
+      const canvas = this.game?.canvas;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      this._viewRect.left = rect.left;
+      this._viewRect.top = rect.top;
+      this._viewRect.width = rect.width;
+      this._viewRect.height = rect.height;
+      const sx = rect.width / this.scale.gameSize.width;
+      const sy = rect.height / this.scale.gameSize.height;
+      this._viewRect.sx = sx;
+      this._viewRect.sy = sy;
+    } catch {}
   }
 
   // ---------------- FX helpers ----------------

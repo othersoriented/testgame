@@ -1,0 +1,5 @@
+Perf: progress bar rectangle + higher DOM video rate
+
+- Swap Graphics fill for Rectangle; resize instead of redraw
+- Throttle progress bar to ~10fps updates
+- Increase webcam bubble follow to ~60fps (16ms)
