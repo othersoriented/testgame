@@ -29,6 +29,7 @@ import DieSoundOgg from '../assets/audio/die.ogg';
 
 // ✅ import timeline JSON and the MP3 so Webpack emits a real URL
 import timelineData from '../assets/data/song-timeline.json';
+import lyricsData from '../assets/data/lyrics.json';
 import trackUrl from '../assets/audio/track.mp3';
 import { loadTrack, getDuration } from '../audio.js';
 
@@ -87,7 +88,7 @@ export default class PreloadScene extends Phaser.Scene {
       'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap'
     );
 
-    // Optional lyrics data (if present in assets). If the file is missing, Phaser logs a warning and we skip gracefully.
+    // Ensure lyrics JSON is bundled; also attempt runtime load for dev static hosting
     try { this.load.json('lyrics', 'assets/data/lyrics.json'); } catch {}
 
     this.load.on('progress', (progress) => {
@@ -104,6 +105,11 @@ export default class PreloadScene extends Phaser.Scene {
       if (!tl.duration) tl.duration = audioDur;
       this.cache.json.add('timeline', tl);
       // Debug (optional): console.log('Timeline audio URL:', tl.audio);
+    }
+
+    // Put lyrics JSON into cache if present via import
+    if (lyricsData) {
+      this.cache.json.add('lyrics', lyricsData);
     }
 
     // Minimal generated textures for collectibles
