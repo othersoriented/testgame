@@ -1,5 +1,0 @@
-Fix: ensure lyrics.json is bundled and cached
-
-- Import lyrics JSON and add to Phaser cache in Preload.create()
-- Keep runtime loader path as fallback (assets/data/lyrics.json)
-- Guarantees lyrics data exists for GameScene lyric spawns
