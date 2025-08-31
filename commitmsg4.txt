@@ -1,6 +1,0 @@
-Fix: reliable chorus webcam background across runs
-
-- Keep camera stream alive on Game Over; only hide bubble
-- Rebind stream to Phaser Video on reuse; discard stale instances
-- Ready-gated swap + chorus retry loop for robust background replace
-- Safer sizing/showing only after video has data
