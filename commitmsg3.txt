@@ -1,0 +1,7 @@
+Feature: Chorus webcam background + snapshots (low overhead)
+
+- Show webcam full-screen behind canvas during chorus; keep bubble visible
+- Hide normal background; restore after chorus
+- Cache canvas metrics and align background video without per-frame layout reads
+- Capture lightweight snapshots during chorus (capped); award points at exit
+- Share: attempt Web Share with image file; fallback to link/snapshot URL

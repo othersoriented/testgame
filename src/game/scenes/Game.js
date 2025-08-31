@@ -57,6 +57,10 @@ const CAMERA_BUBBLE_SIZE = 65;
 // progress / award
 const SONG_BONUS_POINTS = 10000;
 const PROGRESS_HEIGHT   = 10;
+// Chorus webcam snapshots
+const SNAPSHOT_POINTS_PER = 25;        // points per snapshot
+const SNAPSHOT_INTERVAL_MS = 500;      // capture rate during chorus
+const SNAPSHOT_MAX_PER_WINDOW = 6;     // cap per chorus window (keeps memory small)
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -98,6 +102,13 @@ export default class GameScene extends Phaser.Scene {
     this._lastProgressUpdate = 0;
     this._progressUpdateMs = 100; // ~10fps progress redraw
     this._lastProgressDrawW = -1;
+
+    // Chorus webcam BG and snapshots
+    this._chorusBGActive = false;
+    this._prevCanvasZ = '';
+    this.domVideoBG = null;       // DOM video filling background during chorus
+    this._snapTimer = null;
+    this._snapshots = [];         // dataURLs for share on game over
   }
 
   create() {
@@ -307,17 +318,34 @@ export default class GameScene extends Phaser.Scene {
 
   shareScore() {
     const scoreMsg = `My score: ${this.score}`;
-    const data = {
-      title: SHARE_TITLE,
-      text: `Try to beat my score in this Christian music Flappy clone! ${scoreMsg}`,
-      url: SHARE_URL
+    const text = `Try to beat my score in this Christian music Flappy clone! ${scoreMsg}`;
+
+    // Try to share a snapshot if supported
+    const firstSnap = (this._snapshots && this._snapshots[0]) ? this._snapshots[0] : null;
+    const tryShareWithImage = async () => {
+      try {
+        if (!firstSnap) return false;
+        const res = await fetch(firstSnap); const blob = await res.blob();
+        const file = new File([blob], 'snapshot.jpg', { type: 'image/jpeg' });
+        const payload = { title: SHARE_TITLE, text, files: [file] };
+        if (navigator.canShare && navigator.canShare(payload)) {
+          await navigator.share(payload);
+          return true;
+        }
+      } catch {}
+      return false;
     };
-    if (navigator.share) {
-      navigator.share(data).catch(() => {});
-    } else {
-      navigator.clipboard?.writeText(`${data.text} ${data.url}`).catch(() => {});
-      this.openExternal(IG_PROFILE_URL);
-    }
+
+    const fallbackShare = () => {
+      const data = { title: SHARE_TITLE, text, url: SHARE_URL };
+      if (navigator.share) { navigator.share(data).catch(() => {}); }
+      else {
+        navigator.clipboard?.writeText(`${data.text} ${data.url}`).catch(() => {});
+        if (firstSnap) window.open(firstSnap, '_blank'); else this.openExternal(IG_PROFILE_URL);
+      }
+    };
+
+    tryShareWithImage().then((ok) => { if (!ok) fallbackShare(); });
   }
 
   // ---------- Progress UI ----------
@@ -646,7 +674,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
   createBackground() {
     const { width, height } = this.scale;
-    this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.5).refreshBody();
+    this.bgImage = this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.5).refreshBody();
   }
 
   createPlayer() {
@@ -934,6 +962,90 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     this.tweens.add({ targets: t, alpha: { from: 1, to: 0 }, y: '+=8', duration: 1800, ease: 'Cubic.easeOut', onComplete: () => { t.destroy(); this.camStatusText = null; } });
   }
 
+  // ------- Chorus webcam background + snapshots -------
+  ensureBackgroundWebcamVideo() {
+    if (this.domVideoBG || !this.webcamStream) return;
+    const v = document.createElement('video');
+    v.playsInline = true; v.muted = true; v.autoplay = true; v.srcObject = this.webcamStream;
+    v.style.position = 'fixed';
+    v.style.left = '0px'; v.style.top = '0px';
+    v.style.objectFit = 'cover';
+    v.style.pointerEvents = 'none';
+    v.style.zIndex = '1'; // canvas above (we set canvas z-index higher when active)
+    v.style.display = 'none';
+    // initial size/pos
+    const r = this._viewRect;
+    v.style.width = `${r.width}px`;
+    v.style.height = `${r.height}px`;
+    v.style.transform = `translate3d(${r.left}px, ${r.top}px, 0)`;
+    document.body.appendChild(v);
+    try { v.play(); } catch {}
+    this.domVideoBG = v;
+  }
+
+  enterChorusBackground() {
+    if (!this.cameraEnabled) return;
+    if (this._chorusBGActive) return;
+    this.ensureBackgroundWebcamVideo();
+    if (this.domVideoBG) this.domVideoBG.style.display = 'block';
+    if (this.bgImage) this.bgImage.setVisible(false);
+
+    // raise canvas above background video
+    const c = this.game?.canvas;
+    if (c) { this._prevCanvasZ = c.style.zIndex; c.style.position = 'relative'; c.style.zIndex = '2'; }
+
+    this._chorusBGActive = true;
+    this.startSnapshotTimer();
+  }
+
+  exitChorusBackground() {
+    if (!this._chorusBGActive) return;
+    this._chorusBGActive = false;
+    if (this.domVideoBG) this.domVideoBG.style.display = 'none';
+    if (this.bgImage) this.bgImage.setVisible(true);
+    const c = this.game?.canvas; if (c) { c.style.zIndex = this._prevCanvasZ || ''; }
+    this.stopSnapshotTimer(true);
+  }
+
+  startSnapshotTimer() {
+    if (!this.webcamStream) return;
+    if (this._snapTimer) return;
+    this._snapshots = [];
+    this._snapTimer = setInterval(() => this.captureSnapshot(), SNAPSHOT_INTERVAL_MS);
+  }
+
+  stopSnapshotTimer(award) {
+    if (this._snapTimer) { clearInterval(this._snapTimer); this._snapTimer = null; }
+    if (award) {
+      const gained = (this._snapshots?.length || 0) * SNAPSHOT_POINTS_PER;
+      if (gained > 0) {
+        this.addScore(gained);
+        this.showPopupText(`Snapshots +${gained}`, '#82c6ff');
+      }
+    }
+  }
+
+  captureSnapshot() {
+    try {
+      const src = this.domVideoBG || this.domVideoEl;
+      if (!src) return;
+      if ((this._snapshots?.length || 0) >= SNAPSHOT_MAX_PER_WINDOW) return;
+      const vw = src.videoWidth || 320, vh = src.videoHeight || 240;
+      if (!vw || !vh) return;
+      const outW = 320, outH = 180; // lightweight
+      const cx = document.createElement('canvas');
+      cx.width = outW; cx.height = outH;
+      const ctx = cx.getContext('2d');
+      // cover fit crop
+      const s = Math.max(outW / vw, outH / vh);
+      const rw = vw * s, rh = vh * s;
+      const sx = (outW - rw) / 2, sy = (outH - rh) / 2;
+      ctx.drawImage(src, sx, sy, rw, rh);
+      const url = cx.toDataURL('image/jpeg', 0.85);
+      this._snapshots.push(url);
+    } catch {}
+  }
+
   refreshViewMetrics() {
     try {
       const canvas = this.game?.canvas;
@@ -947,6 +1059,13 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       const sy = rect.height / this.scale.gameSize.height;
       this._viewRect.sx = sx;
       this._viewRect.sy = sy;
+
+      // Keep chorus background video aligned if present
+      if (this.domVideoBG) {
+        this.domVideoBG.style.width = `${rect.width}px`;
+        this.domVideoBG.style.height = `${rect.height}px`;
+        this.domVideoBG.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+      }
     } catch {}
   }
 
@@ -1012,9 +1131,15 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
         repeat: -1,
         ease: 'Sine.easeInOut',
       });
+
+      // Enable webcam as background during chorus (keep bubble visible)
+      this.enterChorusBackground();
     } else {
       if (this._chorusPulseTween) { this._chorusPulseTween.stop(); this._chorusPulseTween = null; }
       [...allTop, ...allBot].forEach(p => p && p.clearTint() && (p.scaleX = 1) && (p.scaleY = 1));
+
+      // Restore normal background and finalize snapshots
+      this.exitChorusBackground();
     }
 
     // Multiplier banner
