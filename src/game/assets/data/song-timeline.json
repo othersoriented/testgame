@@ -1,7 +1,7 @@
 {
   "title": "Psalm 150",
   "audio": "assets/audio/track.mp3",
-  "duration": 207  ,
+  "duration": 207,
   "notesToCollect": 12,
   "noteMilestones": [
     { "t": 5.0,  "x": 620, "y": 220, "label": "L1" },
@@ -17,14 +17,11 @@
     { "t": 55.0, "x": 620, "y": 220, "label": "L11" },
     { "t": 58.0, "x": 620, "y": 300, "label": "L12" }
   ],
-
   "ambientCoins": { "rate": 0.7, "yRange": [140, 360], "minGap": 1.2 },
   "powerUps": [],
-    "chorusWindows": [
+  "chorusWindows": [
     { "start": 49.0, "end": 76.0, "coinRate": 7.0, "multiplier": 2 },
     { "start": 93.0, "end": 111.0, "coinRate": 14.0, "multiplier": 4 },
     { "start": 156.0, "end": 183.0, "coinRate": 21.0, "multiplier": 6 }
-  ],
-  "ambientCoins": { "rate": 0.7, "yRange": [140, 360], "minGap": 1.2 },
-  "powerUps": []
+  ]
 }

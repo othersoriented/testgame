@@ -1,0 +1,8 @@
+GameScene: webcam bubble fixes, state visibility, and meme/UX upgrades
+
+- DOM camera: fixed positioning + clamped transform; correct canvas offset
+- Show bubble in Ready/Playing, hide in Game Over; remove on game over
+- Immediate bird replace on camera enable; permission toast
+- Prevent UI overlap: hide cam toggle outside Ready; raise Start/Restart depths
+- Perf: pooling + fast cleanup; score reuse; animation guard
+- Timeline JSON: dedupe + normalize

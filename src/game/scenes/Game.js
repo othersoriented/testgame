@@ -73,6 +73,7 @@ export default class GameScene extends Phaser.Scene {
     this.domVideoSize = CAMERA_BUBBLE_SIZE;
     this.cameraEnabled = false;
     this.camBtn = null;
+    this.camStatusText = null;
 
     // (Phaser video fields kept in case you want to switch back later)
     this.webcamVideo = null;
@@ -107,6 +108,7 @@ export default class GameScene extends Phaser.Scene {
     const { width, height } = this.scale;
     this.startBtn = this.add.image(width * 0.5, height * 0.7, START_BUTTON)
       .setInteractive()
+      .setDepth(1600)
       .on('pointerdown', (e) => e?.event?.stopPropagation())
       .on('pointerup', async (e) => {
         e?.event?.stopPropagation();
@@ -116,6 +118,7 @@ export default class GameScene extends Phaser.Scene {
     // Restart button (GAME OVER)
     this.restartButton = this.add.image(width * 0.5, height * 0.8, START_BUTTON)
       .setInteractive()
+      .setDepth(2601)
       .setVisible(false)
       .on('pointerdown', (e) => e?.event?.stopPropagation())
       .on('pointerup', (e) => { e?.event?.stopPropagation(); this.restart(); });
@@ -139,16 +142,18 @@ export default class GameScene extends Phaser.Scene {
     this.coinsGroup = this.physics.add.group();
     this.notesGroup = this.physics.add.group();
     this.physics.add.overlap(this.player, this.coinsGroup, (_, coin) => {
-      coin.destroy();
+      coin?.disableBody?.(true, true);
       const now = getTime();
       const chorus = this._tl?.chorusWindows?.find((w) => now >= w.start && now <= w.end);
       const mult = chorus ? (chorus.multiplier || 2) : 1;
       this.addScore(1 * mult);
+      this.bumpStreak?.();
     });
     this.physics.add.overlap(this.player, this.notesGroup, (_, note) => {
-      note.destroy();
+      note?.disableBody?.(true, true);
       this.notesCollected += 1;
       this.addScore(5);
+      this.bumpStreak?.();
     });
 
 // Timeline + audio
@@ -168,6 +173,12 @@ export default class GameScene extends Phaser.Scene {
     // Now Playing (clickable)
     const nowPlayingText = this._tl?.title || NOW_PLAYING_FALLBACK;
     this.createNowPlayingBanner(nowPlayingText);
+
+    // FX and particles
+    if (this.createFX) this.createFX();
+
+    // Cleanup handlers
+    this.events.once('shutdown', () => this.disableWebcamDom());
 
     this.setReady();
   }
@@ -286,7 +297,7 @@ export default class GameScene extends Phaser.Scene {
     const scoreMsg = `My score: ${this.score}`;
     const data = {
       title: SHARE_TITLE,
-      text: `${SHARE_TEXT} ${scoreMsg}`,
+      text: `Try to beat my score in this Christian music Flappy clone! ${scoreMsg}`,
       url: SHARE_URL
     };
     if (navigator.share) {
@@ -388,6 +399,13 @@ updateProgressUI(nowSec = null, totalOverride = null) {
       ease: 'Cubic.easeOut',
       onComplete: () => popup.destroy()
     });
+
+    // Confetti burst celebration
+    if (this._particleEmitter) {
+      for (let i = 0; i < 6; i += 1) {
+        this._particleEmitter.explode(30, this.scale.width * Math.random(), this.scale.height * 0.25 + Math.random() * 40);
+      }
+    }
   }
 
   // ---------- Update loop ----------
@@ -415,7 +433,7 @@ updateProgressUI(nowSec = null, totalOverride = null) {
       }
     }
 
-    // --- DOM camera bubble follow ---
+    // --- DOM camera bubble follow + visibility ---
     if (this.domVideoEl && this.player) {
       const canvas = this.game.canvas;
       const rect = canvas.getBoundingClientRect();
@@ -423,11 +441,17 @@ updateProgressUI(nowSec = null, totalOverride = null) {
       const sx = rect.width / this.scale.gameSize.width;
       const sy = rect.height / this.scale.gameSize.height;
 
-      const screenX = rect.left + this.player.x * sx;
-      const screenY = rect.top + this.player.y * sy;
-
-      this.domVideoEl.style.left = `${screenX}px`;
-      this.domVideoEl.style.top  = `${screenY}px`;
+      // Show bubble in READY and PLAYING, hide in GAME_OVER
+      const shouldShow = (this.state !== GAME_OVER_STATE) && this.cameraEnabled;
+      this.domVideoEl.style.display = shouldShow ? 'block' : 'none';
+      if (shouldShow) {
+        // Clamp within canvas rect to avoid drifting off-screen
+        const localX = Phaser.Math.Clamp(this.player.x * sx, 0, rect.width);
+        const localY = Phaser.Math.Clamp(this.player.y * sy, 0, rect.height);
+        const screenX = rect.left + localX;
+        const screenY = rect.top + localY;
+        this.domVideoEl.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%)`;
+      }
     }
 
     // (debug dot removed by default; keep if you still use it)
@@ -483,9 +507,8 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     if (this.camBtn) this.camBtn.setVisible(true);
 
     this.progressActive = false;
-this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
-
-
+    this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
+    if (this.setDomVideoVisible) this.setDomVideoVisible(this.cameraEnabled); // show bubble if cam enabled
   }
 
   async setPlaying() {
@@ -497,13 +520,14 @@ this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
     this.state = PLAYING_STATE;
 
     if (this.startBtn) this.startBtn.setVisible(false);
-    // keep camBtn visible if you want mid-run toggling
+    if (this.camBtn) this.camBtn.setVisible(false);
 
     try {
       await resumeOnGesture();
       if (this._tl?.audio) play(0);
     } catch (_) {}
     this.progressActive = true;  // start advancing the bar with the music
+    if (this.cameraEnabled && this.setDomVideoVisible) this.setDomVideoVisible(true);
 
   }
 
@@ -520,6 +544,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
     this.hitSound.play();
     this.player.anims.stop();
     this.setSocialButtonsVisible(true);
+    if (this.camBtn) this.camBtn.setVisible(false);
 
     const currentBest = Number(localStorage.getItem(BEST_SCORE_KEY) || 0);
     const bestScore = Math.max(currentBest, this.score);
@@ -527,6 +552,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
     this.bestScoreText.setText(`High Score : ${bestScore}`);
 
     this.slideStartButton();
+    if (this.setDomVideoVisible) this.setDomVideoVisible(false); // hide bubble in Game Over
+    // Fully remove webcam element to avoid any stray overlay issues
+    if (this.cameraEnabled) this.disableWebcamDom();
   }
 }
 
@@ -571,6 +599,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     this.player.anims.play(FLAP, true);
     this.player.angle = -ELEVATION_ANGLE;
     this.flapSound.play();
+    if (this._particleEmitter) this._particleEmitter.explode(10, this.player.x - 10, this.player.y);
   }
 
   fall() { if (this.player.angle < FALL_ANGLE) this.player.angle += DECLINE_ANGLE_DELTA; }
@@ -600,7 +629,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     player.setCollideWorldBounds(true);
     player.setGravityY(BIRD_GRAVITY);
     player.body.allowGravity = false;
-    this.anims.create({ key: FLAP, frames: this.anims.generateFrameNumbers(BIRD, { start: 0, end: 2 }), frameRate: FRAME_RATE, repeat: -1 });
+    if (!this.anims.exists || !this.anims.exists(FLAP)) {
+      this.anims.create({ key: FLAP, frames: this.anims.generateFrameNumbers(BIRD, { start: 0, end: 2 }), frameRate: FRAME_RATE, repeat: -1 });
+    }
     return player;
   }
 
@@ -665,6 +696,21 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
   }
 
   updateScoreText() {
+    const digits = String(this.score).split('');
+    const children = this.scoreText.getChildren();
+    if (children.length === digits.length) {
+      const x = this.scale.width * 0.5, y = this.scale.height * 0.08;
+      const length = digits.length * DIGIT_WIDTH;
+      const offsetX = x - length / 2;
+      for (let i = 0; i < digits.length; i += 1) {
+        const s = children[i];
+        s.setTexture(digits[i]);
+        s.setX(offsetX + (i * DIGIT_WIDTH));
+        s.setY(y);
+      }
+      this.pointSound.play();
+      return;
+    }
     this.scoreText.clear(true, true);
     this.scoreText = this.createScoreText();
     this.pointSound.play();
@@ -715,17 +761,24 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       const baseGap = Math.max(this._tl.ambientCoins?.minGap || 1.0, 1.0 / rate);
       this._nextCoinAt = now + baseGap;
     }
+
+    // Visuals when entering/exiting chorus
+    if (this.setChorusVisuals) this.setChorusVisuals(inChorus, chorusWin?.multiplier || 1);
   }
 
   spawnCoin(x, y) {
-    const c = this.coinsGroup.create(x, y, 'coin');
-    if (c?.body) c.body.allowGravity = false;
+    const c = this.coinsGroup.get(x, y, 'coin');
+    if (!c) return null;
+    c.setActive(true).setVisible(true);
+    if (c.body) { c.body.enable = true; c.body.allowGravity = false; }
     return c;
   }
 
   spawnNote(x, y) {
-    const n = this.notesGroup.create(x, y, 'note');
-    if (n?.body) n.body.allowGravity = false;
+    const n = this.notesGroup.get(x, y, 'note');
+    if (!n) return null;
+    n.setActive(true).setVisible(true);
+    if (n.body) { n.body.enable = true; n.body.allowGravity = false; }
     return n;
   }
 
@@ -770,6 +823,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
         this.camBtn.y = this.startBtn.y + 50;
       }
     });
+
+    // Ensure clean label text
+    this.camBtn?.setText('Enable Camera');
   }
 
   async enableWebcamDom() {
@@ -784,17 +840,22 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       video.muted = true;
       video.autoplay = true;
       video.srcObject = stream;
-      video.style.position = 'absolute';
+      video.style.position = 'fixed';
+      video.style.left = '0px';
+      video.style.top = '0px';
       video.style.width = `${this.domVideoSize}px`;
       video.style.height = `${this.domVideoSize}px`;
       video.style.borderRadius = '50%';
       video.style.objectFit = 'cover';
       video.style.pointerEvents = 'none';
       video.style.zIndex = '9999';
-      video.style.transform = 'translate(-50%, -50%)';
+      video.style.transform = 'translate3d(0, 0, 0) translate(-50%, -50%)';
+      video.style.willChange = 'transform';
       video.style.border = '5px solid white';
       // optional glow for contrast
       video.style.boxShadow = '0 0 8px rgba(255,255,255,0.85)';
+      // show bubble in READY or PLAYING
+      video.style.display = (this.state !== GAME_OVER_STATE) ? 'block' : 'none';
 
       document.body.appendChild(video);
 
@@ -805,10 +866,11 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       this.cameraEnabled = true;
       this.camBtn?.setText('Disable Camera');
 
-      // Replace the sprite visually
+      // Replace the sprite visually immediately
       this.player.setVisible(false);
     } catch (err) {
       console.warn('Webcam error:', err);
+      this.showCamToast?.('Camera blocked or unavailable. Check permissions and try again.');
     }
   }
 
@@ -829,5 +891,111 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // Show the sprite again if you hid it
     this.player.setVisible(true);
+  }
+
+  // Helper to toggle DOM video visibility safely
+  setDomVideoVisible(v) { if (this.domVideoEl) this.domVideoEl.style.display = v ? 'block' : 'none'; }
+
+  // Small toast near camera button for permission/status
+  showCamToast(msg) {
+    try { if (this.camStatusText) { this.camStatusText.destroy(); this.camStatusText = null; } } catch {}
+    const x = this.camBtn ? this.camBtn.x : this.scale.width / 2;
+    const y = this.camBtn ? (this.camBtn.y + 26) : (this.scale.height * 0.85);
+    const t = this.add.text(x, y, msg, {
+      fontFamily: 'Teko', fontSize: '18px', color: '#ffffff', stroke: '#000', strokeThickness: 4,
+    }).setOrigin(0.5).setDepth(3001).setScrollFactor(0);
+    this.camStatusText = t;
+    this.tweens.add({ targets: t, alpha: { from: 1, to: 0 }, y: '+=8', duration: 1800, ease: 'Cubic.easeOut', onComplete: () => { t.destroy(); this.camStatusText = null; } });
+  }
+
+  // ---------------- FX helpers ----------------
+  createFX() {
+    // Simple circle texture for particles
+    const g = this.add.graphics();
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(4, 4, 4);
+    g.generateTexture('dot', 8, 8);
+    g.destroy();
+
+    const pm = this.add.particles('dot');
+    this._particleEmitter = pm.createEmitter({
+      quantity: 6,
+      speed: { min: 40, max: 120 },
+      angle: { min: 160, max: 200 },
+      lifespan: { min: 300, max: 600 },
+      scale: { start: 0.8, end: 0.2 },
+      alpha: { start: 0.9, end: 0 },
+      gravityY: 0,
+      tint: [0xffffff, 0xffd700, 0x82c6ff, 0xff66aa],
+      on: false,
+      follow: null,
+      blendMode: 'ADD',
+    });
+  }
+
+  bumpStreak() {
+    this._streak += 1;
+    if (this._streakTimer) this._streakTimer.remove(false);
+    this._streakTimer = this.time.delayedCall(1200, () => { this._streak = 0; });
+    if (this._streak >= 3) {
+      this.showPopupText(`Amen x${this._streak}`, '#ffd700');
+    }
+  }
+
+  showPopupText(text, color = '#ffffff') {
+    const p = this.add.text(this.player.x, Math.max(40, this.player.y - 40), text, {
+      fontFamily: 'Teko', fontSize: '24px', color,
+      stroke: '#000', strokeThickness: 6,
+    }).setOrigin(0.5).setDepth(2000);
+    this.tweens.add({ targets: p, y: '-=20', alpha: { from: 1, to: 0 }, duration: 650, ease: 'Cubic.easeOut', onComplete: () => p.destroy() });
+  }
+
+  setChorusVisuals(active, mult) {
+    if (active === this._lastChorusActive && mult === this._chorusActiveMultiplier) return;
+    this._lastChorusActive = active;
+    this._chorusActiveMultiplier = mult;
+
+    // Pipe tint + pulse
+    const allTop = this.pipes?.topPipes?.getChildren?.() || [];
+    const allBot = this.pipes?.bottomPipes?.getChildren?.() || [];
+    if (active) {
+      [...allTop, ...allBot].forEach(p => p && p.setTint(0x8e44ad));
+      if (this._chorusPulseTween) this._chorusPulseTween.stop();
+      this._chorusPulseTween = this.tweens.add({
+        targets: [...allTop, ...allBot],
+        scaleX: { from: 1.0, to: 1.05 },
+        scaleY: { from: 1.0, to: 1.05 },
+        yoyo: true,
+        duration: 260,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    } else {
+      if (this._chorusPulseTween) { this._chorusPulseTween.stop(); this._chorusPulseTween = null; }
+      [...allTop, ...allBot].forEach(p => p && p.clearTint() && (p.scaleX = 1) && (p.scaleY = 1));
+    }
+
+    // Multiplier banner
+    if (active && mult > 1) {
+      if (!this._chorusLabel) {
+        this._chorusLabel = this.add.text(this.scale.width / 2, this.scale.height * 0.12, '', {
+          fontFamily: 'Teko', fontSize: '32px', color: '#ffd700', stroke: '#000', strokeThickness: 8,
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(2400);
+      }
+      this._chorusLabel.setText(`x${mult} Chorus Hype!`);
+      this._chorusLabel.setVisible(true);
+      this.tweens.add({ targets: this._chorusLabel, scaleX: { from: 1, to: 1.12 }, scaleY: { from: 1, to: 1.12 }, yoyo: true, duration: 320, repeat: 3 });
+      // Webcam bling
+      if (this.domVideoEl) {
+        this.domVideoEl.style.border = '5px solid gold';
+        this.domVideoEl.style.boxShadow = '0 0 12px rgba(255,215,0,0.9)';
+      }
+    } else if (this._chorusLabel) {
+      this._chorusLabel.setVisible(false);
+      if (this.domVideoEl) {
+        this.domVideoEl.style.border = '5px solid white';
+        this.domVideoEl.style.boxShadow = '0 0 8px rgba(255,255,255,0.85)';
+      }
+    }
   }
 }
