@@ -1,0 +1,4 @@
+Fix: stop XHR 404 for lyrics.json
+
+- Remove runtime loader call; rely on imported lyricsData
+- Add lyrics JSON to Phaser cache in Preload.create()

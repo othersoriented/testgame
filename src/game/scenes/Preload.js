@@ -88,8 +88,8 @@ export default class PreloadScene extends Phaser.Scene {
       'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap'
     );
 
-    // Ensure lyrics JSON is bundled; also attempt runtime load for dev static hosting
-    try { this.load.json('lyrics', 'assets/data/lyrics.json'); } catch {}
+    // Lyrics JSON is bundled via import (lyricsData) and added to cache in create();
+    // Avoid runtime XHR to /assets/data/lyrics.json to prevent 404s in dev.
 
     this.load.on('progress', (progress) => {
       loadingText.setText(`Loading... ${Math.round(progress * 100)}%`);
