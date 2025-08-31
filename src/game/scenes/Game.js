@@ -21,16 +21,16 @@ import { play, pause, getTime, getDuration, resumeOnGesture } from '../audio.js'
 
 const FLAP = 'flap';
 const PIPE_HEIGHT = 320;
-const PIPE_GAP_HEIGHT = 120;
-const PIPE_GAP_LENGTH = 180;
+const PIPE_GAP_HEIGHT = 100;
+const PIPE_GAP_LENGTH = 170;
 const PIPE_PAIRS = 1;
-const GROUND_HEIGHT = 100;
+const GROUND_HEIGHT = 110;
 const FRAME_RATE = 5;
 const BIRD_GRAVITY = 1000;
-const BIRD_VELOCITY = -360;
+const BIRD_VELOCITY = -300;
 const GAME_SPEED = 3;
 const ELEVATION_ANGLE = 25;
-const FALL_ANGLE = 100;
+const FALL_ANGLE = 90;
 const DECLINE_ANGLE_DELTA = 2;
 const MIN_PIPE_HEIGHT = -PIPE_HEIGHT * 0.7;
 const READY_STATE = 'ready-state';
@@ -58,9 +58,13 @@ const CAMERA_BUBBLE_SIZE = 65;
 const SONG_BONUS_POINTS = 10000;
 const PROGRESS_HEIGHT   = 10;
 // Chorus webcam snapshots
-const SNAPSHOT_POINTS_PER = 25;        // points per snapshot
-const SNAPSHOT_INTERVAL_MS = 500;      // capture rate during chorus
-const SNAPSHOT_MAX_PER_WINDOW = 6;     // cap per chorus window (keeps memory small)
+const SNAPSHOT_POINTS_PER = 1000;      // points per snapshot
+const SNAPSHOT_INTERVAL_MS = 500;      // legacy (unused in new scheduling)
+const SNAPSHOT_MAX_PER_WINDOW = 6;     // safety cap
+const SNAPSHOT_COUNT_PER_WINDOW = 3;   // exactly 3 snapshots per chorus
+
+// Chorus countdown
+const CHORUS_COUNTDOWN_LEAD = 3;       // seconds before chorus start
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -110,6 +114,13 @@ export default class GameScene extends Phaser.Scene {
     this._snapTimer = null;
     this._snapshots = [];         // dataURLs for share on game over
     this._chorusRetryEvt = null;
+    this._snapshotSchedule = [];
+    this._wasInChorus = false;
+
+    // Countdown UI state
+    this._countdownTarget = null;   // absolute time (sec) of next chorus start
+    this._countdownLabel = null;
+    this._countdownNumber = null;
   }
 
   create() {
@@ -168,6 +179,7 @@ export default class GameScene extends Phaser.Scene {
       const mult = chorus ? (chorus.multiplier || 2) : 1;
       this.addScore(1 * mult);
       this.bumpStreak?.();
+      try { navigator?.vibrate?.(15); } catch {}
     });
     this.physics.add.overlap(this.player, this.notesGroup, (_, note) => {
       note?.disableBody?.(true, true);
@@ -203,6 +215,9 @@ export default class GameScene extends Phaser.Scene {
     // Cache canvas metrics now and on resize
     this.refreshViewMetrics();
     this.scale.on('resize', () => this.refreshViewMetrics());
+
+    // Countdown UI (hidden initially)
+    this.createCountdownUI();
 
     this.setReady();
   }
@@ -461,6 +476,9 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     this.animate();
     this.handleInputs();
 
+    // countdown update
+    this.updateCountdownUI?.();
+
     // progress bar + countdown (throttled)
     if (this.progressActive) {
       const nowMs = this.time?.now || performance.now();
@@ -674,7 +692,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
   createBackground() {
     const { width, height } = this.scale;
-    this.bgImage = this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.5).refreshBody();
+    this.bgImage = this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.7).refreshBody();
   }
 
   createPlayer() {
@@ -805,8 +823,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     }
 
     // coins
-    const inChorus = (this._tl.chorusWindows || []).some((w) => now >= w.start && now <= w.end);
-    const chorusWin = inChorus ? (this._tl.chorusWindows || []).find((w) => now >= w.start && now <= w.end) : null;
+    const windows = this._tl.chorusWindows || [];
+    const inChorus = windows.some((w) => now >= w.start && now <= w.end);
+    const chorusWin = inChorus ? windows.find((w) => now >= w.start && now <= w.end) : null;
     const rate = inChorus ? (chorusWin?.coinRate || 3.0) : (this._tl.ambientCoins?.rate || 0.7);
 
     if (now >= this._nextCoinAt) {
@@ -818,6 +837,39 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // Visuals when entering/exiting chorus
     if (this.setChorusVisuals) this.setChorusVisuals(inChorus, chorusWin?.multiplier || 1);
+
+    // Countdown: schedule when approaching next chorus
+    if (!inChorus && this._countdownTarget == null) {
+      const upNext = windows.find((w) => w.start > now && (w.start - now) <= CHORUS_COUNTDOWN_LEAD);
+      if (upNext) this._countdownTarget = upNext.start;
+    }
+
+    // Entering chorus: schedule snapshots (3 random times)
+    if (inChorus && !this._wasInChorus && chorusWin) {
+      const s = chorusWin.start, e = chorusWin.end;
+      const dur = Math.max(0, e - s);
+      const pad = Math.min(0.5, dur / 6);
+      const slots = [];
+      for (let i = 0; i < SNAPSHOT_COUNT_PER_WINDOW; i += 1) {
+        const r = Math.random();
+        const t = s + pad + r * Math.max(0, (e - pad) - (s + pad));
+        slots.push(t);
+      }
+      slots.sort((a,b)=>a-b);
+      this._snapshotSchedule = slots;
+    }
+
+    // Fire scheduled snapshots when times hit
+    if (this._snapshotSchedule && this._snapshotSchedule.length > 0) {
+      while (this._snapshotSchedule.length > 0 && now >= this._snapshotSchedule[0]) {
+        this._snapshotSchedule.shift();
+        this.captureSnapshot();
+        this.addScore(SNAPSHOT_POINTS_PER);
+        this.showPopupText(`+${SNAPSHOT_POINTS_PER.toLocaleString()}`, '#82c6ff');
+      }
+    }
+
+    this._wasInChorus = inChorus;
   }
 
   spawnCoin(x, y) {
@@ -953,6 +1005,48 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     if (this.webcamVideo) {
       try { this.webcamVideo.stop(); } catch {}
       this.webcamVideo.setVisible(false);
+    }
+  }
+
+  // ------------- Countdown UI -------------
+  createCountdownUI() {
+    const cx = this.scale.width * 0.5;
+    const cy = this.scale.height * 0.2;
+    this._countdownLabel = this.add.text(cx, cy - 30, 'Get Ready To Rock', {
+      fontFamily: 'Teko', fontSize: '36px', color: '#ffd700', stroke: '#000', strokeThickness: 8,
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(2800).setVisible(false);
+    this._countdownNumber = this.add.text(cx, cy + 10, '', {
+      fontFamily: 'Teko', fontSize: '72px', color: '#ffffff', stroke: '#000', strokeThickness: 10,
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(2801).setVisible(false);
+    this.scale.on('resize', () => {
+      const cxx = this.scale.width * 0.5;
+      const cyy = this.scale.height * 0.2;
+      if (this._countdownLabel) { this._countdownLabel.setPosition(cxx, cyy - 30); }
+      if (this._countdownNumber) { this._countdownNumber.setPosition(cxx, cyy + 10); }
+    });
+  }
+
+  updateCountdownUI() {
+    if (this._countdownTarget == null || this.state !== PLAYING_STATE) return;
+    const now = getTime();
+    const rem = Math.ceil(this._countdownTarget - now);
+    if (rem <= 0) {
+      // flash GO
+      if (this._countdownNumber && this._countdownLabel) {
+        this._countdownLabel.setVisible(true);
+        this._countdownNumber.setVisible(true).setText('GO!');
+        this.tweens.add({ targets: this._countdownNumber, scaleX: { from: 1.1, to: 1 }, scaleY: { from: 1.1, to: 1 }, duration: 220, yoyo: true });
+        this.time.delayedCall(450, () => {
+          this._countdownLabel.setVisible(false);
+          this._countdownNumber.setVisible(false).setText('');
+        });
+      }
+      this._countdownTarget = null;
+      return;
+    }
+    if (rem <= CHORUS_COUNTDOWN_LEAD) {
+      this._countdownLabel?.setVisible(true);
+      this._countdownNumber?.setVisible(true).setText(String(rem));
     }
   }
 

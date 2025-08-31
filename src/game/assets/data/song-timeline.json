@@ -20,8 +20,8 @@
   "ambientCoins": { "rate": 0.7, "yRange": [140, 360], "minGap": 1.2 },
   "powerUps": [],
   "chorusWindows": [
-    { "start": 49.0, "end": 76.0, "coinRate": 7.0, "multiplier": 2 },
-    { "start": 93.0, "end": 111.0, "coinRate": 14.0, "multiplier": 4 },
-    { "start": 156.0, "end": 183.0, "coinRate": 21.0, "multiplier": 6 }
+    { "start": 49.0, "end": 76.0, "coinRate": 7.0, "multiplier": 3 },
+    { "start": 93.0, "end": 111.0, "coinRate": 14.0, "multiplier": 6 },
+    { "start": 156.0, "end": 183.0, "coinRate": 21.0, "multiplier": 9 }
   ]
 }
