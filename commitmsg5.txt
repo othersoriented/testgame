@@ -1,7 +1,0 @@
-Feature: lyrics replace coins/powerups
-
-- Load optional assets/data/lyrics.json in Preload
-- Add pooled lyric tokens with time-based spawns from mapped.words
-- Replace coin/powerup spawns when lyrics present
-- Overlap scoring + haptics; move + cleanup like coins
-- Reset lyric schedule on restart
