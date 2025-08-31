@@ -87,6 +87,9 @@ export default class PreloadScene extends Phaser.Scene {
       'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap'
     );
 
+    // Optional lyrics data (if present in assets). If the file is missing, Phaser logs a warning and we skip gracefully.
+    try { this.load.json('lyrics', 'assets/data/lyrics.json'); } catch {}
+
     this.load.on('progress', (progress) => {
       loadingText.setText(`Loading... ${Math.round(progress * 100)}%`);
     });

@@ -121,6 +121,10 @@ export default class GameScene extends Phaser.Scene {
     this._countdownTarget = null;   // absolute time (sec) of next chorus start
     this._countdownLabel = null;
     this._countdownNumber = null;
+
+    // Lyrics data/cache
+    this._lyrics = { words: [], nextIdx: 0 };
+    this._lyricTex = new Map();
   }
 
   create() {
@@ -172,6 +176,7 @@ export default class GameScene extends Phaser.Scene {
     // Collectibles
     this.coinsGroup = this.physics.add.group();
     this.notesGroup = this.physics.add.group();
+    this.lyricGroup = this.physics.add.group();
     this.physics.add.overlap(this.player, this.coinsGroup, (_, coin) => {
       coin?.disableBody?.(true, true);
       const now = getTime();
@@ -186,6 +191,15 @@ export default class GameScene extends Phaser.Scene {
       this.notesCollected += 1;
       this.addScore(5);
       this.bumpStreak?.();
+    });
+    this.physics.add.overlap(this.player, this.lyricGroup, (_, token) => {
+      token?.disableBody?.(true, true);
+      const now = getTime();
+      const chorus = this._tl?.chorusWindows?.find((w) => now >= w.start && now <= w.end);
+      const mult = chorus ? (chorus.multiplier || 2) : 1;
+      this.addScore(1 * mult);
+      this.bumpStreak?.();
+      try { navigator?.vibrate?.(15); } catch {}
     });
 
 // Timeline + audio
@@ -218,6 +232,9 @@ export default class GameScene extends Phaser.Scene {
 
     // Countdown UI (hidden initially)
     this.createCountdownUI();
+
+    // Load lyrics if provided
+    this.loadLyricsIfAny?.();
 
     this.setReady();
   }
@@ -648,6 +665,7 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     this.clearScore();
     this.coinsGroup.clear(true, true);
     this.notesGroup.clear(true, true);
+    this.lyricGroup?.clear(true, true);
     this._nextNoteIdx = 0;
     this._nextCoinAt = 0;
     this.notesCollected = 0;
@@ -659,6 +677,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // optional: turn off camera on restart
     // this.disableWebcamDom();
+
+    // reset lyrics scheduling
+    if (this._lyrics) this._lyrics.nextIdx = 0;
 
     this.scene.restart();
     this.setReady();
@@ -683,11 +704,13 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
   moveCollectibles() {
     this.coinsGroup.getChildren().forEach((c) => { c.x -= GAME_SPEED; });
     this.notesGroup.getChildren().forEach((n) => { n.x -= GAME_SPEED; });
+    if (this.lyricGroup) this.lyricGroup.getChildren().forEach((l) => { l.x -= GAME_SPEED; });
   }
 
   cleanupCollectibles() {
     this.coinsGroup.getChildren().forEach((c) => { if (c.getBounds().right < 0) c.destroy(); });
     this.notesGroup.getChildren().forEach((n) => { if (n.getBounds().right < 0) n.destroy(); });
+    if (this.lyricGroup) this.lyricGroup.getChildren().forEach((l) => { if (l.getBounds().right < 0) l.destroy(); });
   }
 
   createBackground() {
@@ -822,17 +845,28 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       this.spawnNote(this.scale.width + 40, yClamped);
     }
 
-    // coins
+    // coins (or lyrics replacement)
     const windows = this._tl.chorusWindows || [];
     const inChorus = windows.some((w) => now >= w.start && now <= w.end);
     const chorusWin = inChorus ? windows.find((w) => now >= w.start && now <= w.end) : null;
     const rate = inChorus ? (chorusWin?.coinRate || 3.0) : (this._tl.ambientCoins?.rate || 0.7);
 
-    if (now >= this._nextCoinAt) {
-      const range = this._tl.ambientCoins?.yRange || [140, 360];
-      this.spawnCoinCluster(!!inChorus, range);
-      const baseGap = Math.max(this._tl.ambientCoins?.minGap || 1.0, 1.0 / rate);
-      this._nextCoinAt = now + baseGap;
+    const hasLyrics = (this._lyrics?.words?.length || 0) > 0;
+    if (hasLyrics) {
+      // Spawn lyric tokens by time, replacing coins/powerups
+      const words = this._lyrics.words;
+      while (this._lyrics.nextIdx < words.length && words[this._lyrics.nextIdx].t0 <= now + LOOKAHEAD) {
+        const w = this._lyrics.nextIdx < words.length ? words[this._lyrics.nextIdx++] : null;
+        if (!w) break;
+        this.spawnLyricToken(w);
+      }
+    } else {
+      if (now >= this._nextCoinAt) {
+        const range = this._tl.ambientCoins?.yRange || [140, 360];
+        this.spawnCoinCluster(!!inChorus, range);
+        const baseGap = Math.max(this._tl.ambientCoins?.minGap || 1.0, 1.0 / rate);
+        this._nextCoinAt = now + baseGap;
+      }
     }
 
     // Visuals when entering/exiting chorus
@@ -870,6 +904,41 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     }
 
     this._wasInChorus = inChorus;
+  }
+
+  // ---------- Lyrics support ----------
+  loadLyricsIfAny() {
+    try {
+      const lyr = this.cache.json.get('lyrics');
+      const words = lyr?.mapped?.words || [];
+      this._lyrics = { words: words.map(w => ({ text: String(w.text||''), t0: Number(w.t0||0), t1: Number(w.t1||((w.t0||0)+1)) })), nextIdx: 0 };
+      this._lyrics.words.sort((a,b)=>a.t0-b.t0);
+    } catch {}
+  }
+
+  ensureLyricTexture(text) {
+    const key = 'lyric_' + text;
+    if (this._lyricTex?.has(text)) return key;
+    const t = this.make.text({ x: 0, y: 0, text, style: { fontFamily: 'Teko', fontSize: '28px', color: '#ffffff', stroke: '#000', strokeThickness: 6 } }, true);
+    t.setPadding(6, 2, 6, 2);
+    t.updateText(); t.setVisible(false);
+    t.generateTexture(key, t.width, t.height);
+    t.destroy();
+    this._lyricTex?.set(text, key);
+    return key;
+  }
+
+  spawnLyricToken(word) {
+    const key = this.ensureLyricTexture(word.text || '');
+    const x = this.scale.width + 40;
+    const safeTop = 120, safeBot = this.scale.height - 180;
+    const y = Phaser.Math.Between(safeTop, Math.max(safeTop, safeBot));
+    const s = this.lyricGroup.get(x, y, key);
+    if (!s) return null;
+    s.setActive(true).setVisible(true);
+    if (s.body) { s.body.enable = true; s.body.allowGravity = false; }
+    s._wordMeta = word;
+    return s;
   }
 
   spawnCoin(x, y) {
