@@ -109,6 +109,7 @@ export default class GameScene extends Phaser.Scene {
     this.domVideoBG = null;       // DOM video filling background during chorus
     this._snapTimer = null;
     this._snapshots = [];         // dataURLs for share on game over
+    this._chorusRetryEvt = null;
   }
 
   create() {
@@ -197,7 +198,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.createFX) this.createFX();
 
     // Cleanup handlers
-    this.events.once('shutdown', () => this.disableWebcamDom());
+    // Keep webcam stream across scene restarts; explicit toggle handles cleanup.
 
     // Cache canvas metrics now and on resize
     this.refreshViewMetrics();
@@ -607,8 +608,7 @@ updateProgressUI(nowSec = null, totalOverride = null) {
 
     this.slideStartButton();
     if (this.setDomVideoVisible) this.setDomVideoVisible(false); // hide bubble in Game Over
-    // Fully remove webcam element to avoid any stray overlay issues
-    if (this.cameraEnabled) this.disableWebcamDom();
+    // Keep stream alive for next run; just hide UI. Pointer events are already none.
   }
 }
 
@@ -922,6 +922,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
       // Replace the sprite visually immediately
       this.player.setVisible(false);
+
+      // Prepare Phaser webcam video for chorus background
+      this.ensurePhaserWebcamVideo?.();
     } catch (err) {
       console.warn('Webcam error:', err);
       this.showCamToast?.('Camera blocked or unavailable. Check permissions and try again.');
@@ -945,6 +948,12 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // Show the sprite again if you hid it
     this.player.setVisible(true);
+
+    // Hide Phaser video if present
+    if (this.webcamVideo) {
+      try { this.webcamVideo.stop(); } catch {}
+      this.webcamVideo.setVisible(false);
+    }
   }
 
   // Helper to toggle DOM video visibility safely
@@ -985,23 +994,48 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
   enterChorusBackground() {
     if (!this.cameraEnabled) return;
-    if (this._chorusBGActive) return;
-    this.ensureBackgroundWebcamVideo();
-    if (this.domVideoBG) this.domVideoBG.style.display = 'block';
-    if (this.bgImage) this.bgImage.setVisible(false);
+    // Try to ensure Phaser video is ready
+    const phaserReady = this.ensurePhaserWebcamVideo();
 
-    // raise canvas above background video
-    const c = this.game?.canvas;
-    if (c) { this._prevCanvasZ = c.style.zIndex; c.style.position = 'relative'; c.style.zIndex = '2'; }
+    if (phaserReady) {
+      // Hide sprite background only after we have a real video frame
+      if (this.bgImage) this.bgImage.setVisible(false);
+      // raise canvas above anything behind it
+      const c = this.game?.canvas;
+      if (c) { this._prevCanvasZ = c.style.zIndex; c.style.position = 'relative'; c.style.zIndex = '2'; }
+      this._chorusBGActive = true;
+      this.startSnapshotTimer();
+      return;
+    }
 
-    this._chorusBGActive = true;
-    this.startSnapshotTimer();
+    // If Phaser video isn’t ready yet, keep background visible and keep trying.
+    // Kick off a lightweight retry loop while chorus is active.
+    if (!this._chorusRetryEvt) {
+      this._chorusRetryEvt = this.time.addEvent({
+        delay: 150,
+        loop: true,
+        callback: () => {
+          // Stop retrying if chorus ended
+          if (!this._lastChorusActive) { this._chorusRetryEvt.remove(false); this._chorusRetryEvt = null; return; }
+          const ok = this.ensurePhaserWebcamVideo();
+          if (ok) {
+            if (this.bgImage) this.bgImage.setVisible(false);
+            const c = this.game?.canvas; if (c) { this._prevCanvasZ = c.style.zIndex; c.style.position = 'relative'; c.style.zIndex = '2'; }
+            this._chorusBGActive = true;
+            this.startSnapshotTimer();
+            this._chorusRetryEvt.remove(false); this._chorusRetryEvt = null;
+          }
+        }
+      });
+    }
   }
 
   exitChorusBackground() {
     if (!this._chorusBGActive) return;
     this._chorusBGActive = false;
+    if (this._chorusRetryEvt) { this._chorusRetryEvt.remove(false); this._chorusRetryEvt = null; }
     if (this.domVideoBG) this.domVideoBG.style.display = 'none';
+    if (this.webcamVideo) this.webcamVideo.setVisible(false);
     if (this.bgImage) this.bgImage.setVisible(true);
     const c = this.game?.canvas; if (c) { c.style.zIndex = this._prevCanvasZ || ''; }
     this.stopSnapshotTimer(true);
@@ -1027,7 +1061,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
   captureSnapshot() {
     try {
-      const src = this.domVideoBG || this.domVideoEl;
+      const src = (this.webcamVideo && this.webcamVideo.video) || this.domVideoBG || this.domVideoEl;
       if (!src) return;
       if ((this._snapshots?.length || 0) >= SNAPSHOT_MAX_PER_WINDOW) return;
       const vw = src.videoWidth || 320, vh = src.videoHeight || 240;
@@ -1044,6 +1078,67 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       const url = cx.toDataURL('image/jpeg', 0.85);
       this._snapshots.push(url);
     } catch {}
+  }
+
+  // Create Phaser Video object from webcam stream and size to canvas.
+  // Returns true if created or already available.
+  ensurePhaserWebcamVideo() {
+    try {
+      if (!this.webcamStream) return false;
+      // If an old video object exists from a previous scene, discard it
+      if (this.webcamVideo && this.webcamVideo.scene !== this) {
+        try { this.webcamVideo.destroy(); } catch {}
+        this.webcamVideo = null;
+      }
+      if (!this.webcamVideo) {
+        const v = this.add.video(0, 0);
+        v.setOrigin(0, 0).setScrollFactor(0).setDepth(-50).setVisible(false);
+        // Prefer Phaser's stream loader (sets internal texture)
+        let loadedViaPhaser = false;
+        try { if (v.loadMediaStream) { v.loadMediaStream(this.webcamStream, true); loadedViaPhaser = true; } } catch {}
+        const el = v.video;
+        if (el) {
+          el.muted = true; el.autoplay = true; el.playsInline = true;
+          if (!loadedViaPhaser) el.srcObject = this.webcamStream;
+          try { const p = el.play(); if (p && p.catch) p.catch(() => {}); } catch {}
+          const readyHandler = () => {
+            try {
+              v.setPosition(0, 0);
+              v.setDisplaySize(this.scale.width, this.scale.height);
+              v.setVisible(true);
+            } catch {}
+          };
+          el.addEventListener('loadeddata', readyHandler, { once: true });
+          el.addEventListener('playing', readyHandler, { once: true });
+        }
+        this.webcamVideo = v;
+        // keep sized on resize
+        this.scale.on('resize', () => {
+          if (!this.webcamVideo) return;
+          this.webcamVideo.setPosition(0, 0);
+          try { this.webcamVideo.setDisplaySize(this.scale.width, this.scale.height); } catch {}
+        });
+      } else {
+        try {
+          const elExist = this.webcamVideo.video;
+          if (elExist && (!elExist.srcObject || elExist.srcObject !== this.webcamStream)) {
+            elExist.srcObject = this.webcamStream;
+          }
+          const p = elExist?.play(); if (p && p.catch) p.catch(() => {});
+        } catch {}
+      }
+      // Ready when element has data and dimensions
+      const el2 = this.webcamVideo?.video;
+      const ready = !!el2 && (el2.readyState || 0) >= 2 && el2.videoWidth > 0;
+      this.webcamVideo.setVisible(ready);
+      if (ready) {
+        try { this.webcamVideo.setDisplaySize(this.scale.width, this.scale.height); } catch {}
+      }
+      return ready;
+    } catch (e) {
+      console.warn('Phaser webcam video unavailable:', e);
+      return false;
+    }
   }
 
   refreshViewMetrics() {
