@@ -1,5 +1,0 @@
-Fix: lyric tokens spawn once per mapping
-
-- Add one-shot guard via Set keyed by text|t0_ms
-- Clear guard on restart; keep index progression
-- Improve text->texture rendering to avoid cropping
