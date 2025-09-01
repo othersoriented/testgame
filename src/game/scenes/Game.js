@@ -65,7 +65,11 @@ const SNAPSHOT_COUNT_PER_WINDOW = 3;   // exactly 3 snapshots per chorus
 
 // Chorus countdown
 const CHORUS_COUNTDOWN_LEAD = 3;       // seconds before chorus start
-const LYRIC_DESPAWN_GRACE = 0.75;     // seconds after t1 before auto-advance
+const LYRIC_SPAWN_LAG = 0.12;          // positive = spawn a bit later (sec)
+const LYRIC_DESPAWN_GRACE = 0.75;      // keep for reference (not used to expire)
+const LYRIC_BASE_POINTS = 5;           // base points per lyric
+const LYRIC_STREAK_WINDOW_MS = 1600;   // time window to chain lyric streaks
+// (no-op duplicate removed) 
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -128,6 +132,9 @@ export default class GameScene extends Phaser.Scene {
     this._lyricTex = new Map();
     this._lyricSpawned = new Set();
     this._lyricActive = null;         // currently spawned lyric token (single)
+    this._lyricPM = null;             // particles manager for shimmer
+    this._lyricStreak = 0;
+    this._lyricStreakTimer = null;
   }
 
   create() {
@@ -588,6 +595,8 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     this.progressActive = false;
     this.updateProgressUI(0, this._tl?.duration || 0); // reset bar & label
     if (this.setDomVideoVisible) this.setDomVideoVisible(this.cameraEnabled); // show bubble if cam enabled
+    // Reset lyric active token for new ready state
+    this._lyricActive = null;
   }
 
   async setPlaying() {
@@ -675,6 +684,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // reset lyrics scheduling
     if (this._lyrics) this._lyrics.nextIdx = 0;
+    this._lyricActive = null;
     if (this._lyricSpawned) this._lyricSpawned.clear();
 
     this.scene.restart();
@@ -849,27 +859,25 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     const hasLyrics = (this._lyrics?.words?.length || 0) > 0;
     if (hasLyrics) {
-      // Single-token scheduler: keep at most one lyric on screen, in order
+      // Multi-token scheduler with travel-time alignment (keeps order, allows overlap)
       const words = this._lyrics.words;
-      const i = this._lyrics.nextIdx;
-      if (!this._lyricActive && i < words.length) {
-        const w = words[i];
-        if (w.t0 <= now + LOOKAHEAD) {
-          this._lyricActive = this.spawnLyricToken(w);
-        }
-      }
+      let i = this._lyrics.nextIdx;
+      const fps = Math.max(30, Math.min(120, Math.round(this.game?.loop?.actualFps || 60)));
+      const v = GAME_SPEED * fps; // px per second (approximate)
+      const spawnX = this.scale.width + 40;
+      const targetX = this.scale.width - 80; // where it first appears clearly
+      const travelSec = Math.max(0, (spawnX - targetX) / Math.max(1, v));
 
-      // Advance when collected, expired, or offscreen
-      if (this._lyricActive) {
-        const w = this._lyricActive._wordMeta;
-        const off = this._lyricActive.x < -64 || !this._lyricActive.active || !this._lyricActive.visible;
-        const expired = now > (w.t1 + LYRIC_DESPAWN_GRACE);
-        if (off || expired) {
-          if (this._lyricActive.active) this._lyricActive.disableBody(true, true);
-          this._lyricActive = null;
-          this._lyrics.nextIdx = Math.min(this._lyrics.nextIdx + 1, words.length);
+      while (i < words.length && (words[i].t0 - travelSec + LYRIC_SPAWN_LAG) <= now + LOOKAHEAD) {
+        const w = words[i];
+        const skey = `${w.text}|${Math.round(w.t0 * 1000)}`;
+        if (!this._lyricSpawned?.has(skey)) {
+          this.spawnLyricToken(w);
+          this._lyricSpawned?.add(skey);
         }
+        i += 1;
       }
+      this._lyrics.nextIdx = i;
     } else {
       if (now >= this._nextCoinAt) {
         const range = this._tl.ambientCoins?.yRange || [140, 360];
@@ -942,7 +950,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     const key = 'lyric_' + text;
     if (this._lyricTex?.has(text)) return key;
     // Render text to a RenderTexture and save as a texture key
-    const t = this.make.text({ x: 0, y: 0, text, add: false, style: { fontFamily: 'Teko', fontSize: '28px', color: '#ffffff', stroke: '#000', strokeThickness: 6 } });
+    const t = this.make.text({ x: 0, y: 0, text, add: false, style: { fontFamily: 'Teko', fontSize: '28px', color: '#ffd700', stroke: '#2a2000', strokeThickness: 6 } });
     t.setPadding(6, 2, 6, 2);
     t.setOrigin(0, 0); // top-left to avoid cropping when drawing to RT
     t.updateText();
@@ -963,11 +971,32 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     const x = this.scale.width + 40;
     const safeTop = 120, safeBot = this.scale.height - 180;
     const y = Phaser.Math.Between(safeTop, Math.max(safeTop, safeBot));
-    const s = this.lyricGroup.get(x, y, key);
+    // Create a fresh sprite to avoid pooling nulls
+    const s = this.lyricGroup.create(x, y, key);
     if (!s) return null;
     s.setActive(true).setVisible(true);
-    if (s.body) { s.body.enable = true; s.body.allowGravity = false; }
+    if (s.body) { s.body.allowGravity = false; }
     s._wordMeta = word;
+
+    // Shimmer effect
+    s.setBlendMode(Phaser.BlendModes.ADD);
+    this.tweens.add({ targets: s, alpha: { from: 0.9, to: 1 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    // Gold dust trail
+    if (this._lyricPM) {
+      const emitter = this._lyricPM.createEmitter({
+        quantity: 1,
+        frequency: 110,
+        lifespan: 320,
+        speedX: { min: -10, max: -30 },
+        speedY: { min: -10, max: 10 },
+        scale: { start: 0.35, end: 0.05 },
+        alpha: { start: 0.8, end: 0 },
+        tint: [0xffd700, 0xfff3b0],
+        blendMode: 'ADD',
+        follow: s,
+      });
+      s._le = emitter;
+    }
     return s;
   }
 
@@ -977,9 +1006,14 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     const now = getTime();
     const chorus = this._tl?.chorusWindows?.find((w) => now >= w.start && now <= w.end);
     const mult = chorus ? (chorus.multiplier || 2) : 1;
-    // Base lyric score: same as coin (1) for now; easy to tweak
-    this.addScore(1 * mult);
-    this.bumpStreak?.();
+
+    // Lyric streak multiplier
+    this._lyricStreak += 1;
+    if (this._lyricStreakTimer) this._lyricStreakTimer.remove(false);
+    this._lyricStreakTimer = this.time.delayedCall(LYRIC_STREAK_WINDOW_MS, () => { this._lyricStreak = 0; });
+    const points = (LYRIC_BASE_POINTS + Math.max(0, this._lyricStreak - 1) * 2) * mult;
+    this.addScore(points);
+    this.showPopupText(`+${points} (x${this._lyricStreak})`, '#ffd700');
     try { navigator?.vibrate?.(15); } catch {}
 
     // Advance pointer if this was the active token
@@ -987,6 +1021,10 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       this._lyricActive = null;
       if (this._lyrics) this._lyrics.nextIdx = Math.min(this._lyrics.nextIdx + 1, (this._lyrics.words?.length || 0));
     }
+
+    // Confetti burst and clean up emitter
+    if (this._particleEmitter) this._particleEmitter.explode(16, token.x, token.y);
+    try { token._le?.stop(); this.time.delayedCall(300, () => token._le?.remove()); } catch {}
   }
 
   spawnCoin(x, y) {
@@ -1398,6 +1436,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       follow: null,
       blendMode: 'ADD',
     });
+
+    // Particles for lyric shimmer
+    this._lyricPM = this.add.particles('dot');
   }
 
   bumpStreak() {
