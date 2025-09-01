@@ -138,6 +138,18 @@ export default class GameScene extends Phaser.Scene {
 
     // Gamepad
     this.pad = null;
+
+    // Webcam video lifecycle guards
+    this._webcamVideoResizeHook = false;
+    this._webcamVideoListenersAdded = false;
+    this._onWebcamResize = () => {
+      try {
+        if (!this.webcamVideo) return;
+        this.webcamVideo.setPosition(this.scale.width * 0.5, this.scale.height * 0.5);
+        this.webcamVideo.setDisplaySize(this.scale.width, this.scale.height);
+      } catch {}
+    };
+    this._domUpdateMsPrev = null; // for chorus throttle
   }
 
   create() {
@@ -169,7 +181,7 @@ export default class GameScene extends Phaser.Scene {
       .setDepth(2601)
       .setVisible(false)
       .on('pointerdown', (e) => e?.event?.stopPropagation())
-      .on('pointerup', (e) => { e?.event?.stopPropagation(); this.restart(); });
+      .on('pointerup', (e) => { e?.event?.stopPropagation(); this.askRestartConfirm(); });
 
     // Sounds
     this.pointSound = this.sound.add(POINT_SOUND);
@@ -665,6 +677,8 @@ updateProgressUI(nowSec = null, totalOverride = null) {
     this.bestScoreText.setText(`High Score : ${bestScore}`);
 
     this.slideStartButton();
+    // Show snapshots gallery
+    this.showSnapshotsPanel();
     if (this.setDomVideoVisible) this.setDomVideoVisible(false); // hide bubble in Game Over
     // Keep stream alive for next run; just hide UI. Pointer events are already none.
   }
@@ -1195,6 +1209,75 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     }
   }
 
+  // ---------- Restart confirm ----------
+  askRestartConfirm() {
+    if (this._restartConfirm) { this._restartConfirm.setVisible(true); return; }
+    const w = 260, h = 120;
+    const x = this.scale.width * 0.5, y = this.scale.height * 0.5;
+    const g = this.add.graphics().setScrollFactor(0).setDepth(3005);
+    g.fillStyle(0x000000, 0.6).fillRoundedRect(x - w/2, y - h/2, w, h, 10).lineStyle(2, 0xffffff, 1).strokeRoundedRect(x - w/2, y - h/2, w, h, 10);
+    const title = this.add.text(x, y - 24, 'Restart?', { fontFamily: 'Teko', fontSize: '28px', color: '#ffffff', stroke: '#000', strokeThickness: 4 }).setOrigin(0.5).setDepth(3006).setScrollFactor(0);
+    const btnYes = this.add.text(x - 60, y + 16, 'Yes', { fontFamily: 'Teko', fontSize: '24px', color: '#ffffff', backgroundColor: '#e7157e' }).setOrigin(0.5).setDepth(3006).setScrollFactor(0).setInteractive({ useHandCursor: true }).on('pointerup', () => { this.hideSnapshotsPanel?.(); this._restartConfirm?.destroy(true); this._restartConfirm=null; this.restart(); });
+    const btnNo = this.add.text(x + 60, y + 16, 'No', { fontFamily: 'Teko', fontSize: '24px', color: '#ffffff', backgroundColor: '#13ad28' }).setOrigin(0.5).setDepth(3006).setScrollFactor(0).setInteractive({ useHandCursor: true }).on('pointerup', () => { if (this._restartConfirm) this._restartConfirm.setVisible(false); });
+    this._restartConfirm = this.add.container(0,0, [g, title, btnYes, btnNo]);
+    this._restartConfirm.setDepth(3005);
+  }
+
+  // ---------- Snapshots gallery (DOM overlay) ----------
+  showSnapshotsPanel() {
+    try { this.hideSnapshotsPanel(); } catch {}
+    const shots = Array.isArray(this._snapshots) ? this._snapshots : [];
+    if (!shots.length) return;
+    const root = document.createElement('div');
+    root.style.position = 'fixed';
+    root.style.left = '50%';
+    root.style.bottom = '12px';
+    root.style.transform = 'translateX(-50%)';
+    root.style.zIndex = '10000';
+    root.style.display = 'flex';
+    root.style.gap = '8px';
+    root.style.padding = '6px 8px';
+    root.style.background = 'rgba(0,0,0,0.4)';
+    root.style.borderRadius = '8px';
+
+    const makeBtn = (label) => { const b = document.createElement('button'); b.textContent = label; b.style.marginLeft = '4px'; b.style.fontFamily = 'Teko, sans-serif'; b.style.cursor='pointer'; return b; };
+
+    shots.slice(-6).forEach((s, idx) => {
+      const url = s.url || s; const wrap = document.createElement('div'); wrap.style.display='flex'; wrap.style.flexDirection='column'; wrap.style.alignItems='center';
+      const img = document.createElement('img'); img.src = url; img.width = 96; img.height = 54; img.style.objectFit='cover'; img.style.borderRadius='4px'; img.style.boxShadow='0 0 6px rgba(0,0,0,0.6)';
+      const row = document.createElement('div'); row.style.display='flex'; row.style.marginTop='4px';
+      const share = makeBtn('Share');
+      share.onclick = async () => { try { const file = await this.composeAndBlob(url, true); if (navigator.canShare && navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title: 'My run', text: 'Check this!' }); } else { const a=document.createElement('a'); a.href=url; a.download='shot.jpg'; a.click(); } } catch {} };
+      const save = makeBtn('Save');
+      save.onclick = () => { const a=document.createElement('a'); a.href=url; a.download=`shot_${idx}.jpg`; a.click(); };
+      const card = makeBtn('Card');
+      card.onclick = async () => { const file = await this.composeAndBlob(url, true); const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download='card.jpg'; a.click(); };
+      row.appendChild(share); row.appendChild(save); row.appendChild(card);
+      wrap.appendChild(img); wrap.appendChild(row); root.appendChild(wrap);
+    });
+
+    const close = document.createElement('button'); close.textContent='×'; close.style.marginLeft='8px'; close.style.fontSize='18px'; close.style.cursor='pointer'; close.onclick = () => this.hideSnapshotsPanel(); root.appendChild(close);
+    document.body.appendChild(root);
+    this._snapPanel = root;
+  }
+
+  hideSnapshotsPanel() { try { if (this._snapPanel?.parentNode) this._snapPanel.parentNode.removeChild(this._snapPanel); this._snapPanel = null; } catch {} }
+
+  async composeAndBlob(dataUrl, withOverlay=false) {
+    return new Promise((resolve) => {
+      const img = new Image(); img.crossOrigin='anonymous'; img.onload = () => {
+        const scale = 2; const w = img.width*scale, h = img.height*scale; const c = document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0,w,h);
+        if (withOverlay) {
+          ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fillRect(0,0,w,64);
+          ctx.fillStyle='#ffd700'; ctx.font='bold 34px Teko, sans-serif'; ctx.textBaseline='top';
+          ctx.fillText('Game Over', 12, 8);
+          ctx.fillStyle='#ffffff'; ctx.font='28px Teko, sans-serif'; ctx.fillText(`Score: ${this.score}`, 12, 8+32);
+        }
+        c.toBlob((b)=> resolve(new File([b], 'card.jpg', { type: 'image/jpeg' })), 'image/jpeg', 0.92);
+      }; img.src=dataUrl; });
+  }
+
   // ------------- Countdown UI -------------
   createCountdownUI() {
     const cx = this.scale.width * 0.5;
@@ -1275,6 +1358,8 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
   enterChorusBackground() {
     if (!this.cameraEnabled) return;
+    // Clear any lingering retry loop before starting
+    if (this._chorusRetryEvt) { try { this._chorusRetryEvt.remove(false); } catch {} this._chorusRetryEvt = null; }
     // Try to ensure Phaser video is ready
     const phaserReady = this.ensurePhaserWebcamVideo();
 
@@ -1285,6 +1370,9 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       const c = this.game?.canvas;
       if (c) { this._prevCanvasZ = c.style.zIndex; c.style.position = 'relative'; c.style.zIndex = '2'; }
       this._chorusBGActive = true;
+      // Throttle DOM bubble update while chorus BG is active to ease main thread
+      if (this._domUpdateMsPrev == null) this._domUpdateMsPrev = this._domUpdateMs;
+      this._domUpdateMs = 33; // ~30fps
       this.startSnapshotTimer();
       return;
     }
@@ -1293,7 +1381,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     // Kick off a lightweight retry loop while chorus is active.
     if (!this._chorusRetryEvt) {
       this._chorusRetryEvt = this.time.addEvent({
-        delay: 150,
+        delay: 300,
         loop: true,
         callback: () => {
           // Stop retrying if chorus ended
@@ -1303,6 +1391,8 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
             if (this.bgImage) this.bgImage.setVisible(false);
             const c = this.game?.canvas; if (c) { this._prevCanvasZ = c.style.zIndex; c.style.position = 'relative'; c.style.zIndex = '2'; }
             this._chorusBGActive = true;
+            if (this._domUpdateMsPrev == null) this._domUpdateMsPrev = this._domUpdateMs;
+            this._domUpdateMs = 33;
             this.startSnapshotTimer();
             this._chorusRetryEvt.remove(false); this._chorusRetryEvt = null;
           }
@@ -1320,6 +1410,8 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     if (this.bgImage) this.bgImage.setVisible(true);
     const c = this.game?.canvas; if (c) { c.style.zIndex = this._prevCanvasZ || ''; }
     this.stopSnapshotTimer(true);
+    // Restore DOM bubble update rate
+    if (this._domUpdateMsPrev != null) { this._domUpdateMs = this._domUpdateMsPrev; this._domUpdateMsPrev = null; }
   }
 
   startSnapshotTimer() {
@@ -1357,7 +1449,8 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       const sx = (outW - rw) / 2, sy = (outH - rh) / 2;
       ctx.drawImage(src, sx, sy, rw, rh);
       const url = cx.toDataURL('image/jpeg', 0.85);
-      this._snapshots.push(url);
+      const t = getTime?.() || 0;
+      this._snapshots.push({ url, t });
     } catch {}
   }
 
@@ -1382,23 +1475,25 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
           el.muted = true; el.autoplay = true; el.playsInline = true;
           if (!loadedViaPhaser) el.srcObject = this.webcamStream;
           try { const p = el.play(); if (p && p.catch) p.catch(() => {}); } catch {}
-          const readyHandler = () => {
-            try {
-              v.setPosition(0, 0);
-              v.setDisplaySize(this.scale.width, this.scale.height);
-              v.setVisible(true);
-            } catch {}
-          };
-          el.addEventListener('loadeddata', readyHandler, { once: true });
-          el.addEventListener('playing', readyHandler, { once: true });
+          if (!this._webcamVideoListenersAdded) {
+            const readyHandler = () => {
+              try {
+                v.setPosition(0, 0);
+                v.setDisplaySize(this.scale.width, this.scale.height);
+                v.setVisible(true);
+              } catch {}
+            };
+            el.addEventListener('loadeddata', readyHandler, { once: true });
+            el.addEventListener('playing', readyHandler, { once: true });
+            this._webcamVideoListenersAdded = true;
+          }
         }
         this.webcamVideo = v;
-        // keep sized on resize
-        this.scale.on('resize', () => {
-          if (!this.webcamVideo) return;
-          this.webcamVideo.setPosition(0, 0);
-          try { this.webcamVideo.setDisplaySize(this.scale.width, this.scale.height); } catch {}
-        });
+        // keep sized on resize (one-time)
+        if (!this._webcamVideoResizeHook) {
+          this.scale.on('resize', this._onWebcamResize);
+          this._webcamVideoResizeHook = true;
+        }
       } else {
         try {
           const elExist = this.webcamVideo.video;
