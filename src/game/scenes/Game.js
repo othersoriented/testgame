@@ -135,6 +135,9 @@ export default class GameScene extends Phaser.Scene {
     this._lyricPM = null;             // particles manager for shimmer
     this._lyricStreak = 0;
     this._lyricStreakTimer = null;
+
+    // Gamepad
+    this.pad = null;
   }
 
   create() {
@@ -237,6 +240,12 @@ export default class GameScene extends Phaser.Scene {
 
     // Load lyrics if provided
     this.loadLyricsIfAny?.();
+
+    // Gamepad hookup
+    if (this.input.gamepad) {
+      this.input.gamepad.once('connected', (pad) => { this.pad = pad; });
+      if (this.input.gamepad.total) this.pad = this.input.gamepad.getPad(0);
+    }
 
     this.setReady();
   }
@@ -563,18 +572,28 @@ updateProgressUI(nowSec = null, totalOverride = null) {
 
   handleInputs() {
     if (this.state === READY_STATE) {
-      if (this.cursors.space.isDown) { this.setPlaying(); }
+      if (this.cursors.space.isDown || this.isGamepadDown()) { this.setPlaying(); }
     } else if (this.state === PLAYING_STATE) {
-      if (this.cursors.space.isDown || this.input.activePointer.primaryDown) {
+      if (this.cursors.space.isDown || this.input.activePointer.primaryDown || this.isGamepadDown()) {
         if (!this.isPlayerFlapping) { this.isPlayerFlapping = true; this.flap(); }
       }
       if (this.isReleased() && this.isPlayerFlapping) this.isPlayerFlapping = false;
     } else if (this.state === GAME_OVER_STATE) {
-      if (this.cursors.space.isDown && this.isAllowedToRestart) this.restart();
+      if ((this.cursors.space.isDown || this.isGamepadDown()) && this.isAllowedToRestart) this.restart();
     }
   }
 
-  isReleased() { return this.cursors.space.isUp && !this.input.activePointer.primaryDown; }
+  isReleased() { return this.cursors.space.isUp && !this.input.activePointer.primaryDown && !this.isGamepadDown(); }
+
+  isGamepadDown() {
+    const p = this.pad || (this.input.gamepad && this.input.gamepad.getPad(0));
+    if (!p) return false;
+    // A(0), B(1), X(2), Y(3), Start(9), DPad Up(12)
+    return !!(
+      p.buttons?.[0]?.pressed || p.buttons?.[1]?.pressed || p.buttons?.[2]?.pressed || p.buttons?.[3]?.pressed ||
+      p.buttons?.[9]?.pressed || p.buttons?.[12]?.pressed
+    );
+  }
 
   setReady() {
     this.swooshSound.play();
@@ -978,20 +997,19 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     if (s.body) { s.body.allowGravity = false; }
     s._wordMeta = word;
 
-    // Shimmer effect
-    s.setBlendMode(Phaser.BlendModes.ADD);
-    this.tweens.add({ targets: s, alpha: { from: .1, to: 1 }, duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    // Subtle scale pulse (no transparency changes)
+    this.tweens.add({ targets: s, scaleX: { from: 1.0, to: 1.3 }, scaleY: { from: 1.0, to: 1.3 }, duration: 420, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     // Gold dust trail
     if (this._lyricPM) {
       const emitter = this._lyricPM.createEmitter({
         quantity: 1,
-        frequency: 110,
+        frequency: 510,
         lifespan: 320,
         speedX: { min: -10, max: -30 },
         speedY: { min: -10, max: 10 },
-        scale: { start: 0.35, end: 0.05 },
+        scale: { start: 1.35, end: 3.05 },
         tint: [0xffd700, 0xfff3b0],
-        blendMode: 'MULTIPLY',
+        blendMode: 'ADD',
         follow: s,
       });
       s._le = emitter;
@@ -1085,7 +1103,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     });
 
     // Ensure clean label text
-    this.camBtn?.setText('Enable Camera');
+    this.camBtn?.setText('Enable Camera 😆');
   }
 
   async enableWebcamDom() {
@@ -1150,7 +1168,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       }
     } catch {}
     this.cameraEnabled = false;
-    this.camBtn?.setText('Enable Camera');
+    this.camBtn?.setText('Enable Camera 😆');
 
     // Show the sprite again if you hid it
     this.player.setVisible(true);
@@ -1501,7 +1519,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       // Webcam bling
       if (this.domVideoEl) {
         this.domVideoEl.style.border = '5px solid gold';
-        this.domVideoEl.style.boxShadow = '0 0 12px rgba(255,215,0,0.9)';
+        this.domVideoEl.style.boxShadow = '0 0 12px rgba(233, 16, 160, 0.9)';
       }
     } else if (this._chorusLabel) {
       this._chorusLabel.setVisible(false);
