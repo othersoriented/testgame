@@ -1,0 +1,6 @@
+Lyric scheduler: single active token, in-order, one-shot
+
+- Spawn only the next word when within LOOKAHEAD; max one token at a time
+- Advance on pickup, offscreen, or after t1+grace
+- Add onLyricPickup handler; scoring + haptics retained
+- Add LYRIC_DESPAWN_GRACE; reset state on restart

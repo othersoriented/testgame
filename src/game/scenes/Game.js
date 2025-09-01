@@ -65,6 +65,7 @@ const SNAPSHOT_COUNT_PER_WINDOW = 3;   // exactly 3 snapshots per chorus
 
 // Chorus countdown
 const CHORUS_COUNTDOWN_LEAD = 3;       // seconds before chorus start
+const LYRIC_DESPAWN_GRACE = 0.75;     // seconds after t1 before auto-advance
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -126,6 +127,7 @@ export default class GameScene extends Phaser.Scene {
     this._lyrics = { words: [], nextIdx: 0 };
     this._lyricTex = new Map();
     this._lyricSpawned = new Set();
+    this._lyricActive = null;         // currently spawned lyric token (single)
   }
 
   create() {
@@ -193,15 +195,7 @@ export default class GameScene extends Phaser.Scene {
       this.addScore(5);
       this.bumpStreak?.();
     });
-    this.physics.add.overlap(this.player, this.lyricGroup, (_, token) => {
-      token?.disableBody?.(true, true);
-      const now = getTime();
-      const chorus = this._tl?.chorusWindows?.find((w) => now >= w.start && now <= w.end);
-      const mult = chorus ? (chorus.multiplier || 2) : 1;
-      this.addScore(1 * mult);
-      this.bumpStreak?.();
-      try { navigator?.vibrate?.(15); } catch {}
-    });
+    this.physics.add.overlap(this.player, this.lyricGroup, (_, token) => this.onLyricPickup(token));
 
 // Timeline + audio
     this._tl = this.cache.json.get('timeline') || {};
@@ -855,15 +849,26 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     const hasLyrics = (this._lyrics?.words?.length || 0) > 0;
     if (hasLyrics) {
-      // Spawn lyric tokens by time, replacing coins/powerups
+      // Single-token scheduler: keep at most one lyric on screen, in order
       const words = this._lyrics.words;
-      while (this._lyrics.nextIdx < words.length && words[this._lyrics.nextIdx].t0 <= now + LOOKAHEAD) {
-        const w = this._lyrics.nextIdx < words.length ? words[this._lyrics.nextIdx++] : null;
-        if (!w) break;
-        const skey = `${w.text}|${Math.round(w.t0 * 1000)}`;
-        if (this._lyricSpawned?.has(skey)) continue;
-        this.spawnLyricToken(w);
-        this._lyricSpawned?.add(skey);
+      const i = this._lyrics.nextIdx;
+      if (!this._lyricActive && i < words.length) {
+        const w = words[i];
+        if (w.t0 <= now + LOOKAHEAD) {
+          this._lyricActive = this.spawnLyricToken(w);
+        }
+      }
+
+      // Advance when collected, expired, or offscreen
+      if (this._lyricActive) {
+        const w = this._lyricActive._wordMeta;
+        const off = this._lyricActive.x < -64 || !this._lyricActive.active || !this._lyricActive.visible;
+        const expired = now > (w.t1 + LYRIC_DESPAWN_GRACE);
+        if (off || expired) {
+          if (this._lyricActive.active) this._lyricActive.disableBody(true, true);
+          this._lyricActive = null;
+          this._lyrics.nextIdx = Math.min(this._lyrics.nextIdx + 1, words.length);
+        }
       }
     } else {
       if (now >= this._nextCoinAt) {
@@ -964,6 +969,24 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     if (s.body) { s.body.enable = true; s.body.allowGravity = false; }
     s._wordMeta = word;
     return s;
+  }
+
+  onLyricPickup(token) {
+    if (!token) return;
+    token?.disableBody?.(true, true);
+    const now = getTime();
+    const chorus = this._tl?.chorusWindows?.find((w) => now >= w.start && now <= w.end);
+    const mult = chorus ? (chorus.multiplier || 2) : 1;
+    // Base lyric score: same as coin (1) for now; easy to tweak
+    this.addScore(1 * mult);
+    this.bumpStreak?.();
+    try { navigator?.vibrate?.(15); } catch {}
+
+    // Advance pointer if this was the active token
+    if (this._lyricActive === token) {
+      this._lyricActive = null;
+      if (this._lyrics) this._lyrics.nextIdx = Math.min(this._lyrics.nextIdx + 1, (this._lyrics.words?.length || 0));
+    }
   }
 
   spawnCoin(x, y) {
