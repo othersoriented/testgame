@@ -20,17 +20,17 @@ import { play, pause, getTime, getDuration, resumeOnGesture } from '../audio.js'
 
 
 const FLAP = 'flap';
-const PIPE_HEIGHT = 320;
-const PIPE_GAP_HEIGHT = 100;
-const PIPE_GAP_LENGTH = 170;
+const PIPE_HEIGHT = 1800;
+const PIPE_GAP_HEIGHT = 1900;
+const PIPE_GAP_LENGTH = 230;
 const PIPE_PAIRS = 1;
 const GROUND_HEIGHT = 110;
 const FRAME_RATE = 5;
-const BIRD_GRAVITY = 1000;
-const BIRD_VELOCITY = -300;
+const BIRD_GRAVITY = 1500;
+const BIRD_VELOCITY = -390;
 const GAME_SPEED = 3;
 const ELEVATION_ANGLE = 25;
-const FALL_ANGLE = 90;
+const FALL_ANGLE = 100;
 const DECLINE_ANGLE_DELTA = 2;
 const MIN_PIPE_HEIGHT = -PIPE_HEIGHT * 0.7;
 const READY_STATE = 'ready-state';
@@ -42,7 +42,7 @@ const BEST_SCORE_KEY = 'best-score';
 // --- Social links (edit to yours) ---
 const IG_PROFILE_URL = 'https://www.instagram.com/christianaiband/';
 const LINKTREE_URL   = 'https://linktr.ee/lostboyfound';
-const SHARE_TITLE    = 'How about...Flappy Bird but make it Christian';
+const SHARE_TITLE    = 'Flappy Bird but make it Christian';
 const SHARE_TEXT     = 'Try to beat my score in this Christian music Flappy clone 🎶';
 const SHARE_URL      = 'https://christianaiband.com/game.html';
 const NOW_PLAYING_FALLBACK = 'Now Playing: Psalm 150';
@@ -65,7 +65,7 @@ const SNAPSHOT_COUNT_PER_WINDOW = 3;   // exactly 3 snapshots per chorus
 
 // Chorus countdown
 const CHORUS_COUNTDOWN_LEAD = 3;       // seconds before chorus start
-const LYRIC_SPAWN_LAG = 0.10;          // positive = spawn a bit later (sec)
+const LYRIC_SPAWN_LAG = 0.4;          // positive = spawn a bit later (sec)
 const LYRIC_DESPAWN_GRACE = 0.75;      // keep for reference (not used to expire)
 const LYRIC_BASE_POINTS = 5;           // base points per lyric
 const LYRIC_STREAK_WINDOW_MS = 1600;   // time window to chain lyric streaks
@@ -789,6 +789,17 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     const bottomY = y + PIPE_GAP_HEIGHT + PIPE_HEIGHT;
     const bottom = this.physics.add.image(x, bottomY, PIPE);
     bottom.body.moves = false; bottom.setOrigin(0, 0);
+    // Make obstacles clearly visible and full collision width
+    top.setAlpha(1); bottom.setAlpha(1);
+    top.setDepth(0); bottom.setDepth(0);
+    if (top.body?.setSize) {
+      top.body.setSize(top.width, top.height, true);
+      top.body.setOffset(0, 0);
+    }
+    if (bottom.body?.setSize) {
+      bottom.body.setSize(bottom.width, bottom.height, true);
+      bottom.body.setOffset(0, 0);
+    }
     return [top, bottom];
   }
 
@@ -996,18 +1007,22 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     s.setActive(true).setVisible(true);
     if (s.body) { s.body.allowGravity = false; }
     s._wordMeta = word;
+    // Tappable for collection
+    s.setInteractive({ useHandCursor: true });
+    s.on('pointerup', () => { if (this.state === PLAYING_STATE && s.active) this.onLyricPickup(s); });
 
     // Subtle scale pulse (no transparency changes)
-    this.tweens.add({ targets: s, scaleX: { from: 1.0, to: 1.3 }, scaleY: { from: 1.0, to: 1.3 }, duration: 420, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: s, scaleX: { from: 1.0, to: 1.06 }, scaleY: { from: 1.0, to: 1.06 }, duration: 420, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     // Gold dust trail
     if (this._lyricPM) {
       const emitter = this._lyricPM.createEmitter({
         quantity: 1,
-        frequency: 510,
+        frequency: 110,
         lifespan: 320,
         speedX: { min: -10, max: -30 },
         speedY: { min: -10, max: 10 },
-        scale: { start: 1.35, end: 3.05 },
+        scale: { start: 0.35, end: 0.05 },
+        alpha: { start: 0.7, end: 0 },
         tint: [0xffd700, 0xfff3b0],
         blendMode: 'ADD',
         follow: s,
