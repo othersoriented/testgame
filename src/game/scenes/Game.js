@@ -65,7 +65,7 @@ const SNAPSHOT_COUNT_PER_WINDOW = 3;   // exactly 3 snapshots per chorus
 
 // Chorus countdown
 const CHORUS_COUNTDOWN_LEAD = 3;       // seconds before chorus start
-const LYRIC_SPAWN_LAG = 0.12;          // positive = spawn a bit later (sec)
+const LYRIC_SPAWN_LAG = 0.10;          // positive = spawn a bit later (sec)
 const LYRIC_DESPAWN_GRACE = 0.75;      // keep for reference (not used to expire)
 const LYRIC_BASE_POINTS = 5;           // base points per lyric
 const LYRIC_STREAK_WINDOW_MS = 1600;   // time window to chain lyric streaks
@@ -950,7 +950,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     const key = 'lyric_' + text;
     if (this._lyricTex?.has(text)) return key;
     // Render text to a RenderTexture and save as a texture key
-    const t = this.make.text({ x: 0, y: 0, text, add: false, style: { fontFamily: 'Teko', fontSize: '28px', color: '#ffd700', stroke: '#2a2000', strokeThickness: 6 } });
+    const t = this.make.text({ x: 0, y: 0, text, add: false, style: { fontFamily: 'Teko', fontSize: '28px', color: '#d3d62bff', stroke: '#634a15ff', strokeThickness: 3 } });
     t.setPadding(6, 2, 6, 2);
     t.setOrigin(0, 0); // top-left to avoid cropping when drawing to RT
     t.updateText();
@@ -980,7 +980,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // Shimmer effect
     s.setBlendMode(Phaser.BlendModes.ADD);
-    this.tweens.add({ targets: s, alpha: { from: 0.9, to: 1 }, duration: 500, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: s, alpha: { from: .1, to: 1 }, duration: 1000, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     // Gold dust trail
     if (this._lyricPM) {
       const emitter = this._lyricPM.createEmitter({
@@ -990,9 +990,8 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
         speedX: { min: -10, max: -30 },
         speedY: { min: -10, max: 10 },
         scale: { start: 0.35, end: 0.05 },
-        alpha: { start: 0.8, end: 0 },
         tint: [0xffd700, 0xfff3b0],
-        blendMode: 'ADD',
+        blendMode: 'MULTIPLY',
         follow: s,
       });
       s._le = emitter;
