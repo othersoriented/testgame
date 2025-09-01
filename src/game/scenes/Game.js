@@ -125,6 +125,7 @@ export default class GameScene extends Phaser.Scene {
     // Lyrics data/cache
     this._lyrics = { words: [], nextIdx: 0 };
     this._lyricTex = new Map();
+    this._lyricSpawned = new Set();
   }
 
   create() {
@@ -680,6 +681,7 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
     // reset lyrics scheduling
     if (this._lyrics) this._lyrics.nextIdx = 0;
+    if (this._lyricSpawned) this._lyricSpawned.clear();
 
     this.scene.restart();
     this.setReady();
@@ -858,7 +860,10 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
       while (this._lyrics.nextIdx < words.length && words[this._lyrics.nextIdx].t0 <= now + LOOKAHEAD) {
         const w = this._lyrics.nextIdx < words.length ? words[this._lyrics.nextIdx++] : null;
         if (!w) break;
+        const skey = `${w.text}|${Math.round(w.t0 * 1000)}`;
+        if (this._lyricSpawned?.has(skey)) continue;
         this.spawnLyricToken(w);
+        this._lyricSpawned?.add(skey);
       }
     } else {
       if (now >= this._nextCoinAt) {
@@ -911,18 +916,38 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
     try {
       const lyr = this.cache.json.get('lyrics');
       const words = lyr?.mapped?.words || [];
-      this._lyrics = { words: words.map(w => ({ text: String(w.text||''), t0: Number(w.t0||0), t1: Number(w.t1||((w.t0||0)+1)) })), nextIdx: 0 };
-      this._lyrics.words.sort((a,b)=>a.t0-b.t0);
+      const seen = new Set();
+      const norm = [];
+      for (const w of words) {
+        const text = String(w.text || '').trim();
+        const t0 = Number(w.t0 || 0);
+        const t1 = Number(w.t1 || (t0 + 1));
+        if (!text) continue;
+        const key = `${text}|${Math.round(t0 * 1000)}`;
+        if (seen.has(key)) continue; // drop duplicates that share the same start
+        seen.add(key);
+        norm.push({ text, t0, t1, _spawned: false });
+      }
+      norm.sort((a,b)=>a.t0-b.t0);
+      this._lyrics = { words: norm, nextIdx: 0 };
     } catch {}
   }
 
   ensureLyricTexture(text) {
     const key = 'lyric_' + text;
     if (this._lyricTex?.has(text)) return key;
-    const t = this.make.text({ x: 0, y: 0, text, style: { fontFamily: 'Teko', fontSize: '28px', color: '#ffffff', stroke: '#000', strokeThickness: 6 } }, true);
+    // Render text to a RenderTexture and save as a texture key
+    const t = this.make.text({ x: 0, y: 0, text, add: false, style: { fontFamily: 'Teko', fontSize: '28px', color: '#ffffff', stroke: '#000', strokeThickness: 6 } });
     t.setPadding(6, 2, 6, 2);
-    t.updateText(); t.setVisible(false);
-    t.generateTexture(key, t.width, t.height);
+    t.setOrigin(0, 0); // top-left to avoid cropping when drawing to RT
+    t.updateText();
+    const w = Math.max(1, Math.ceil(t.width + 2));
+    const h = Math.max(1, Math.ceil(t.height + 2));
+    const rt = this.make.renderTexture({ x: 0, y: 0, width: w, height: h, add: false });
+    // Draw at top-left so the whole glyphs fit in the texture
+    rt.draw(t, 0, 0);
+    rt.saveTexture(key);
+    rt.destroy();
     t.destroy();
     this._lyricTex?.set(text, key);
     return key;
