@@ -1,7 +1,7 @@
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-
+// webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -13,22 +13,22 @@ module.exports = {
 
   output: {
     filename: '[name].[contenthash].js',
-    path: path.resolve(__dirname, 'dist'), // v3 will serve from memory; this is for prod build
+    path: path.resolve(__dirname, 'dist'),
     clean: true,
-    environment: {
-      dynamicImport: true,
-    },
+    environment: { dynamicImport: true },
   },
 
   devtool: 'source-map',
 
-  // ✅ v3 syntax
+  // Dev server (Webpack Dev Server v3 syntax). Safe to keep for local dev.
+  // If you ever upgrade to v4, switch to:
+  // devServer: { static: { directory: path.resolve(__dirname, 'dist') }, open: true, hot: true }
   devServer: {
-    contentBase: path.resolve(__dirname, 'public'),
+    contentBase: path.resolve(__dirname, 'dist'),
     port: 8080,
-    open: true,       // (v3 doesn't support array form)
+    open: true,
     hot: true,
-    overlay: true,    // show build errors in the browser (v3 feature)
+    overlay: true,
     historyApiFallback: false,
   },
 
@@ -36,7 +36,7 @@ module.exports = {
     rules: [
       { test: /\.css$/i, use: ['style-loader', 'css-loader'] },
       {
-        test: /\.(png|svg|jpg|jpeg|gif|webp|mp3|wav|ogg)$/i,
+        test: /\.(png|svg|jpg|jpeg|gif|webp|mp3|wav|ogg|mp4|webm)$/i,
         type: 'asset/resource',
         generator: { filename: 'assets/[name][ext]' },
       },
@@ -45,6 +45,7 @@ module.exports = {
   },
 
   plugins: [
+    // Landing page → dist/index.html
     new HtmlWebpackPlugin({
       template: './src/index.html',
       chunks: ['main'],
@@ -52,6 +53,7 @@ module.exports = {
       favicon: './logo.png',
       inject: 'body',
     }),
+    // Phaser game page → dist/game.html
     new HtmlWebpackPlugin({
       template: './src/game/game.html',
       chunks: ['game'],
@@ -59,10 +61,19 @@ module.exports = {
       favicon: './logo.png',
       inject: 'body',
     }),
+    // Copy Lyric Ninja folder (tolerate missing on older commits)
     new CopyWebpackPlugin({
-  patterns: [
-    { from: 'src/BlockNinja', to: 'ninja' } // dist/ninja/... mirrors your folder
-  ]
-}),
+      patterns: [
+        {
+          from: path.resolve(__dirname, 'src/BlockNinja'),
+          to: 'ninja',
+          noErrorOnMissing: true,
+        },
+      ],
+    }),
   ],
+
+  resolve: {
+    extensions: ['.js', '.json'],
+  },
 };
