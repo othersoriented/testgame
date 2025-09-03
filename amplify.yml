@@ -7,6 +7,10 @@ frontend:
     build:
       commands:
         - npm run build
+        - echo "=== DIST TOP ==="
+        - ls -al dist
+        - echo "=== DIST/NINJA ==="
+        - ls -al dist/ninja || true
   artifacts:
     baseDirectory: dist
     files:
