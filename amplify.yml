@@ -11,6 +11,6 @@ frontend:
     baseDirectory: dist
     files:
       - '**/*'
-  cache:
-    paths:
-      - node_modules/**/*
+# cache:    <-- delete this whole section for one clean build
+#   paths:
+#     - node_modules/**/*
