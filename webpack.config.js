@@ -1,3 +1,5 @@
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -57,5 +59,10 @@ module.exports = {
       favicon: './logo.png',
       inject: 'body',
     }),
+    new CopyWebpackPlugin({
+  patterns: [
+    { from: 'src/BlockNinja', to: 'ninja' } // dist/ninja/... mirrors your folder
+  ]
+}),
   ],
 };
