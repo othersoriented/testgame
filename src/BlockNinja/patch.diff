@@ -1,0 +1,17 @@
+*** Begin Patch
+*** Update File: index.html
+@@
+   <body>
+     <!-- Game canvas -->
+     <canvas id="c"></canvas>
++    <!-- Lyrics overlay -->
++    <div class="lyrics" aria-live="polite"></div>
+     <!-- Gameplay HUD -->
+     <div class="hud">
+@@
+     </div>
+-    <script src="index.js"></script>
++    <script src="index.js"></script>
+   </body>
+ </html>
+*** End Patch
