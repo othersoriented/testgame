@@ -1,0 +1,29 @@
+{
+  "brand": {
+    "name": "lost boy found - Christian AI Music",
+    "tagline": "Trying to redeem AI by spinning up more edifying Christian music | 150+ Songs | New Every Week!",
+    "avatar": "/logo.png"
+  },
+  "flags": [""],
+  "feature": {
+    "eyebrow": "New",
+    "title": "Play this week's arcade song",
+    "image": "/assets/background.png",
+    "href": "/game.html",
+    "cta": "Play now"
+  },
+  "featured": ["game"],
+  "cards": [
+    { "id": "game", "icon": "game", "label": "Play Flappy Praise", "href": "/game.html", "color": "#39FF14" },
+    { "id": "ninja", "icon": "game", "label": "Play Praise Ninja", "href": "/ninja/", "color": "#00E5FF" },
+    { "id": "instagram", "icon": "instagram", "label": "Follow on Instagram", "href": "https://www.instagram.com/christianaiband/", "color": "#E1306C" },
+    { "id": "spotify", "icon": "spotify", "label": "Listen on Spotify", "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc", "color": "#1DB954" },
+    { "id": "apple", "icon": "apple", "label": "Listen on Apple Music", "href": "https://music.apple.com/us/artist/lost-boy-found/1763501707", "color": "#FFFFFF" },
+    { "id": "ytm", "icon": "youtubemusic", "label": "Listen on YouTube Music", "href": "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg", "color": "#FF0000" },
+    { "id": "amazon", "icon": "amazon", "label": "Listen on Amazon Music", "href": "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found", "color": "#00A8E1" },
+    { "id": "pandora", "icon": "pandora", "label": "Listen on Pandora", "href": "https://pandora.app.link/R4jc6mU0jNb", "color": "#1F7CF0" },
+    { "id": "youtube", "icon": "youtube", "label": "Visit our YouTube Channel", "href": "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw", "color": "#FF0000" },
+    { "id": "merch", "icon": "merch", "label": "Official Merch", "href": "https://othersoriented.creator-spring.com/", "color": "#39FF14" }
+  ]
+}
+

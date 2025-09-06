@@ -1,7 +1,12 @@
 // webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+// Optional favicon helper (avoid build error if logo.png is missing)
+const FAVICON_PATH = path.resolve(__dirname, 'logo.png');
+const faviconOpts = fs.existsSync(FAVICON_PATH) ? { favicon: FAVICON_PATH } : {};
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -23,7 +28,8 @@ module.exports = {
   // Dev server (Webpack Dev Server v4 syntax)
   devServer: {
     static: { directory: path.resolve(__dirname, 'dist') },
-    port: 8080,
+    // Prefer env PORT, otherwise pick a free one automatically
+    port: process.env.PORT || 'auto',
     open: true,
     hot: true,
     client: { overlay: true },
@@ -44,21 +50,19 @@ module.exports = {
 
   plugins: [
     // Landing page → dist/index.html
-    new HtmlWebpackPlugin({
+    new HtmlWebpackPlugin(Object.assign({
       template: './src/index.html',
       chunks: ['main'],
       filename: 'index.html',
-      favicon: './logo.png',
       inject: 'body',
-    }),
+    }, faviconOpts)),
     // Phaser game page → dist/game.html
-    new HtmlWebpackPlugin({
+    new HtmlWebpackPlugin(Object.assign({
       template: './src/game/game.html',
       chunks: ['game'],
       filename: 'game.html',
-      favicon: './logo.png',
       inject: 'body',
-    }),
+    }, faviconOpts)),
     // Copy Lyric Ninja folder (tolerate missing on older commits)
     new CopyWebpackPlugin({
       patterns: [

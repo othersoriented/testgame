@@ -2,133 +2,75 @@
 <html lang="en">
 <head>
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-2PBJPDNWKZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-2PBJPDNWKZ');
-</script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9232628266326658"
-     crossorigin="anonymous"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2PBJPDNWKZ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-2PBJPDNWKZ');
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Lost Boy Found — Arcade</title>
-  <meta name="description" content="Pick a game: Flappy Praise (Phaser) or Lyric Ninja (Canvas)." />
-  <meta name="theme-color" content="#111111" />
+  <title>lost boy found - Christian AI</title>
+  <meta name="description" content="Music + arcade. Follow, listen, and play. Pop-punk neon vibes." />
+  <meta name="theme-color" content="#0b0b12" />
   <base href="/" />
+  <!-- Anime.js for playful motion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     :root{
       --bg:#0b0b12; --bg2:#101026; --ink:#f8f8ff; --muted:#a6a8b3;
-      --ring:#39FF14; --accent:#00E5FF; --card:#141428; --card2:#1b1b34;
-      --radius:18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+      --accent:#39FF14; --accent2:#e1ee2c; --card:#141428; --card2:#1b1b34;
+      --radius:16px; --shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
     body{
       color:var(--ink);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      min-height: 100svh;
       background:
         radial-gradient(1200px 600px at 10% -10%, #1b1b34 0%, transparent 60%),
         radial-gradient(1200px 600px at 100% 0%, #102338 0%, transparent 55%),
         linear-gradient(180deg, var(--bg), var(--bg2));
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-      min-height: 100svh; /* mobile viewport */
       padding:
         calc(20px + env(safe-area-inset-top))
         calc(16px + env(safe-area-inset-right))
         calc(24px + env(safe-area-inset-bottom))
         calc(16px + env(safe-area-inset-left));
     }
-    .wrap{ max-width: 1040px; margin: 0 auto; }
-    header h1{
-      margin:0 0 10px;
-      font-size: clamp(22px, 3.5vw, 34px);
-      letter-spacing:.3px;
-    }
-    .hint{
-      color:var(--muted);
-      font-size: clamp(12px, 2.6vw, 14px);
-      margin: 0 0 20px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap:16px;
-    }
-    a.card{
-      position:relative;
-      display:flex; flex-direction:column; justify-content:flex-end;
-      min-height: 140px;
-      aspect-ratio: 16 / 9; /* keeps a nice tile on phones */
-      padding:16px;
-      border-radius: var(--radius);
-      text-decoration: none; color: inherit;
-      background:
-        linear-gradient(135deg, rgba(57,255,20,.15), rgba(0,229,255,.10)),
-        linear-gradient(180deg, var(--card), var(--card2));
-      box-shadow: var(--shadow);
-      border:1px solid rgba(255,255,255,.06);
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-    }
-    a.card:active { transform: translateY(1px) scale(.995); }
-    a.card:hover { box-shadow: 0 14px 40px rgba(0,0,0,.45), 0 0 0 2px rgba(57,255,20,.25); border-color: rgba(57,255,20,.35); }
-    .eyebrow{
-      position:absolute; top:10px; left:12px;
-      font-size: clamp(10px, 2.4vw, 11px); letter-spacing:.12em;
-      text-transform:uppercase; color: var(--muted);
-      background: rgba(255,255,255,.06); padding:4px 8px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.08);
-    }
-    .title{ font-size: clamp(16px, 4.6vw, 22px); margin: 2px 0 4px; }
-    .desc{ color:var(--muted); font-size: clamp(12px, 3.2vw, 14px); margin:0; }
-    .glow{
-      position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
-      box-shadow: 0 0 50px rgba(57,255,20,.06), inset 0 0 40px rgba(0,229,255,.03);
-    }
-    footer{ margin-top:18px; color:var(--muted); font-size: clamp(12px, 2.6vw, 13px); }
+    .lbf-wrap{ max-width: 720px; margin: 0 auto; }
+    .lbf-header{ text-align:center; margin-bottom:14px; opacity:0 }
+    .lbf-avatar{ width:84px; height:84px; border-radius:50%; box-shadow:var(--shadow); }
+    .lbf-title{ margin:10px 0 4px; font-size: clamp(22px, 5.5vw, 28px); }
+    .lbf-tag{ margin:0 auto 14px; color:var(--muted); font-size: clamp(12px, 3.6vw, 14px); max-width: 36ch; }
 
-    /* Reduce motion for users who prefer it */
-    @media (prefers-reduced-motion: reduce) {
-      a.card, a.card:hover { transition:none }
-    }
+    .lbf-feature{ display:block; position:relative; border-radius:16px; overflow:hidden; box-shadow:var(--shadow); border:1px solid rgba(255,255,255,.08); margin: 12px 0 18px; text-decoration:none; color:inherit; opacity:0 }
+    .lbf-feature-media{ height:160px; background-size:cover; background-position:center; filter: contrast(1.1) saturate(1.1); }
+    .lbf-feature-meta{ position:absolute; inset:auto 10px 10px 10px; background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.55)); padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.05); }
+    .lbf-eyebrow{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+    .lbf-feature-title{ font-size:16px; font-weight:600; }
+    .lbf-cta{ font-size:13px; color: var(--accent2); }
 
-    /* Landscape hint only on very short screens */
-    @media (max-height: 520px) and (orientation: landscape){
-      .hint::after{
-        content:" • Tip: rotate to landscape for best gameplay";
-      }
+    .lbf-list{ display:flex; flex-direction:column; gap:10px; }
+    .lbf-card{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 14px; border-radius:14px; text-decoration:none; color:inherit; background:linear-gradient(180deg, var(--card), var(--card2)); border:1px solid rgba(255,255,255,.08); box-shadow:var(--shadow); opacity:0 }
+    .lbf-ico{ width:24px; height:24px; display:grid; place-items:center; filter: drop-shadow(0 2px 8px rgba(0,0,0,.35)); }
+    .lbf-label{ flex:1; font-weight:600; font-size:16px; }
+    .lbf-arrow{ opacity:.6 }
+    .lbf-card:active{ transform: translateY(1px) }
+    .lbf-card:hover{ outline:1px solid rgba(57,255,20,.25) }
+
+    /* Holiday flag */
+    .flag-holiday .lbf-title{ background: linear-gradient(90deg, #39FF14, #00E5FF, #FF2BD6); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+    @media (min-width: 640px){
+      .lbf-feature-media{ height:200px }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>Lost Boy Found — Arcade</h1>
-      <p class="hint">Choose a game. Works best with sound on.</p>
-    </header>
-
-    <section class="grid">
-      <a class="card" href="/game.html" aria-label="Play Flappy Praise">
-        <span class="eyebrow">Phaser</span>
-        <strong class="title">Flappy Praise</strong>
-        <p class="desc">Tap to fly. Classic arcade physics with Scripture.</p>
-        <span class="glow" aria-hidden="true"></span>
-      </a>
-
-      <a class="card" href="/ninja/" aria-label="Play Lyric Ninja">
-        <span class="eyebrow">Canvas</span>
-        <strong class="title">Lyric Ninja</strong>
-        <p class="desc">Slice lyrics in time. Bonus quizzes for extra points.</p>
-        <span class="glow" aria-hidden="true"></span>
-      </a>
-    </section>
-
-    <footer>Add to Home Screen for a full-screen “arcade” feel.</footer>
+  <div class="lbf-wrap">
+    <div id="app"></div>
   </div>
-<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </body>
 </html>
+
