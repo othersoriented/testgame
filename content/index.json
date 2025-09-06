@@ -1,0 +1,21 @@
+{
+  "current": "Luke_4_16_28",
+  "songs": {
+    "Luke_4_16_28": {
+      "title": "Luke 4:16-28",
+      "verseRef": "Luke 4:16-28",
+      "audio": "/assets/audio/luke_4_16_28.mp3",
+      "lyricsUrl": "/content/Luke_4_16_28/lyrics.json",
+      "bpm": 90,
+      "offsetMs": 0
+    },
+    "psalm150": {
+      "title": "Psalm 150 (Edit)",
+      "verseRef": "Psalm 150",
+      "audio": "/assets/track.mp3",
+      "lyricsUrl": "/content/psalm150/lyrics.json",
+      "bpm": 90,
+      "offsetMs": 0
+    }
+  }
+}

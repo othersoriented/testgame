@@ -201,6 +201,7 @@ let nextLyricSpawnIdx = 0;        // spawn scheduler index
 let lyricsReady = false;
 let lyricsOffsetSec = 0; // countdown + latency (sec) [not applied per user request]
 let audioEl = null; // created if JSON meta.audioName is present
+let __audioOverrideUrl = null; // shared manifest override when available
 
 function setLyricsFromData(data) {
   try {
@@ -213,10 +214,13 @@ function setLyricsFromData(data) {
     // Keep recorded values but do not apply any timing offset to lyrics, per user request
     lyricsOffsetSec = (Number(meta.countdownSec) || 0) + ((Number(meta.latencyMs) || 0) / 1000);
 
-    // Initialize audio if declared in meta
-    if (meta.audioName && typeof meta.audioName === 'string' && !audioEl) {
+    // Initialize audio: prefer manifest override, else JSON meta.audioName
+    const audioSrc = (__audioOverrideUrl && typeof __audioOverrideUrl === 'string')
+      ? __audioOverrideUrl
+      : (meta.audioName && typeof meta.audioName === 'string' ? meta.audioName : null);
+    if (audioSrc && !audioEl) {
       try {
-        audioEl = new Audio(meta.audioName);
+        audioEl = new Audio(audioSrc);
         audioEl.preload = 'auto';
         audioEl.style.display = 'none';
         // Append to DOM to ensure some browsers allow playback after user gesture
@@ -1482,9 +1486,28 @@ function makeTargetModel() {
 
 renderMenus();
 
-// Attempt to load lyrics data (optional). If no lyrics.json is present,
-// this will silently do nothing.
-loadLyrics();
+// Attempt to load shared manifest; fall back to local lyrics.json if absent
+async function loadSharedSong() {
+  try {
+    const res = await fetch('/content/index.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('no manifest');
+    const manifest = await res.json();
+    const key = manifest?.current;
+    const song = key && manifest?.songs ? manifest.songs[key] : null;
+    if (song) {
+      if (song.audio) __audioOverrideUrl = song.audio;
+      if (song.lyricsUrl) {
+        await loadLyrics(song.lyricsUrl);
+        return;
+      }
+    }
+    await loadLyrics();
+  } catch (_) {
+    await loadLyrics();
+  }
+}
+
+loadSharedSong();
 
 
 

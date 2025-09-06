@@ -88,6 +88,9 @@ export default class PreloadScene extends Phaser.Scene {
       'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Teko:wght@600;700&display=swap'
     );
 
+    // Try to load shared content manifest (non-breaking fallback if missing)
+    this.load.json('contentManifest', '/content/index.json');
+
     // Lyrics JSON is bundled via import (lyricsData) and added to cache in create();
     // Avoid runtime XHR to /assets/data/lyrics.json to prevent 404s in dev.
 
@@ -111,6 +114,37 @@ export default class PreloadScene extends Phaser.Scene {
     if (lyricsData) {
       this.cache.json.add('lyrics', lyricsData);
     }
+
+    // If a shared content manifest is present, override audio/lyrics accordingly
+    try {
+      const manifest = this.cache.json.get('contentManifest');
+      const songKey = manifest?.current;
+      const song    = songKey && manifest?.songs ? manifest.songs[songKey] : null;
+      if (song) {
+        // Override timeline audio and title
+        const tl = this.cache.json.get('timeline') || { ...timelineData };
+        const audioUrl = song.audio || tl.audio || trackUrl;
+        const title    = song.title || tl.title || '';
+        tl.audio = audioUrl;
+        tl.title = title;
+        // Decode to determine duration when absent
+        try { await loadTrack(audioUrl); } catch {}
+        const audioDur = Math.round(getDuration()) || 0;
+        if (!tl.duration) tl.duration = audioDur;
+        if (this.cache.json.exists('timeline')) this.cache.json.remove('timeline');
+        this.cache.json.add('timeline', tl);
+
+        // Override lyrics from manifest if provided
+        if (song.lyricsUrl) {
+          const res = await fetch(song.lyricsUrl, { cache: 'no-store' });
+          if (res.ok) {
+            const json = await res.json();
+            if (this.cache.json.exists('lyrics')) this.cache.json.remove('lyrics');
+            this.cache.json.add('lyrics', json);
+          }
+        }
+      }
+    } catch {}
 
     // Minimal generated textures for collectibles
     const g = this.make.graphics({ x: 0, y: 0, add: false });

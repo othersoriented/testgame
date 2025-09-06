@@ -20,15 +20,13 @@ module.exports = {
 
   devtool: 'source-map',
 
-  // Dev server (Webpack Dev Server v3 syntax). Safe to keep for local dev.
-  // If you ever upgrade to v4, switch to:
-  // devServer: { static: { directory: path.resolve(__dirname, 'dist') }, open: true, hot: true }
+  // Dev server (Webpack Dev Server v4 syntax)
   devServer: {
-    contentBase: path.resolve(__dirname, 'dist'),
+    static: { directory: path.resolve(__dirname, 'dist') },
     port: 8080,
     open: true,
     hot: true,
-    overlay: true,
+    client: { overlay: true },
     historyApiFallback: false,
   },
 
@@ -67,6 +65,24 @@ module.exports = {
         {
           from: path.resolve(__dirname, 'src/BlockNinja'),
           to: 'ninja',
+          noErrorOnMissing: true,
+        },
+        // Shared content (manifest + assets placed under /content)
+        {
+          from: path.resolve(__dirname, 'content'),
+          to: 'content',
+          noErrorOnMissing: true,
+        },
+        // Ensure the Phaser lyrics JSON is available to both games at /content/psalm150/lyrics.json
+        {
+          from: path.resolve(__dirname, 'src/game/assets/data/lyrics.json'),
+          to: 'content/psalm150/lyrics.json',
+          noErrorOnMissing: true,
+        },
+        // Copy top-level assets/ into /assets so manifest audio like /assets/audio/*.mp3 resolves
+        {
+          from: path.resolve(__dirname, 'assets'),
+          to: 'assets',
           noErrorOnMissing: true,
         },
       ],
