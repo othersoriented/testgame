@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "updatedAt": "2025-09-11T12:59:54.232Z",
+  "current": "hymns_vol6/this_is_my_fathers_world",
+  "albums": {
+    "gospel_vol1": {
+      "slug": "gospel_vol1",
+      "title": "B(ai)ble Songs, Vol. 4",
+      "cover": null,
+      "songs": [
+        "gospel_vol1/luke_4_16_28"
+      ]
+    },
+    "hymns_vol6": {
+      "slug": "hymns_vol6",
+      "title": "Hymns of the F(ai)th, Vol. 6",
+      "cover": null,
+      "songs": [
+        "hymns_vol6/this_is_my_fathers_world"
+      ]
+    }
+  },
+  "songs": {
+    "gospel_vol1/luke_4_16_28": {
+      "id": "gospel_vol1/luke_4_16_28",
+      "album": "gospel_vol1",
+      "slug": "luke_4_16_28",
+      "title": "Luke 4:16-28",
+      "audio": "/assets/audio/luke_4_16_28.mp3",
+      "lyricsUrl": "/content/albums/gospel_vol1/luke_4_16_28/lyrics.json",
+      "art": null,
+      "bgImage": null,
+      "bgVideo": null,
+      "bpm": 90,
+      "offsetMs": 0,
+      "verseRef": "Luke 4:16-28"
+    },
+    "hymns_vol6/this_is_my_fathers_world": {
+      "id": "hymns_vol6/this_is_my_fathers_world",
+      "album": "hymns_vol6",
+      "slug": "this_is_my_fathers_world",
+      "title": "This Is My Father's World",
+      "audio": "/content/albums/hymns_vol6/this_is_my_fathers_world/This is my father’s world .wav",
+      "lyricsUrl": "/content/albums/hymns_vol6/this_is_my_fathers_world/lyrics.json",
+      "art": "/content/albums/hymns_vol6/this_is_my_fathers_world/father's world 2.png",
+      "bgImage": "/content/albums/hymns_vol6/this_is_my_fathers_world/father's world 2.png",
+      "bgVideo": "/content/albums/hymns_vol6/this_is_my_fathers_world/Father's World.mp4",
+      "bpm": 90,
+      "offsetMs": 0,
+      "verseRef": "Hymns of the F(ai)th, Vol. 6"
+    }
+  }
+}

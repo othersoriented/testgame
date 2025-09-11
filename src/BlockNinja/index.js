@@ -1486,25 +1486,46 @@ function makeTargetModel() {
 
 renderMenus();
 
-// Attempt to load shared manifest; fall back to local lyrics.json if absent
+// Attempt to resolve song from catalog (supports albums) or fallback manifest/index
 async function loadSharedSong() {
   try {
-    const res = await fetch('/content/index.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('no manifest');
-    const manifest = await res.json();
-    const key = manifest?.current;
-    const song = key && manifest?.songs ? manifest.songs[key] : null;
+    const params = new URLSearchParams(window.location.search);
+    const want = params.get('song');
+    let current = null; let song = null;
+    try {
+      const res = await fetch('/content/catalog.json', { cache: 'no-store' });
+      if (res.ok) {
+        const cat = await res.json();
+        current = want || cat.current || null;
+        song = current ? (cat.songs?.[current] || null) : null;
+      }
+    } catch {}
+    if (!song) {
+      try {
+        const res = await fetch('/content/index.json', { cache: 'no-store' });
+        if (res.ok) {
+          const m = await res.json();
+          current = want || m.current || null;
+          song = (current && m.songs) ? m.songs[current] : null;
+        }
+      } catch {}
+    }
     if (song) {
       if (song.audio) __audioOverrideUrl = song.audio;
-      if (song.lyricsUrl) {
-        await loadLyrics(song.lyricsUrl);
-        return;
+      // Per-song background video override if provided
+      if (song.bgVideo && typeof song.bgVideo === 'string') {
+        try {
+          const vid = document.querySelector('.bg-video');
+          if (vid) {
+            const srcEl = vid.querySelector('source');
+            if (srcEl) { srcEl.src = song.bgVideo; vid.load(); }
+          }
+        } catch {}
       }
+      if (song.lyricsUrl) { await loadLyrics(song.lyricsUrl); return; }
     }
     await loadLyrics();
-  } catch (_) {
-    await loadLyrics();
-  }
+  } catch (_) { await loadLyrics(); }
 }
 
 loadSharedSong();

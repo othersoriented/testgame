@@ -4,8 +4,10 @@
   "description": "FlappyBird clone",
   "private": true,
   "scripts": {
+    "prestart": "node scripts/build-catalog.js",
     "start": "webpack-dev-server --open",
     "dev": "webpack-dev-server --open",
+    "prebuild": "node scripts/build-catalog.js",
     "build": "webpack",
     "webhint": "hint .",
     "stylelint": "stylelint \"**/*.{css,scss}\"",

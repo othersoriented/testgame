@@ -161,6 +161,97 @@ async function boot() {
   const cfg = await fetchJSON('/content/landing.json') || fallback;
   applyThemeFlags(cfg.flags || []);
   mountLanding(cfg);
+
+  // Non-breaking auth panel: only shows if env + Amplify are available
+  try {
+    const auth = await import('./auth/client.js');
+    const initRes = await auth.init();
+    if (initRes?.enabled) {
+      const app = document.getElementById('app');
+      const bar = document.createElement('div');
+      bar.className = 'lbf-auth';
+      async function renderAuth() {
+        bar.innerHTML = '';
+        const me = await auth.currentUser();
+        if (!me) {
+          const g = document.createElement('button'); g.className = 'lbf-btn'; g.textContent = 'Sign in with Google'; g.onclick = auth.signInWithGoogle;
+          const f = document.createElement('button'); f.className = 'lbf-btn'; f.textContent = 'Sign in with Facebook'; f.onclick = auth.signInWithFacebook;
+          bar.appendChild(g); bar.appendChild(f);
+        } else {
+          const img = document.createElement('img'); img.src = me.picture || '/logo.png'; img.alt = ''; img.style.width = '28px'; img.style.height='28px'; img.style.borderRadius='50%';
+          const name = document.createElement('span'); name.textContent = me.name; name.style.alignSelf='center'; name.style.fontWeight='600';
+          const out = document.createElement('button'); out.className = 'lbf-btn'; out.textContent = 'Sign out'; out.onclick = auth.signOut;
+          bar.appendChild(img); bar.appendChild(name); bar.appendChild(out);
+        }
+      }
+      app.prepend(bar);
+      renderAuth();
+      // Re-render on visibility change (returns from Hosted UI)
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAuth(); });
+    }
+  } catch {}
+
+  // Song picker with search + collapsible albums
+  try {
+    const cat = await fetchJSON('/content/catalog.json');
+    if (!cat || !cat.songs || !Object.keys(cat.songs).length) return;
+    const app = document.getElementById('app');
+    const box = document.createElement('section'); box.className = 'lbf-songs';
+    const title = document.createElement('h2'); title.textContent = 'Songs'; box.appendChild(title);
+    const searchWrap = document.createElement('div'); searchWrap.className = 'lbf-search';
+    const input = document.createElement('input'); input.type = 'search'; input.placeholder = 'Search songs or albums…'; searchWrap.appendChild(input); box.appendChild(searchWrap);
+
+    const byAlbum = new Map();
+    Object.values(cat.songs).forEach(s => {
+      const list = byAlbum.get(s.album) || []; list.push(s); byAlbum.set(s.album, list);
+    });
+
+    const albumSections = new Map();
+
+    function renderAlbums(filter) {
+      // Clear existing (keep title+search)
+      [...box.querySelectorAll('.lbf-album')].forEach(n => n.remove());
+      for (const [album, list] of byAlbum.entries()) {
+        const sec = document.createElement('div'); sec.className = 'lbf-album';
+        const head = document.createElement('div'); head.className = 'lbf-album-head';
+        const img = document.createElement('img'); img.className = 'lbf-cover';
+        const albumInfo = cat.albums?.[album] || {};
+        img.src = albumInfo.cover || '/logo.png'; img.alt = '';
+        const h = document.createElement('h3'); h.textContent = albumInfo.title || album;
+        const toggle = document.createElement('span'); toggle.className = 'lbf-toggle'; toggle.textContent = '▸';
+        head.appendChild(img); head.appendChild(h); head.appendChild(toggle); sec.appendChild(head);
+
+        const key = `lbf_album_open:${album}`;
+        const defaultOpen = localStorage.getItem(key) !== 'false';
+        sec.dataset.collapsed = String(!defaultOpen);
+        head.addEventListener('click', () => {
+          const isCollapsed = sec.dataset.collapsed === 'true';
+          const next = !isCollapsed; sec.dataset.collapsed = String(!next);
+          localStorage.setItem(key, String(next));
+        });
+
+        list.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
+        list.forEach(s => {
+          const term = (filter || '').trim().toLowerCase();
+          const hay = `${albumInfo.title||album} ${s.title||s.slug} ${s.slug}`.toLowerCase();
+          if (term && !hay.includes(term)) return;
+          const row = document.createElement('div'); row.className = 'lbf-song';
+          const left = document.createElement('div'); left.className = 'lbf-song-title'; left.textContent = s.title || s.slug; row.appendChild(left);
+          const actions = document.createElement('div'); actions.className = 'lbf-song-actions';
+          const a1 = document.createElement('a'); a1.href = `/game.html?song=${encodeURIComponent(s.id)}`; a1.textContent = 'Flappy'; actions.appendChild(a1);
+          const a2 = document.createElement('a'); a2.href = `/ninja/?song=${encodeURIComponent(s.id)}`; a2.textContent = 'Ninja'; actions.appendChild(a2);
+          row.appendChild(actions);
+          sec.appendChild(row);
+        });
+        box.appendChild(sec);
+        albumSections.set(album, sec);
+      }
+    }
+
+    renderAlbums('');
+    input.addEventListener('input', () => renderAlbums(input.value));
+    app.appendChild(box);
+  } catch {}
 }
 
 document.addEventListener('DOMContentLoaded', boot);

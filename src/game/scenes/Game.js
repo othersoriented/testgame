@@ -754,6 +754,11 @@ this.updateProgressUI(0, this._tl?.duration || 0); // show full time remaining a
 
   createBackground() {
     const { width, height } = this.scale;
+    const overrideKey = this.registry.get('bg_image_override');
+    if (overrideKey && this.textures.exists(overrideKey)) {
+      this.bgImage = this.physics.add.staticImage(width * 0.5, height * 0.5, overrideKey).setScale(1.7).refreshBody();
+      return;
+    }
     this.bgImage = this.physics.add.staticImage(width * 0.5, height * 0.5, BACKGROUND).setScale(1.7).refreshBody();
   }
 

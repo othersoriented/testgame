@@ -115,26 +115,33 @@ export default class PreloadScene extends Phaser.Scene {
       this.cache.json.add('lyrics', lyricsData);
     }
 
-    // If a shared content manifest is present, override audio/lyrics accordingly
+    // If a shared content manifest or catalog is present, override audio/lyrics accordingly
     try {
       const manifest = this.cache.json.get('contentManifest');
-      const songKey = manifest?.current;
-      const song    = songKey && manifest?.songs ? manifest.songs[songKey] : null;
+      const params = new URLSearchParams(window.location.search);
+      let songKey = params.get('song') || manifest?.current || null;
+      let song = songKey && manifest?.songs ? manifest.songs[songKey] : null;
+      if (!song) {
+        try {
+          const res = await fetch('/content/catalog.json', { cache: 'no-store' });
+          if (res.ok) {
+            const catalog = await res.json();
+            if (!songKey) songKey = catalog.current || null;
+            song = songKey ? catalog.songs?.[songKey] : null;
+          }
+        } catch {}
+      }
       if (song) {
-        // Override timeline audio and title
         const tl = this.cache.json.get('timeline') || { ...timelineData };
         const audioUrl = song.audio || tl.audio || trackUrl;
         const title    = song.title || tl.title || '';
-        tl.audio = audioUrl;
-        tl.title = title;
-        // Decode to determine duration when absent
+        tl.audio = audioUrl; tl.title = title;
         try { await loadTrack(audioUrl); } catch {}
         const audioDur = Math.round(getDuration()) || 0;
         if (!tl.duration) tl.duration = audioDur;
         if (this.cache.json.exists('timeline')) this.cache.json.remove('timeline');
         this.cache.json.add('timeline', tl);
 
-        // Override lyrics from manifest if provided
         if (song.lyricsUrl) {
           const res = await fetch(song.lyricsUrl, { cache: 'no-store' });
           if (res.ok) {
@@ -142,6 +149,19 @@ export default class PreloadScene extends Phaser.Scene {
             if (this.cache.json.exists('lyrics')) this.cache.json.remove('lyrics');
             this.cache.json.add('lyrics', json);
           }
+        }
+
+        // Optional: per-song background image override (for Flappy)
+        const bgImg = song.bgImage || song.art || null;
+        if (bgImg) {
+          try {
+            this.load.image('BG_OVERRIDE', bgImg);
+            await new Promise((resolve) => {
+              this.load.once(Phaser.Loader.Events.COMPLETE, resolve);
+              this.load.start();
+            });
+            this.registry.set('bg_image_override', 'BG_OVERRIDE');
+          } catch {}
         }
       }
     } catch {}
