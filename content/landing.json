@@ -1,29 +1,189 @@
 {
-  "brand": {
-    "name": "lost boy found - Christian AI Music",
-    "tagline": "Trying to redeem AI by spinning up more edifying Christian music | 150+ Songs | New Every Week!",
-    "avatar": "/logo.png"
+  "hero": {
+    "kicker": "Christian AI Music Collective",
+    "title": "Lost Boy Found + The Great Reunion",
+    "subtitle": "Two original AI-assisted music projects always releasing new songs.",
+    "avatar": "/logo.png",
+    "tagline": "The days are evil. Listen to edifying music."
   },
-  "flags": [""],
-  "feature": {
-    "eyebrow": "New",
-    "title": "Play this week's arcade song",
-    "image": "/assets/background.png",
-    "href": "/game.html",
-    "cta": "Play now"
-  },
-  "featured": ["game"],
+  "flags": [],
+  "bands": [
+    {
+      "id": "lost-boy-found",
+      "name": "Lost Boy Found",
+      "tagline": "Christian AI Pop-Punk / Rock",
+      "description": "Punk-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.",
+      "accent": "#39FF14",
+      "logo": null,
+      "latestRelease": {
+        "title": "Hymns Vol. 8",
+        "subtitle": "Hit play to catch the freshest drop.",
+        "cta": "Listen now",
+        "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
+        "image": null
+      },
+      "links": [
+        {
+          "id": "spotify",
+          "icon": "spotify",
+          "label": "Spotify",
+          "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
+          "color": "#1DB954"
+        },
+        {
+          "id": "apple",
+          "icon": "apple",
+          "label": "Apple Music",
+          "href": "https://music.apple.com/us/artist/lost-boy-found/1763501707",
+          "color": "#FFFFFF"
+        },
+        {
+          "id": "ytm",
+          "icon": "youtubemusic",
+          "label": "YouTube Music",
+          "href": "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg",
+          "color": "#FF0000"
+        },
+        {
+          "id": "amazon",
+          "icon": "amazon",
+          "label": "Amazon Music",
+          "href": "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found",
+          "color": "#00A8E1"
+        },
+        {
+          "id": "pandora",
+          "icon": "pandora",
+          "label": "Pandora",
+          "href": "https://pandora.app.link/R4jc6mU0jNb",
+          "color": "#1F7CF0"
+        },
+        {
+          "id": "youtube",
+          "icon": "youtube",
+          "label": "YouTube",
+          "href": "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw",
+          "color": "#FF0000"
+        }
+      ],
+      "extras": [
+        {
+          "id": "instagram",
+          "icon": "instagram",
+          "label": "Instagram",
+          "href": "https://www.instagram.com/christianaiband/",
+          "color": "#E1306C"
+        },
+        {
+          "id": "tiktok",
+          "icon": "tiktok",
+          "label": "TikTok",
+          "href": "https://www.tiktok.com/@lostboyfoundofficial",
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "id": "the-great-reunion",
+      "name": "The Great Reunion",
+      "tagline": "Christian AI Indie-Folk / Indie Rock",
+      "description": "Warm, reflective folk textures crafted with AI tools to soundtrack the coming kingdom.",
+      "accent": "#6AD7E5",
+      "logo": null,
+      "latestRelease": {
+        "title": "New songs on deck",
+        "subtitle": "Christmas Volume 1",
+        "cta": "Explore now",
+        "href": "https://music.apple.com/us/artist/the-great-reunion/1846862216",
+        "image": null
+      },
+      "links": [
+        {
+          "id": "spotify",
+          "icon": "spotify",
+          "label": "Spotify",
+          "href": "https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ",
+          "color": "#1DB954"
+        },
+        {
+          "id": "apple",
+          "icon": "apple",
+          "label": "Apple Music",
+          "href": "https://music.apple.com/us/artist/the-great-reunion/1846862216",
+          "color": "#FFFFFF"
+        },
+        {
+          "id": "ytm",
+          "icon": "youtubemusic",
+          "label": "YouTube Music",
+          "href": "https://music.youtube.com/channel/UCF750lcrGvPrwLF2rELwrhw",
+          "color": "#FF0000"
+        },
+        {
+          "id": "amazon",
+          "icon": "amazon",
+          "label": "Amazon Music",
+          "href": "https://music.amazon.com/artists/B0FWTZYP96/the-great-reunion",
+          "color": "#00A8E1"
+        },
+        {
+          "id": "pandora",
+          "icon": "pandora",
+          "label": "Pandora",
+          "href": "https://www.pandora.com/artist/the-great-reunion/ARpwqxg9bwwjpJ9",
+          "color": "#1F7CF0"
+        },
+        {
+          "id": "youtube",
+          "icon": "youtube",
+          "label": "YouTube",
+          "href": "https://www.youtube.com/@thegreatreunion",
+          "color": "#FF0000"
+        }
+      ],
+      "extras": [
+        {
+          "id": "instagram",
+          "icon": "instagram",
+          "label": "Instagram",
+          "href": "https://www.instagram.com/thegreatreunionmusic/",
+          "color": "#E1306C"
+        },
+        {
+          "id": "tiktok",
+          "icon": "tiktok",
+          "label": "TikTok",
+          "href": "https://www.tiktok.com/@thegreatreunionmusic",
+          "color": "#000000"
+        }
+      ]
+    }
+  ],
+  "cardsTitle": "Arcade + Extras",
   "cards": [
-    { "id": "game", "icon": "game", "label": "Play Flappy Praise", "href": "/game.html", "color": "#39FF14" },
-    { "id": "ninja", "icon": "game", "label": "Play Praise Ninja", "href": "/ninja/", "color": "#00E5FF" },
-    { "id": "instagram", "icon": "instagram", "label": "Follow on Instagram", "href": "https://www.instagram.com/christianaiband/", "color": "#E1306C" },
-    { "id": "spotify", "icon": "spotify", "label": "Listen on Spotify", "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc", "color": "#1DB954" },
-    { "id": "apple", "icon": "apple", "label": "Listen on Apple Music", "href": "https://music.apple.com/us/artist/lost-boy-found/1763501707", "color": "#FFFFFF" },
-    { "id": "ytm", "icon": "youtubemusic", "label": "Listen on YouTube Music", "href": "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg", "color": "#FF0000" },
-    { "id": "amazon", "icon": "amazon", "label": "Listen on Amazon Music", "href": "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found", "color": "#00A8E1" },
-    { "id": "pandora", "icon": "pandora", "label": "Listen on Pandora", "href": "https://pandora.app.link/R4jc6mU0jNb", "color": "#1F7CF0" },
-    { "id": "youtube", "icon": "youtube", "label": "Visit our YouTube Channel", "href": "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw", "color": "#FF0000" },
-    { "id": "merch", "icon": "merch", "label": "Official Merch", "href": "https://othersoriented.creator-spring.com/", "color": "#39FF14" }
+    {
+      "id": "game",
+      "icon": "game",
+      "label": "Play Flappy Praise",
+      "href": "/game.html",
+      "color": "#39FF14"
+    },
+    {
+      "id": "ninja",
+      "icon": "game",
+      "label": "Play Praise Ninja",
+      "href": "/ninja/",
+      "color": "#00E5FF"
+    },
+    {
+      "id": "merch",
+      "icon": "merch",
+      "label": "Official Merch",
+      "href": "https://othersoriented.creator-spring.com/",
+      "color": "#39FF14"
+    }
+  ],
+  "featured": [
+    "game"
   ]
 }
-

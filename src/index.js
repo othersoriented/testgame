@@ -41,6 +41,8 @@ function iconSVG(name) {
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden><path fill="${fill}" d="M6 6h12a4 4 0 0 1 4 4v6a2 2 0 0 1-2 2h-3l-2-2H9l-2 2H4a2 2 0 0 1-2-2v-6a4 4 0 0 1 4-4Zm0 3v2h2v2h2v-2h2V9h-2V7H8v2H6Zm10 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm2-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg>`;
     case 'merch':
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden><path fill="${fill}" d="M4 4h16l-2 16H6L4 4Zm3 2 1 12h8l1-12H7Z"/></svg>`;
+    case 'tiktok':
+      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M15 2h4.1a5.9 5.9 0 0 0 .1 1.3c.3 1.9 1.8 3.4 3.6 3.7V11a8.9 8.9 0 0 1-4-.9v7a5.6 5.6 0 1 1-5.6-5.6h.8V2Zm-1.4 11.9a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 2.9-2.9v-7.5a6.9 6.9 0 0 1-2.9-.9v5.5h-.8Z"/></svg>`;
     default:
       return '';
   }
@@ -48,15 +50,15 @@ function iconSVG(name) {
 
 function createCard({ id, label, href, icon, color }) {
   const a = document.createElement('a');
-  a.className = 'lbf-card';
+  a.className = 'landing-card';
   a.href = href;
   a.target = href?.startsWith('/') ? '_self' : '_blank';
   a.rel = 'noopener noreferrer';
   a.dataset.cardId = id || '';
   a.innerHTML = `
-    <span class="lbf-ico" style="color:${color || 'inherit'}">${iconSVG(icon)}</span>
-    <span class="lbf-label">${label}</span>
-    <span class="lbf-arrow" aria-hidden>›</span>
+    <span class="landing-card-icon" style="color:${color || 'inherit'}">${iconSVG(icon)}</span>
+    <span class="landing-card-label">${label}</span>
+    <span class="landing-card-arrow" aria-hidden="true">&rarr;</span>
   `;
   a.addEventListener('click', () => emitAnalytics('card_click', { card_id: id, label, url: href }));
   return a;
@@ -67,93 +69,376 @@ function applyThemeFlags(flags) {
   (flags || []).forEach(f => root.classList.add('flag-' + f));
 }
 
+function hexToRgba(hex, alpha) {
+  if (!hex) return '';
+  const normalized = String(hex).replace('#', '');
+  if (![3, 6].includes(normalized.length)) return '';
+  const pairs = normalized.length === 3
+    ? normalized.split('').map(ch => ch + ch)
+    : normalized.match(/.{2}/g);
+  if (!pairs) return '';
+  const rgb = pairs.map(part => parseInt(part, 16));
+  if (rgb.some(num => Number.isNaN(num))) return '';
+  return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
+}
+
+function createHero(hero) {
+  if (!hero) return null;
+  const section = document.createElement('section');
+  section.className = 'landing-hero';
+
+  const avatar = document.createElement('img');
+  avatar.className = 'landing-hero-avatar';
+  avatar.src = hero.avatar || '/logo.png';
+  avatar.alt = hero.title || hero.name || 'logo';
+  section.appendChild(avatar);
+
+  if (hero.kicker) {
+    const kicker = document.createElement('div');
+    kicker.className = 'landing-hero-kicker';
+    kicker.textContent = hero.kicker;
+    section.appendChild(kicker);
+  }
+
+  const title = document.createElement('h1');
+  title.className = 'landing-hero-title';
+  title.textContent = hero.title || hero.name || '';
+  section.appendChild(title);
+
+  if (hero.subtitle) {
+    const subtitle = document.createElement('p');
+    subtitle.className = 'landing-hero-subtitle';
+    subtitle.textContent = hero.subtitle;
+    section.appendChild(subtitle);
+  }
+
+  if (hero.tagline) {
+    const tagline = document.createElement('p');
+    tagline.className = 'landing-hero-tagline';
+    tagline.textContent = hero.tagline;
+    section.appendChild(tagline);
+  }
+
+  return section;
+}
+
+
+
+function createBandSection(band) {
+  if (!band) return null;
+  const section = document.createElement('section');
+  section.className = 'landing-band';
+  if (band.id) section.dataset.bandId = band.id;
+
+  const accent = band.accent || '#39FF14';
+  const accentSoft = hexToRgba(accent, 0.18) || 'rgba(57,255,20,0.18)';
+  section.style.setProperty('--band-accent', accent);
+  section.style.setProperty('--band-accent-soft', accentSoft);
+
+  const top = document.createElement('div');
+  top.className = 'landing-band-top';
+
+  const logo = document.createElement('div');
+  logo.className = 'landing-band-logo';
+  if (band.logo) {
+    const img = document.createElement('img');
+    img.src = band.logo;
+    img.alt = `${band.name || band.id || 'band'} logo`;
+    logo.appendChild(img);
+  } else {
+    logo.dataset.empty = 'true';
+    const initials = (band.name || band.id || '?')
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(part => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+    logo.textContent = initials || 'B';
+  }
+  top.appendChild(logo);
+
+  const info = document.createElement('div');
+  info.className = 'landing-band-info';
+  if (band.tagline) {
+    const tag = document.createElement('p');
+    tag.className = 'landing-band-tag';
+    tag.textContent = band.tagline;
+    info.appendChild(tag);
+  }
+  const name = document.createElement('h2');
+  name.className = 'landing-band-name';
+  name.textContent = band.name || '';
+  info.appendChild(name);
+  if (band.description) {
+    const desc = document.createElement('p');
+    desc.className = 'landing-band-description';
+    desc.textContent = band.description;
+    info.appendChild(desc);
+  }
+  top.appendChild(info);
+  section.appendChild(top);
+
+  const content = document.createElement('div');
+  content.className = 'landing-band-content';
+
+  const links = Array.isArray(band.links) ? band.links.filter(Boolean) : [];
+  if (links.length) {
+    const list = document.createElement('div');
+    list.className = 'landing-band-links';
+    links.forEach(link => {
+      const a = document.createElement('a');
+      a.className = 'landing-link';
+      a.href = link.href;
+      a.target = link.href?.startsWith('/') ? '_self' : '_blank';
+      a.rel = 'noopener noreferrer';
+      a.dataset.bandId = band.id || '';
+      a.dataset.linkId = link.id || '';
+      a.innerHTML = `
+        <span class="landing-link-icon" style="color:${link.color || accent}">${iconSVG(link.icon)}</span>
+        <span class="landing-link-label">${link.label || ''}</span>
+      `;
+      a.addEventListener('click', () => emitAnalytics('band_stream_click', { band_id: band.id, stream_id: link.id, label: link.label, url: link.href }));
+      list.appendChild(a);
+    });
+    content.appendChild(list);
+  }
+
+  const release = band.latestRelease || band.release || null;
+  if (release && (release.title || release.image || release.cta || release.href || release.subtitle)) {
+    const card = document.createElement('div');
+    card.className = 'landing-band-release';
+
+    const art = document.createElement('div');
+    art.className = 'landing-band-release-art';
+    if (release.image) {
+      const img = document.createElement('img');
+      img.src = release.image;
+      img.alt = `${release.title || band.name || 'Latest'} cover art`;
+      art.appendChild(img);
+    } else {
+      art.textContent = 'Art coming soon';
+    }
+    card.appendChild(art);
+
+    const copy = document.createElement('div');
+    copy.className = 'landing-band-release-copy';
+    const eyebrow = document.createElement('span');
+    eyebrow.className = 'landing-band-release-eyebrow';
+    eyebrow.textContent = release.eyebrow || 'Latest Release';
+    copy.appendChild(eyebrow);
+    const title = document.createElement('h3');
+    title.className = 'landing-band-release-title';
+    title.textContent = release.title || 'New music on the way';
+    copy.appendChild(title);
+    if (release.subtitle) {
+      const sub = document.createElement('p');
+      sub.className = 'landing-band-release-subtitle';
+      sub.textContent = release.subtitle;
+      copy.appendChild(sub);
+    }
+    if (release.cta && release.href) {
+      const cta = document.createElement('a');
+      cta.className = 'landing-band-release-cta';
+      cta.href = release.href;
+      cta.target = release.href.startsWith('/') ? '_self' : '_blank';
+      cta.rel = 'noopener noreferrer';
+      cta.textContent = release.cta;
+      cta.addEventListener('click', () => emitAnalytics('band_release_click', { band_id: band.id, label: release.title, url: release.href }));
+      copy.appendChild(cta);
+    }
+    card.appendChild(copy);
+    content.appendChild(card);
+  }
+
+  if (content.childElementCount) {
+    section.appendChild(content);
+  }
+
+  const extras = Array.isArray(band.extras) ? band.extras.filter(Boolean) : [];
+  if (extras.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'landing-band-connect';
+    const label = document.createElement('span');
+    label.className = 'landing-band-connect-label';
+    label.textContent = 'Connect';
+    wrap.appendChild(label);
+
+    const list = document.createElement('div');
+    list.className = 'landing-band-extras';
+    extras.forEach(extra => {
+      const a = document.createElement('a');
+      a.className = 'landing-connect-btn';
+      a.href = extra.href;
+      a.target = extra.href?.startsWith('/') ? '_self' : '_blank';
+      a.rel = 'noopener noreferrer';
+      a.dataset.bandId = band.id || '';
+      a.dataset.linkId = extra.id || '';
+      a.innerHTML = `
+        <span class="landing-connect-icon" style="color:${extra.color || accent}">${iconSVG(extra.icon)}</span>
+        <span>${extra.label || ''}</span>
+      `;
+      a.addEventListener('click', () => emitAnalytics('band_extra_click', { band_id: band.id, action_id: extra.id, label: extra.label, url: extra.href }));
+      list.appendChild(a);
+    });
+    wrap.appendChild(list);
+    section.appendChild(wrap);
+  }
+
+  return section;
+}
+
+function createActionsSection(cards, titleText) {
+  if (!cards || !cards.length) return null;
+  const section = document.createElement('section');
+  section.className = 'landing-actions-wrap';
+
+  if (titleText !== '') {
+    const heading = document.createElement('h2');
+    heading.className = 'landing-section-title';
+    heading.textContent = titleText || 'Arcade + Extras';
+    section.appendChild(heading);
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'landing-actions';
+  cards.forEach(card => grid.appendChild(createCard(card)));
+  section.appendChild(grid);
+
+  return section;
+}
+
 function mountLanding(cfg) {
   const app = document.getElementById('app');
   if (!app) return;
 
-  // Header
-  const header = document.createElement('header');
-  header.className = 'lbf-header';
-  header.innerHTML = `
-    <img class="lbf-avatar" src="${(cfg.brand && cfg.brand.avatar) || '/logo.png'}" alt="logo" />
-    <h1 class="lbf-title">${(cfg.brand && cfg.brand.name) || 'lost boy found - Christian AI'}</h1>
-    <p class="lbf-tag">${(cfg.brand && cfg.brand.tagline) || ''}</p>
-  `;
-  app.appendChild(header);
+  app.innerHTML = '';
 
-  // Featured banner (optional)
-  if (cfg.feature && cfg.feature.href) {
-    const f = cfg.feature;
-    const feat = document.createElement('a');
-    feat.className = 'lbf-feature';
-    feat.href = f.href;
-    feat.target = f.href.startsWith('/') ? '_self' : '_blank';
-    feat.rel = 'noopener noreferrer';
-    feat.innerHTML = `
-      <div class="lbf-feature-media" style="background-image:url('${f.image || '/assets/background.png'}')"></div>
-      <div class="lbf-feature-meta">
-        <div class="lbf-eyebrow">${f.eyebrow || 'New'}</div>
-        <div class="lbf-feature-title">${f.title || ''}</div>
-        <div class="lbf-cta">${f.cta || 'Check it out'}</div>
-      </div>
-    `;
-    feat.addEventListener('click', () => emitAnalytics('feature_click', { href: f.href, title: f.title }));
-    app.appendChild(feat);
+  const heroSource = cfg.hero || (cfg.brand ? {
+    avatar: cfg.brand.avatar,
+    title: cfg.brand.name,
+    subtitle: cfg.hero?.subtitle,
+    tagline: cfg.brand.tagline,
+    kicker: cfg.hero?.kicker || cfg.brand.kicker
+  } : null);
+
+  if (heroSource && (heroSource.title || heroSource.subtitle || heroSource.tagline)) {
+    const hero = createHero(heroSource);
+    if (hero) app.appendChild(hero);
   }
 
-  // Cards (featured first if specified)
-  const list = document.createElement('section');
-  list.className = 'lbf-list';
-  const features = new Set(cfg.featured || []);
+  const bands = Array.isArray(cfg.bands) ? cfg.bands.filter(Boolean) : [];
+  const bandWrap = document.createElement('section');
+  bandWrap.className = 'landing-bands';
+
+  bands.forEach(band => {
+    const bandSection = createBandSection(band);
+    if (bandSection) bandWrap.appendChild(bandSection);
+  });
+
+  if (bandWrap.childElementCount) {
+    app.appendChild(bandWrap);
+  }
+
   const flags = new Set(cfg.flags || []);
-  const cards = (cfg.cards || []).filter(c => {
-    if (!c) return false;
-    if (!c.enabled && c.enabled !== undefined) return false;
-    if (Array.isArray(c.showIf) && c.showIf.length) {
-      return c.showIf.some(fl => flags.has(fl));
+  const features = new Set(cfg.featured || []);
+  const cards = (cfg.cards || []).filter(card => {
+    if (!card) return false;
+    if (!card.enabled && card.enabled !== undefined) return false;
+    if (Array.isArray(card.showIf) && card.showIf.length) {
+      return card.showIf.some(fl => flags.has(fl));
     }
     return true;
   }).sort((a, b) => Number(features.has(b.id)) - Number(features.has(a.id)));
 
-  cards.forEach(c => list.appendChild(createCard(c)));
-  app.appendChild(list);
+  const actions = createActionsSection(cards, cfg.cardsTitle || cfg.cardsHeading);
+  if (actions) app.appendChild(actions);
 
-  // Animate
   if (window.anime) {
-    window.anime.timeline({ easing: 'easeOutQuad' })
-      .add({ targets: '.lbf-header', opacity: [0,1], translateY: [-8,0], duration: 400 })
-      .add({ targets: '.lbf-feature', opacity: [0,1], translateY: [-8,0], duration: 450 }, '-=150')
-      .add({ targets: '.lbf-card', opacity: [0,1], translateY: [8,0], delay: window.anime.stagger(50), duration: 350 }, '-=200');
+    const tl = window.anime.timeline({ easing: 'easeOutQuad' });
+    tl.add({ targets: '.landing-hero', opacity: [0, 1], translateY: [-12, 0], duration: 420 });
+    tl.add({ targets: '.landing-band', opacity: [0, 1], translateY: [16, 0], delay: window.anime.stagger(120), duration: 380 }, '-=200');
+    tl.add({ targets: '.landing-card', opacity: [0, 1], translateY: [12, 0], delay: window.anime.stagger(60), duration: 320 }, '-=200');
+  } else {
+    document.querySelectorAll('.landing-hero, .landing-band, .landing-card').forEach(el => {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
   }
 }
 
 async function boot() {
   // Default config if content/landing.json is missing
-  const fallback = {
-    brand: {
-      name: 'lost boy found - Christian AI',
-      tagline: 'Trying to redeem AI by spinning up more edifying Christian music | 1500+ Songs',
-      avatar: '/logo.png'
+const fallback = {
+    hero: {
+      kicker: "Christian AI Music Collective",
+      title: "Lost Boy Found + The Great Reunion",
+      subtitle: "Two original AI-assisted worship projects releasing new songs weekly.",
+      avatar: "/logo.png",
+      tagline: "Trying to redeem AI by spinning up more edifying Christian music | 150+ songs | New every week!"
     },
     flags: [],
-    feature: {
-      eyebrow: 'New',
-      title: "Play this week's arcade song",
-      image: '/assets/background.png',
-      href: '/game.html',
-      cta: 'Play now'
-    },
+    bands: [
+      {
+        id: 'lost-boy-found',
+        name: 'Lost Boy Found',
+        tagline: 'Christian AI Pop-Punk / Rock',
+        description: 'Neon-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.',
+        accent: '#39FF14',
+        logo: null,
+        latestRelease: {
+          title: 'Latest release coming soon',
+          subtitle: 'Hit play to catch the freshest drop.',
+          cta: 'Listen now',
+          href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc',
+          image: null
+        },
+        links: [
+          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc', color: '#1DB954' },
+          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/lost-boy-found/1763501707', color: '#FFFFFF' },
+          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg', color: '#FF0000' },
+          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found', color: '#00A8E1' },
+          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://pandora.app.link/R4jc6mU0jNb', color: '#1F7CF0' },
+          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw', color: '#FF0000' }
+        ],
+        extras: [
+          { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/christianaiband/', color: '#E1306C' },
+          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@christianaiband', color: '#000000' }
+        ]
+      },
+      {
+        id: 'the-great-reunion',
+        name: 'The Great Reunion',
+        tagline: 'Christian AI Indie-Folk / Indie Rock',
+        description: 'Warm, reflective folk textures crafted with AI tools to soundtrack the coming kingdom.',
+        accent: '#6AD7E5',
+        logo: null,
+        latestRelease: {
+          title: 'New songs on deck',
+          subtitle: 'Folky meditations for the hopeful heart.',
+          cta: 'Explore now',
+          href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216',
+          image: null
+        },
+        links: [
+          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/search/the%20great%20reunion/artists', color: '#1DB954' },
+          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216', color: '#FFFFFF' },
+          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/search?q=The%20Great%20Reunion', color: '#FF0000' },
+          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/search/the%20great%20reunion', color: '#00A8E1' },
+          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://www.pandora.com/search/the%20great%20reunion', color: '#1F7CF0' },
+          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/results?search_query=The+Great+Reunion', color: '#FF0000' }
+        ],
+        extras: [
+          { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/thegreatreunion/', color: '#E1306C' },
+          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@thegreatreunion', color: '#000000' }
+        ]
+      }
+    ],
+    cardsTitle: 'Arcade + Extras',
     featured: ['game'],
     cards: [
       { id: 'game', icon: 'game', label: 'Play Flappy Praise', href: '/game.html', color: '#39FF14' },
-      { id: 'ninja', icon: 'game', label: 'Play Lyric Ninja', href: '/ninja/', color: '#00E5FF' },
-      { id: 'instagram', icon: 'instagram', label: 'Follow on Instagram', href: 'https://www.instagram.com/christianaiband/', color: '#E1306C' },
-      { id: 'spotify', icon: 'spotify', label: 'Listen on Spotify', href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc', color: '#1DB954' },
-      { id: 'apple', icon: 'apple', label: 'Listen on Apple Music', href: 'https://music.apple.com/us/artist/lost-boy-found/1763501707', color: '#ffffff' },
-      { id: 'ytm', icon: 'youtubemusic', label: 'Listen on YouTube Music', href: 'https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg', color: '#FF0000' },
-      { id: 'amazon', icon: 'amazon', label: 'Listen on Amazon Music', href: 'https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found', color: '#00A8E1' },
-      { id: 'pandora', icon: 'pandora', label: 'Listen on Pandora', href: 'https://pandora.app.link/R4jc6mU0jNb', color: '#1F7CF0' },
-      { id: 'youtube', icon: 'youtube', label: 'Visit our YouTube Channel', href: 'https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw', color: '#FF0000' },
+      { id: 'ninja', icon: 'game', label: 'Play Praise Ninja', href: '/ninja/', color: '#00E5FF' },
       { id: 'merch', icon: 'merch', label: 'Official Merch', href: 'https://othersoriented.creator-spring.com/', color: '#39FF14' }
     ]
   };
@@ -169,18 +454,18 @@ async function boot() {
     if (initRes?.enabled) {
       const app = document.getElementById('app');
       const bar = document.createElement('div');
-      bar.className = 'lbf-auth';
+      bar.className = 'landing-auth';
       async function renderAuth() {
         bar.innerHTML = '';
         const me = await auth.currentUser();
         if (!me) {
-          const g = document.createElement('button'); g.className = 'lbf-btn'; g.textContent = 'Sign in with Google'; g.onclick = auth.signInWithGoogle;
-          const f = document.createElement('button'); f.className = 'lbf-btn'; f.textContent = 'Sign in with Facebook'; f.onclick = auth.signInWithFacebook;
+          const g = document.createElement('button'); g.className = 'landing-auth-btn'; g.textContent = 'Sign in with Google'; g.onclick = auth.signInWithGoogle;
+          const f = document.createElement('button'); f.className = 'landing-auth-btn'; f.textContent = 'Sign in with Facebook'; f.onclick = auth.signInWithFacebook;
           bar.appendChild(g); bar.appendChild(f);
         } else {
           const img = document.createElement('img'); img.src = me.picture || '/logo.png'; img.alt = ''; img.style.width = '28px'; img.style.height='28px'; img.style.borderRadius='50%';
           const name = document.createElement('span'); name.textContent = me.name; name.style.alignSelf='center'; name.style.fontWeight='600';
-          const out = document.createElement('button'); out.className = 'lbf-btn'; out.textContent = 'Sign out'; out.onclick = auth.signOut;
+          const out = document.createElement('button'); out.className = 'landing-auth-btn'; out.textContent = 'Sign out'; out.onclick = auth.signOut;
           bar.appendChild(img); bar.appendChild(name); bar.appendChild(out);
         }
       }
@@ -191,67 +476,12 @@ async function boot() {
     }
   } catch {}
 
-  // Song picker with search + collapsible albums
-  try {
-    const cat = await fetchJSON('/content/catalog.json');
-    if (!cat || !cat.songs || !Object.keys(cat.songs).length) return;
-    const app = document.getElementById('app');
-    const box = document.createElement('section'); box.className = 'lbf-songs';
-    const title = document.createElement('h2'); title.textContent = 'Songs'; box.appendChild(title);
-    const searchWrap = document.createElement('div'); searchWrap.className = 'lbf-search';
-    const input = document.createElement('input'); input.type = 'search'; input.placeholder = 'Search songs or albums…'; searchWrap.appendChild(input); box.appendChild(searchWrap);
-
-    const byAlbum = new Map();
-    Object.values(cat.songs).forEach(s => {
-      const list = byAlbum.get(s.album) || []; list.push(s); byAlbum.set(s.album, list);
-    });
-
-    const albumSections = new Map();
-
-    function renderAlbums(filter) {
-      // Clear existing (keep title+search)
-      [...box.querySelectorAll('.lbf-album')].forEach(n => n.remove());
-      for (const [album, list] of byAlbum.entries()) {
-        const sec = document.createElement('div'); sec.className = 'lbf-album';
-        const head = document.createElement('div'); head.className = 'lbf-album-head';
-        const img = document.createElement('img'); img.className = 'lbf-cover';
-        const albumInfo = cat.albums?.[album] || {};
-        img.src = albumInfo.cover || '/logo.png'; img.alt = '';
-        const h = document.createElement('h3'); h.textContent = albumInfo.title || album;
-        const toggle = document.createElement('span'); toggle.className = 'lbf-toggle'; toggle.textContent = '▸';
-        head.appendChild(img); head.appendChild(h); head.appendChild(toggle); sec.appendChild(head);
-
-        const key = `lbf_album_open:${album}`;
-        const defaultOpen = localStorage.getItem(key) !== 'false';
-        sec.dataset.collapsed = String(!defaultOpen);
-        head.addEventListener('click', () => {
-          const isCollapsed = sec.dataset.collapsed === 'true';
-          const next = !isCollapsed; sec.dataset.collapsed = String(!next);
-          localStorage.setItem(key, String(next));
-        });
-
-        list.sort((a,b)=> (a.title||'').localeCompare(b.title||''));
-        list.forEach(s => {
-          const term = (filter || '').trim().toLowerCase();
-          const hay = `${albumInfo.title||album} ${s.title||s.slug} ${s.slug}`.toLowerCase();
-          if (term && !hay.includes(term)) return;
-          const row = document.createElement('div'); row.className = 'lbf-song';
-          const left = document.createElement('div'); left.className = 'lbf-song-title'; left.textContent = s.title || s.slug; row.appendChild(left);
-          const actions = document.createElement('div'); actions.className = 'lbf-song-actions';
-          const a1 = document.createElement('a'); a1.href = `/game.html?song=${encodeURIComponent(s.id)}`; a1.textContent = 'Flappy'; actions.appendChild(a1);
-          const a2 = document.createElement('a'); a2.href = `/ninja/?song=${encodeURIComponent(s.id)}`; a2.textContent = 'Ninja'; actions.appendChild(a2);
-          row.appendChild(actions);
-          sec.appendChild(row);
-        });
-        box.appendChild(sec);
-        albumSections.set(album, sec);
-      }
-    }
-
-    renderAlbums('');
-    input.addEventListener('input', () => renderAlbums(input.value));
-    app.appendChild(box);
-  } catch {}
 }
 
 document.addEventListener('DOMContentLoaded', boot);
+
+
+
+
+
+
