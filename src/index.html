@@ -9,7 +9,7 @@
   </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>lost boy found - Christian AI</title>
+  <title>Christian AI Music</title>
   <meta name="description" content="Music + arcade. Follow, listen, and play. Pop-punk neon vibes." />
   <meta name="theme-color" content="#0b0b12" />
   <base href="/" />
@@ -199,7 +199,7 @@
     }
     .landing-link:hover{
       transform:translateY(-2px);
-      border-color:var(--band-accent,#39FF14);
+      border-color:var(--band-accent,#bf12eb);
       box-shadow:0 16px 36px rgba(19,22,36,0.12);
     }
     .landing-link-icon{
@@ -215,7 +215,8 @@
       letter-spacing:0.01em;
     }
     .landing-band-release{
-      display:flex;
+      display:grid;
+      grid-template-columns:auto 1fr auto;
       gap:16px;
       align-items:center;
       padding:18px 20px;
@@ -223,38 +224,30 @@
       background:linear-gradient(180deg,#ffffff 0%,rgba(246,248,253,0.95) 100%);
       border:1px solid rgba(19,22,36,0.08);
       box-shadow:var(--shadow-sm);
-      min-height:140px;
     }
     .landing-band-release-art{
-      width:104px;
+      width:80px;
       aspect-ratio:1;
       border-radius:18px;
       background:var(--band-accent-soft, rgba(57,255,20,0.18));
       border:1px solid rgba(19,22,36,0.06);
-      overflow:hidden;
-      position:relative;
+      background-size:cover;
+      background-position:center;
       display:flex;
       align-items:center;
       justify-content:center;
-      color:rgba(19,22,36,0.65);
       font-size:11px;
       font-weight:600;
+      letter-spacing:0.16em;
       text-transform:uppercase;
-      letter-spacing:0.18em;
-      text-align:center;
-      padding:10px;
+      color:rgba(19,22,36,0.5);
+      overflow:hidden;
+      padding:8px;
     }
-    .landing-band-release-art img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-    .landing-band-release-copy{
+    .landing-band-release-info{
       display:flex;
       flex-direction:column;
       gap:6px;
-      flex:1;
-      min-width:0;
     }
     .landing-band-release-eyebrow{
       font-size:11px;
@@ -264,7 +257,7 @@
     }
     .landing-band-release-title{
       margin:0;
-      font-size:18px;
+      font-size:17px;
       font-weight:600;
       letter-spacing:-0.01em;
     }
@@ -272,27 +265,63 @@
       margin:0;
       color:rgba(19,22,36,0.65);
       font-size:14px;
-      line-height:1.5;
+      line-height:1.45;
     }
-    .landing-band-release-cta{
+    .landing-band-release-link{
+      margin-top:4px;
+      font-size:13px;
+      font-weight:600;
+      color:var(--band-accent,#39FF14);
+      text-decoration:none;
       display:inline-flex;
       align-items:center;
-      gap:8px;
-      margin-top:8px;
-      align-self:flex-start;
-      padding:8px 14px;
-      border-radius:999px;
-      background:var(--band-accent,#39FF14);
-      color:#0b0d14;
-      text-decoration:none;
-      font-weight:600;
-      letter-spacing:0.04em;
-      transition:transform .18s ease, box-shadow .18s ease;
+      gap:6px;
     }
-    .landing-band-release-cta:hover{
-      transform:translateY(-1px);
-      box-shadow:0 12px 28px rgba(19,22,36,0.18);
+    .landing-band-release-link::after{
+      content:'↗';
+      font-size:13px;
     }
+    .landing-band-release-control{
+      position:relative;
+      width:72px;
+      height:72px;
+      border:none;
+      background:none;
+      padding:0;
+      cursor:pointer;
+      --progress:0deg;
+    }
+    .landing-band-release-control::before{
+      content:'';
+      position:absolute;
+      inset:-6px;
+      border-radius:50%;
+      background:conic-gradient(var(--band-accent,#39FF14) var(--progress), rgba(19,22,36,0.12) var(--progress));
+      transition:background .15s linear;
+    }
+    .landing-band-release-control::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:#ffffff;
+      box-shadow:0 12px 28px rgba(19,22,36,0.12);
+    }
+    .landing-band-release-icon{
+      position:relative;
+      z-index:1;
+      font-size:22px;
+      color:var(--ink);
+      transition:transform .15s ease;
+    }
+    .landing-band-release-control[data-state="playing"] .landing-band-release-icon{
+      transform:translateX(1px);
+    }
+    .landing-band-release-control:focus-visible{
+      outline:2px solid var(--band-accent,#39FF14);
+      outline-offset:4px;
+    }
+    .landing-band-release-audio{display:none}
     .landing-band-connect{
       display:flex;
       flex-direction:column;
@@ -425,12 +454,15 @@
       .landing-bands .landing-band[data-band-id="the-great-reunion"]{
         order:-1;
       }
+    }
+    @media (max-width:640px){
       .landing-band-release{
-        flex-direction:column;
-        align-items:flex-start;
+        grid-template-columns:1fr;
+        text-align:center;
       }
-      .landing-band-release-art{
-        width:88px;
+      .landing-band-release-art,
+      .landing-band-release-control{
+        margin:0 auto;
       }
     }
     @media (min-width: 992px) and (orientation: landscape){

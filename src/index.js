@@ -69,6 +69,8 @@ function applyThemeFlags(flags) {
   (flags || []).forEach(f => root.classList.add('flag-' + f));
 }
 
+const sampleControllers = new Set();
+
 function hexToRgba(hex, alpha) {
   if (!hex) return '';
   const normalized = String(hex).replace('#', '');
@@ -205,49 +207,119 @@ function createBandSection(band) {
   }
 
   const release = band.latestRelease || band.release || null;
-  if (release && (release.title || release.image || release.cta || release.href || release.subtitle)) {
+  const sample = band.sample || null;
+  if ((release && (release.title || release.image || release.subtitle || release.href)) || (sample && sample.src)) {
     const card = document.createElement('div');
     card.className = 'landing-band-release';
 
     const art = document.createElement('div');
     art.className = 'landing-band-release-art';
-    if (release.image) {
-      const img = document.createElement('img');
-      img.src = release.image;
-      img.alt = `${release.title || band.name || 'Latest'} cover art`;
-      art.appendChild(img);
+    if (release?.image) {
+      art.style.backgroundImage = `url('${release.image}')`;
     } else {
-      art.textContent = 'Art coming soon';
+      art.textContent = 'ART';
     }
     card.appendChild(art);
 
-    const copy = document.createElement('div');
-    copy.className = 'landing-band-release-copy';
+    const info = document.createElement('div');
+    info.className = 'landing-band-release-info';
     const eyebrow = document.createElement('span');
     eyebrow.className = 'landing-band-release-eyebrow';
-    eyebrow.textContent = release.eyebrow || 'Latest Release';
-    copy.appendChild(eyebrow);
+    eyebrow.textContent = release?.eyebrow || 'Latest Release';
+    info.appendChild(eyebrow);
     const title = document.createElement('h3');
     title.className = 'landing-band-release-title';
-    title.textContent = release.title || 'New music on the way';
-    copy.appendChild(title);
-    if (release.subtitle) {
+    title.textContent = release?.title || sample?.title || 'New music on the way';
+    info.appendChild(title);
+    if (release?.subtitle) {
       const sub = document.createElement('p');
       sub.className = 'landing-band-release-subtitle';
       sub.textContent = release.subtitle;
-      copy.appendChild(sub);
+      info.appendChild(sub);
     }
-    if (release.cta && release.href) {
-      const cta = document.createElement('a');
-      cta.className = 'landing-band-release-cta';
-      cta.href = release.href;
-      cta.target = release.href.startsWith('/') ? '_self' : '_blank';
-      cta.rel = 'noopener noreferrer';
-      cta.textContent = release.cta;
-      cta.addEventListener('click', () => emitAnalytics('band_release_click', { band_id: band.id, label: release.title, url: release.href }));
-      copy.appendChild(cta);
+    if (release?.cta && release?.href) {
+      const link = document.createElement('a');
+      link.className = 'landing-band-release-link';
+      link.href = release.href;
+      link.target = release.href.startsWith('/') ? '_self' : '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = release.cta;
+      link.addEventListener('click', () => emitAnalytics('band_release_click', { band_id: band.id, label: release.title, url: release.href }));
+      info.appendChild(link);
     }
-    card.appendChild(copy);
+    card.appendChild(info);
+
+    if (sample?.src) {
+      const control = document.createElement('button');
+      control.type = 'button';
+      control.className = 'landing-band-release-control';
+      control.dataset.state = 'paused';
+      control.style.setProperty('--progress', '0deg');
+      const icon = document.createElement('span');
+      icon.className = 'landing-band-release-icon';
+      icon.textContent = '▶';
+      control.appendChild(icon);
+      control.setAttribute('aria-label', `Play sample ${sample.title || release?.title || 'preview'}`);
+      card.appendChild(control);
+
+      const audio = document.createElement('audio');
+      audio.className = 'landing-band-release-audio';
+      audio.preload = 'metadata';
+      audio.src = sample.src;
+      audio.dataset.bandId = band.id || '';
+      card.appendChild(audio);
+
+      const controller = { audio, button: control };
+      sampleControllers.add(controller);
+
+      const updateProgress = () => {
+        const pct = audio.duration ? Math.min(Math.max(audio.currentTime / audio.duration, 0), 1) : 0;
+        control.style.setProperty('--progress', `${pct * 360}deg`);
+      };
+      const updateState = () => {
+        const playing = !audio.paused && !audio.ended;
+        control.dataset.state = playing ? 'playing' : 'paused';
+        icon.textContent = playing ? '❚❚' : '▶';
+        control.setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} sample ${sample.title || release?.title || 'preview'}`);
+      };
+      controller.updateProgress = updateProgress;
+      controller.updateState = updateState;
+
+      control.addEventListener('click', () => {
+        if (audio.paused) {
+          sampleControllers.forEach(ctrl => {
+            if (ctrl !== controller && !ctrl.audio.paused) {
+              ctrl.audio.pause();
+            }
+          });
+          audio.play().catch(() => {});
+        } else {
+          audio.pause();
+        }
+      });
+
+      audio.addEventListener('play', () => {
+        sampleControllers.forEach(ctrl => {
+          if (ctrl !== controller && !ctrl.audio.paused) {
+            ctrl.audio.pause();
+          }
+        });
+        emitAnalytics('band_sample_play', { band_id: band.id, sample_title: sample.title, url: sample.src });
+        updateState();
+      });
+      audio.addEventListener('pause', updateState);
+      audio.addEventListener('loadedmetadata', updateProgress);
+      audio.addEventListener('timeupdate', updateProgress);
+      audio.addEventListener('ended', () => {
+        audio.pause();
+        audio.currentTime = 0;
+        updateProgress();
+      });
+
+      updateState();
+      updateProgress();
+    }
+
     content.appendChild(card);
   }
 
@@ -313,6 +385,7 @@ function mountLanding(cfg) {
   if (!app) return;
 
   app.innerHTML = '';
+  sampleControllers.clear();
 
   const heroSource = cfg.hero || (cfg.brand ? {
     avatar: cfg.brand.avatar,
@@ -385,13 +458,17 @@ const fallback = {
         tagline: 'Christian AI Pop-Punk / Rock',
         description: 'Neon-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.',
         accent: '#39FF14',
-        logo: null,
+        logo: "/assets/bands/lbf/logo.png",
         latestRelease: {
           title: 'Latest release coming soon',
           subtitle: 'Hit play to catch the freshest drop.',
           cta: 'Listen now',
           href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc',
-          image: null
+          image: "/assets/bands/lbf/releases/hymns-viii-remixes.png"
+        },
+        sample: {
+          title: 'Sample: Hymns VIII Remix',
+          src: '/assets/audio/lbf-sample.mp3'
         },
         links: [
           { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc', color: '#1DB954' },
@@ -412,13 +489,17 @@ const fallback = {
         tagline: 'Christian AI Indie-Folk / Indie Rock',
         description: 'Warm, reflective folk textures crafted with AI tools to soundtrack the coming kingdom.',
         accent: '#6AD7E5',
-        logo: null,
+        logo: "/assets/bands/tgr/logo.png",
         latestRelease: {
           title: 'New songs on deck',
           subtitle: 'Folky meditations for the hopeful heart.',
           cta: 'Explore now',
           href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216',
-          image: null
+          image: "/assets/bands/tgr/releases/christmas-vol1.png"
+        },
+        sample: {
+          title: 'Sample: Christmas Vol. 1',
+          src: '/assets/audio/tgr-sample.mp3'
         },
         links: [
           { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/search/the%20great%20reunion/artists', color: '#1DB954' },

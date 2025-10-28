@@ -14,13 +14,17 @@
       "tagline": "Christian AI Pop-Punk / Rock",
       "description": "Punk-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.",
       "accent": "#39FF14",
-      "logo": null,
+      "logo": "/assets/bands/lbf/logo.png",
       "latestRelease": {
         "title": "Hymns Vol. 8",
         "subtitle": "Hit play to catch the freshest drop.",
         "cta": "Listen now",
         "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
-        "image": null
+        "image": "/assets/bands/lbf/releases/hymns-viii-remixes.png"
+      },
+      "sample": {
+        "title": "Sample: Hymns VIII Remix",
+        "src": "/assets/audio/lbf-sample.mp3"
       },
       "links": [
         {
@@ -89,13 +93,17 @@
       "tagline": "Christian AI Indie-Folk / Indie Rock",
       "description": "Warm, reflective folk textures crafted with AI tools to soundtrack the coming kingdom.",
       "accent": "#6AD7E5",
-      "logo": null,
+      "logo": "/assets/bands/tgr/logo.png",
       "latestRelease": {
         "title": "New songs on deck",
         "subtitle": "Christmas Volume 1",
         "cta": "Explore now",
         "href": "https://music.apple.com/us/artist/the-great-reunion/1846862216",
-        "image": null
+        "image": "/assets/bands/tgr/releases/christmas-vol1.png"
+      },
+      "sample": {
+        "title": "Sample: Christmas Vol. 1",
+        "src": "/assets/audio/tgr-sample.mp3"
       },
       "links": [
         {
