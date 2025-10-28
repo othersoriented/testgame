@@ -1,11 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1870249111108155" crossorigin="anonymous"></script>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2PBJPDNWKZ"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4XF02KPXME"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-2PBJPDNWKZ');
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-4XF02KPXME');
   </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -39,8 +42,27 @@
         linear-gradient(180deg,#ffffff 0%, var(--bg) 100%);
       padding:clamp(18px,4vw,36px);
       min-height:100svh;
+      position:relative;
     }
     a{color:inherit}
+    .landing-bg-video{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      z-index:-2;
+      pointer-events:none;
+      opacity:0.35;
+      filter:saturate(0.8);
+    }
+    .landing-bg-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(244,245,248,0.55);
+      z-index:-1;
+      pointer-events:none;
+    }
     .landing{
       margin:0 auto;
       max-width:min(1100px,100%);
@@ -267,19 +289,11 @@
       font-size:14px;
       line-height:1.45;
     }
-    .landing-band-release-link{
-      margin-top:4px;
-      font-size:13px;
-      font-weight:600;
-      color:var(--band-accent,#39FF14);
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-    }
-    .landing-band-release-link::after{
-      content:'↗';
-      font-size:13px;
+    .landing-band-release-date{
+      font-size:12px;
+      color:rgba(19,22,36,0.5);
+      letter-spacing:0.06em;
+      text-transform:uppercase;
     }
     .landing-band-release-control{
       position:relative;
@@ -322,6 +336,38 @@
       outline-offset:4px;
     }
     .landing-band-release-audio{display:none}
+    .landing-share-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid rgba(19,22,36,0.12);
+      background:#ffffff;
+      color:var(--ink);
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow:var(--shadow-sm);
+      transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      margin-left:auto;
+    }
+    .landing-share-btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(19,22,36,0.22);
+      box-shadow:0 12px 26px rgba(19,22,36,0.12);
+    }
+    .landing-share-btn[data-copied="true"] span:last-child::after{
+      content:' \2713';
+      color:var(--band-accent,#39FF14);
+    }
+    .landing-share-icon{
+      display:grid;
+      place-items:center;
+      width:18px;
+      height:18px;
+      color:var(--ink);
+    }
     .landing-band-connect{
       display:flex;
       flex-direction:column;
@@ -457,12 +503,16 @@
     }
     @media (max-width:640px){
       .landing-band-release{
-        grid-template-columns:1fr;
-        text-align:center;
+        gap:12px;
+        padding:16px;
       }
-      .landing-band-release-art,
+      .landing-band-release-art{
+        width:64px;
+        border-radius:16px;
+      }
       .landing-band-release-control{
-        margin:0 auto;
+        width:58px;
+        height:58px;
       }
     }
     @media (min-width: 992px) and (orientation: landscape){
@@ -480,4 +530,3 @@
   </div>
 </body>
 </html>
-

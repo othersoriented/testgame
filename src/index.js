@@ -43,6 +43,8 @@ function iconSVG(name) {
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden><path fill="${fill}" d="M4 4h16l-2 16H6L4 4Zm3 2 1 12h8l1-12H7Z"/></svg>`;
     case 'tiktok':
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M15 2h4.1a5.9 5.9 0 0 0 .1 1.3c.3 1.9 1.8 3.4 3.6 3.7V11a8.9 8.9 0 0 1-4-.9v7a5.6 5.6 0 1 1-5.6-5.6h.8V2Zm-1.4 11.9a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 2.9-2.9v-7.5a6.9 6.9 0 0 1-2.9-.9v5.5h-.8Z"/></svg>`;
+    case 'share':
+      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M18 16a3 3 0 0 1-2.82-4H9.82a3 3 0 1 1 0-2h5.36a3 3 0 1 1 2.82 4Zm0-10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm-12 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm12 6a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/></svg>`;
     default:
       return '';
   }
@@ -70,6 +72,33 @@ function applyThemeFlags(flags) {
 }
 
 const sampleControllers = new Set();
+
+function ensureBackgroundVideo(videoCfg) {
+  const body = document.body;
+  if (!body) return;
+  let videoEl = document.querySelector('.landing-bg-video');
+  let overlayEl = document.querySelector('.landing-bg-overlay');
+  if (videoCfg?.src) {
+    if (!videoEl) {
+      videoEl = document.createElement('video');
+      videoEl.className = 'landing-bg-video';
+      videoEl.autoplay = true;
+      videoEl.muted = true;
+      videoEl.loop = true;
+      videoEl.playsInline = true;
+      body.prepend(videoEl);
+    }
+    if (videoEl.src !== videoCfg.src) videoEl.src = videoCfg.src;
+    if (!overlayEl) {
+      overlayEl = document.createElement('div');
+      overlayEl.className = 'landing-bg-overlay';
+      body.prepend(overlayEl);
+    }
+  } else {
+    if (videoEl) videoEl.remove();
+    if (overlayEl) overlayEl.remove();
+  }
+}
 
 function hexToRgba(hex, alpha) {
   if (!hex) return '';
@@ -126,7 +155,18 @@ function createHero(hero) {
 
 
 
-function createBandSection(band) {
+function formatDateLabel(dateish) {
+  if (!dateish) return null;
+  try {
+    const d = new Date(dateish);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch {
+    return null;
+  }
+}
+
+function createBandSection(band, shareUrl) {
   if (!band) return null;
   const section = document.createElement('section');
   section.className = 'landing-band';
@@ -179,6 +219,41 @@ function createBandSection(band) {
     info.appendChild(desc);
   }
   top.appendChild(info);
+
+  const shareBtn = document.createElement('button');
+  shareBtn.type = 'button';
+  shareBtn.className = 'landing-share-btn';
+  shareBtn.innerHTML = `
+    <span class="landing-share-icon">${iconSVG('share')}</span>
+    <span>Share</span>
+  `;
+  shareBtn.addEventListener('click', async () => {
+    const payload = {
+      title: band.name || 'Christian AI Music',
+      text: (band.description || 'Check out these Christian AI music projects!'),
+      url: shareUrl || window.location.href
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(payload);
+        emitAnalytics('band_share', { band_id: band.id, method: 'navigator.share' });
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(payload.url);
+      shareBtn.dataset.copied = 'true';
+      emitAnalytics('band_share', { band_id: band.id, method: 'clipboard' });
+      setTimeout(() => { delete shareBtn.dataset.copied; }, 1500);
+    } catch {
+      window.open(payload.url, '_blank');
+      emitAnalytics('band_share', { band_id: band.id, method: 'window.open' });
+    }
+  });
+  top.appendChild(shareBtn);
+
   section.appendChild(top);
 
   const content = document.createElement('div');
@@ -237,15 +312,12 @@ function createBandSection(band) {
       sub.textContent = release.subtitle;
       info.appendChild(sub);
     }
-    if (release?.cta && release?.href) {
-      const link = document.createElement('a');
-      link.className = 'landing-band-release-link';
-      link.href = release.href;
-      link.target = release.href.startsWith('/') ? '_self' : '_blank';
-      link.rel = 'noopener noreferrer';
-      link.textContent = release.cta;
-      link.addEventListener('click', () => emitAnalytics('band_release_click', { band_id: band.id, label: release.title, url: release.href }));
-      info.appendChild(link);
+    const releaseDateLabel = formatDateLabel(release?.releaseDate || band.releaseDate);
+    if (releaseDateLabel) {
+      const date = document.createElement('span');
+      date.className = 'landing-band-release-date';
+      date.textContent = `Released ${releaseDateLabel}`;
+      info.appendChild(date);
     }
     card.appendChild(info);
 
@@ -384,6 +456,7 @@ function mountLanding(cfg) {
   const app = document.getElementById('app');
   if (!app) return;
 
+  ensureBackgroundVideo(cfg.backgroundVideo);
   app.innerHTML = '';
   sampleControllers.clear();
 
@@ -404,8 +477,9 @@ function mountLanding(cfg) {
   const bandWrap = document.createElement('section');
   bandWrap.className = 'landing-bands';
 
+  const shareUrl = cfg.shareUrl || 'https://christianaiband.com';
   bands.forEach(band => {
-    const bandSection = createBandSection(band);
+    const bandSection = createBandSection(band, shareUrl);
     if (bandSection) bandWrap.appendChild(bandSection);
   });
 
@@ -442,7 +516,7 @@ function mountLanding(cfg) {
 
 async function boot() {
   // Default config if content/landing.json is missing
-const fallback = {
+  const fallback = {
     hero: {
       kicker: "Christian AI Music Collective",
       title: "Lost Boy Found + The Great Reunion",
@@ -451,6 +525,9 @@ const fallback = {
       tagline: "Trying to redeem AI by spinning up more edifying Christian music | 150+ songs | New every week!"
     },
     flags: [],
+    backgroundVideo: {
+      src: "/assets/video/background.mp4"
+    },
     bands: [
       {
         id: 'lost-boy-found',
@@ -460,19 +537,19 @@ const fallback = {
         accent: '#39FF14',
         logo: "/assets/bands/lbf/logo.png",
         latestRelease: {
-          title: 'Latest release coming soon',
+          title: 'Hymns Vol. 8',
           subtitle: 'Hit play to catch the freshest drop.',
-          cta: 'Listen now',
-          href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc',
-          image: "/assets/bands/lbf/releases/hymns-viii-remixes.png"
+          image: "/assets/bands/lbf/releases/hymns-viii-remixes.png",
+          releaseDate: '2025-09-12'
         },
         sample: {
           title: 'Sample: Hymns VIII Remix',
           src: '/assets/audio/lbf-sample.mp3'
         },
+        releaseDate: '2025-09-12',
         links: [
           { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc', color: '#1DB954' },
-          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/lost-boy-found/1763501707', color: '#FFFFFF' },
+          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/lost-boy-found/1763501707', color: '#0F0F0F' },
           { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg', color: '#FF0000' },
           { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found', color: '#00A8E1' },
           { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://pandora.app.link/R4jc6mU0jNb', color: '#1F7CF0' },
@@ -493,28 +570,29 @@ const fallback = {
         latestRelease: {
           title: 'New songs on deck',
           subtitle: 'Folky meditations for the hopeful heart.',
-          cta: 'Explore now',
-          href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216',
-          image: "/assets/bands/tgr/releases/christmas-vol1.png"
+          image: "/assets/bands/tgr/releases/christmas-vol1.png",
+          releaseDate: '2025-12-10'
         },
         sample: {
           title: 'Sample: Christmas Vol. 1',
           src: '/assets/audio/tgr-sample.mp3'
         },
+        releaseDate: '2025-12-10',
         links: [
-          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/search/the%20great%20reunion/artists', color: '#1DB954' },
-          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216', color: '#FFFFFF' },
-          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/search?q=The%20Great%20Reunion', color: '#FF0000' },
-          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/search/the%20great%20reunion', color: '#00A8E1' },
-          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://www.pandora.com/search/the%20great%20reunion', color: '#1F7CF0' },
-          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/results?search_query=The+Great+Reunion', color: '#FF0000' }
+          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ', color: '#1DB954' },
+          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216', color: '#0F0F0F' },
+          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/channel/UCF750lcrGvPrwLF2rELwrhw', color: '#FF0000' },
+          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/artists/B0FWTZYP96/the-great-reunion', color: '#00A8E1' },
+          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://www.pandora.com/artist/the-great-reunion/ARpwqxg9bwwjpJ9', color: '#1F7CF0' },
+          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/@thegreatreunion', color: '#FF0000' }
         ],
         extras: [
-          { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/thegreatreunion/', color: '#E1306C' },
-          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@thegreatreunion', color: '#000000' }
+          { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/thegreatreunionmusic/', color: '#E1306C' },
+          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@thegreatreunionmusic', color: '#000000' }
         ]
       }
     ],
+    shareUrl: 'https://christianaiband.com',
     cardsTitle: 'Arcade + Extras',
     featured: ['game'],
     cards: [
