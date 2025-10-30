@@ -1,96 +1,41 @@
 {
     "hero":  {
                  "kicker":  "Christian AI Music Collective",
-                 "title":  "Lost Boy Found + The Great Reunion",
+                 "title":  "The Great Reunion + Lost Boy Found",
                  "subtitle":  "The days are evil. Your music should edify you.",
-                 "avatar":  "/logo.png",
-                 "tagline":  "Two original AI generated music projects | Always releasing new songs"
+                 "avatar":  "/assets/bands/tgr/logo.png",
+                 "tagline":  "Two original AI generated music projects | Always releasing new songs",
+                 "cta":  {
+                     "id":  "hero_stream_tgr",
+                     "label":  "Stream The Great Reunion",
+                     "href":  "https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ",
+                     "icon":  "spotify"
+                 },
+                 "secondaryCta":  {
+                     "id":  "hero_stream_lbf",
+                     "label":  "Stream Lost Boy Found",
+                     "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
+                     "icon":  "spotify"
+                 },
+                 "highlights":  [
+                     {
+                         "value":  "200+",
+                         "label":  "AI-crafted songs"
+                     },
+                     {
+                         "value":  "2",
+                         "label":  "Active projects"
+                     },
+                     {
+                         "value":  "Monthly",
+                         "label":  "New releases"
+                     }
+                 ]
              },
     "flags":  [
 
               ],
     "bands":  [
-                  {
-                      "id":  "lost-boy-found",
-                      "name":  "Lost Boy Found",
-                      "tagline":  "Christian AI Pop-Punk / Rock",
-                      "description":  "Punk-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.",
-                      "accent":  "#39FF14",
-                      "logo":  "/assets/bands/lbf/logo.png",
-                      "latestRelease":  {
-                                            "title":  "Hymns Vol. 8",
-                                            "subtitle":  "Hit play to catch the freshest drop.",
-                                            "cta":  "Listen now",
-                                            "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
-                                            "image":  "/assets/bands/lbf/releases/hymns-viii-remixes.png",
-                                            "releaseDate":  "2025-09-12"
-                                        },
-                      "sample":  {
-                                     "title":  "Sample: Hymns VIII Remix",
-                                     "src":  "/assets/audio/lbf-sample.mp3"
-                                 },
-                      "releaseDate":  "2025-10-14",
-                      "links":  [
-                                    {
-                                        "id":  "spotify",
-                                        "icon":  "spotify",
-                                        "label":  "Spotify",
-                                        "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
-                                        "color":  "#1DB954"
-                                    },
-                                    {
-                                        "id":  "apple",
-                                        "icon":  "apple",
-                                        "label":  "Apple Music",
-                                        "href":  "https://music.apple.com/us/artist/lost-boy-found/1763501707",
-                                        "color":  "#0F0F0F"
-                                    },
-                                    {
-                                        "id":  "ytm",
-                                        "icon":  "youtubemusic",
-                                        "label":  "YouTube Music",
-                                        "href":  "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg",
-                                        "color":  "#FF0000"
-                                    },
-                                    {
-                                        "id":  "amazon",
-                                        "icon":  "amazon",
-                                        "label":  "Amazon Music",
-                                        "href":  "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found",
-                                        "color":  "#00A8E1"
-                                    },
-                                    {
-                                        "id":  "pandora",
-                                        "icon":  "pandora",
-                                        "label":  "Pandora",
-                                        "href":  "https://pandora.app.link/R4jc6mU0jNb",
-                                        "color":  "#1F7CF0"
-                                    },
-                                    {
-                                        "id":  "youtube",
-                                        "icon":  "youtube",
-                                        "label":  "YouTube",
-                                        "href":  "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw",
-                                        "color":  "#FF0000"
-                                    }
-                                ],
-                      "extras":  [
-                                     {
-                                         "id":  "instagram",
-                                         "icon":  "instagram",
-                                         "label":  "Instagram",
-                                         "href":  "https://www.instagram.com/christianaiband/",
-                                         "color":  "#E1306C"
-                                     },
-                                     {
-                                         "id":  "tiktok",
-                                         "icon":  "tiktok",
-                                         "label":  "TikTok",
-                                         "href":  "https://www.tiktok.com/@lostboyfoundofficial",
-                                         "color":  "#000000"
-                                     }
-                                 ]
-                  },
                   {
                       "id":  "the-great-reunion",
                       "name":  "The Great Reunion",
@@ -111,6 +56,17 @@
                                      "src":  "/assets/audio/tgr-sample.mp3"
                                  },
                       "releaseDate":  "2025-12-01",
+                      "socialProofTitle":  "Stories from the community",
+                      "socialProof":  [
+                                          {
+                                              "quote":  "\"This is gorgeous, instand add on Spotify! Thank you for being clear about using AI.\"",
+                                              "source":  "Russell W. - TikTok"
+                                          },
+                                          {
+                                              "quote":  "\"You know what, heck yeah! God can use anything to reach His people!\"",
+                                              "source":  "Karen - TikTok"
+                                          }
+                                      ],
                       "links":  [
                                     {
                                         "id":  "spotify",
@@ -171,9 +127,109 @@
                                          "color":  "#000000"
                                      }
                                  ]
+                  },
+                  {
+                      "id":  "lost-boy-found",
+                      "name":  "Lost Boy Found",
+                      "tagline":  "Christian AI Pop-Punk / Rock",
+                      "description":  "Punk-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.",
+                      "accent":  "#39FF14",
+                      "logo":  "/assets/bands/lbf/logo.png",
+                      "latestRelease":  {
+                                            "title":  "Hymns Vol. 8",
+                                            "subtitle":  "Hit play to catch the freshest drop.",
+                                            "cta":  "Listen now",
+                                            "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
+                                            "image":  "/assets/bands/lbf/releases/hymns-viii-remixes.png",
+                                            "releaseDate":  "2025-09-12"
+                                        },
+                      "sample":  {
+                                     "title":  "Sample: Hymns VIII Remix",
+                                     "src":  "/assets/audio/lbf-sample.mp3"
+                                 },
+                      "releaseDate":  "2025-10-14",
+                      "socialProofTitle":  "What listeners say",
+                      "socialProof":  [
+                                          {
+                                              "quote":  "\"The sound is great! Really brings me back to my high school days. But more importantly, they are close to Scripture and they definitely draw me back to His Word and help me to remember the verses.\"",
+                                              "source":  "Cordell G."
+                                          },
+                                          {
+                                              "quote":  "\"Bro, if your 'band' ever needs a drummer, hmu\"",
+                                              "source":  "Daniel R."
+                                          }
+                                      ],
+                      "links":  [
+                                    {
+                                        "id":  "spotify",
+                                        "icon":  "spotify",
+                                        "label":  "Spotify",
+                                        "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
+                                        "color":  "#1DB954"
+                                    },
+                                    {
+                                        "id":  "apple",
+                                        "icon":  "apple",
+                                        "label":  "Apple Music",
+                                        "href":  "https://music.apple.com/us/artist/lost-boy-found/1763501707",
+                                        "color":  "#0F0F0F"
+                                    },
+                                    {
+                                        "id":  "ytm",
+                                        "icon":  "youtubemusic",
+                                        "label":  "YouTube Music",
+                                        "href":  "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg",
+                                        "color":  "#FF0000"
+                                    },
+                                    {
+                                        "id":  "amazon",
+                                        "icon":  "amazon",
+                                        "label":  "Amazon Music",
+                                        "href":  "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found",
+                                        "color":  "#00A8E1"
+                                    },
+                                    {
+                                        "id":  "pandora",
+                                        "icon":  "pandora",
+                                        "label":  "Pandora",
+                                        "href":  "https://pandora.app.link/R4jc6mU0jNb",
+                                        "color":  "#1F7CF0"
+                                    },
+                                    {
+                                        "id":  "youtube",
+                                        "icon":  "youtube",
+                                        "label":  "YouTube",
+                                        "href":  "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw",
+                                        "color":  "#FF0000"
+                                    }
+                                ],
+                      "extras":  [
+                                     {
+                                         "id":  "instagram",
+                                         "icon":  "instagram",
+                                         "label":  "Instagram",
+                                         "href":  "https://www.instagram.com/christianaiband/",
+                                         "color":  "#E1306C"
+                                     },
+                                     {
+                                         "id":  "tiktok",
+                                         "icon":  "tiktok",
+                                         "label":  "TikTok",
+                                         "href":  "https://www.tiktok.com/@lostboyfoundofficial",
+                                         "color":  "#000000"
+                                     }
+                                 ]
                   }
               ],
     "cardsTitle":  "Arcade + Extras",
+    "subscribe":  {
+                      "enabled":  true,
+                      "title":  "Get new drops first",
+                      "description":  "Join the email list for updates on fresh releases.",
+                      "ctaLabel":  "Subscribe",
+                      "analyticsLocation":  "midpage",
+                      "disclaimer":  "We send 1-2 thoughtful emails a month. Unsubscribe anytime."
+                  },
     "shareUrl":  "https://christianaiband.com",
     "backgroundVideo":  {
                             "src":  "/assets/video/background.mp4"

@@ -19,6 +19,77 @@ function emitAnalytics(kind, detail) {
   } catch {}
 }
 
+function sanitizeEventKey(value) {
+  if (value == null) return '';
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function emitBandAnalytics(baseEventName, band, suffixParts, detail) {
+  const normalizedBase = sanitizeEventKey(baseEventName) || 'band_event';
+  const bandId = band?.id || null;
+  const bandName = band?.name || null;
+  const basePayload = {
+    band_id: bandId,
+    band_name: bandName,
+    ...(detail || {})
+  };
+  emitAnalytics(normalizedBase, basePayload);
+
+  const parts = Array.isArray(suffixParts) ? suffixParts : (suffixParts ? [suffixParts] : []);
+  const flatParts = parts.flatMap(part => Array.isArray(part) ? part : [part]);
+  const specificParts = [
+    sanitizeEventKey(normalizedBase),
+    sanitizeEventKey(bandId),
+    ...flatParts.map(sanitizeEventKey)
+  ].filter(Boolean);
+  const specificEvent = specificParts.join('_');
+  if (specificEvent && specificEvent !== normalizedBase) {
+    emitAnalytics(specificEvent, { ...basePayload, event_name_specific: specificEvent });
+  }
+}
+
+function ensureMetaTag(attrs) {
+  if (!attrs || !attrs.name && !attrs.property) return null;
+  const selector = attrs.name ? `meta[name="${attrs.name}"]` : `meta[property="${attrs.property}"]`;
+  let tag = document.head.querySelector(selector);
+  if (!tag) {
+    tag = document.createElement('meta');
+    if (attrs.name) tag.name = attrs.name;
+    if (attrs.property) tag.setAttribute('property', attrs.property);
+    document.head.appendChild(tag);
+  }
+  return tag;
+}
+
+function updateHeadMetadata(cfg) {
+  if (typeof document === 'undefined') return;
+  const hero = cfg?.hero || {};
+  const seo = cfg?.seo || {};
+  const title = seo.title || hero.title || 'Christian AI Music';
+  const description = seo.description || hero.subtitle || hero.tagline || 'Discover new Christian AI music projects.';
+  const url = seo.url || cfg?.shareUrl || window.location.href;
+  if (title) document.title = title;
+  if (description) {
+    const metaDescription = ensureMetaTag({ name: 'description' });
+    if (metaDescription) metaDescription.setAttribute('content', description);
+  }
+  if (title) {
+    const ogTitle = ensureMetaTag({ property: 'og:title' });
+    if (ogTitle) ogTitle.setAttribute('content', title);
+  }
+  if (description) {
+    const ogDescription = ensureMetaTag({ property: 'og:description' });
+    if (ogDescription) ogDescription.setAttribute('content', description);
+  }
+  if (url) {
+    const ogUrl = ensureMetaTag({ property: 'og:url' });
+    if (ogUrl) ogUrl.setAttribute('content', url);
+  }
+}
+
 function iconSVG(name) {
   // minimal inline SVGs for key platforms
   const fill = 'currentColor';
@@ -44,7 +115,7 @@ function iconSVG(name) {
     case 'tiktok':
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M15 2h4.1a5.9 5.9 0 0 0 .1 1.3c.3 1.9 1.8 3.4 3.6 3.7V11a8.9 8.9 0 0 1-4-.9v7a5.6 5.6 0 1 1-5.6-5.6h.8V2Zm-1.4 11.9a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 2.9-2.9v-7.5a6.9 6.9 0 0 1-2.9-.9v5.5h-.8Z"/></svg>`;
     case 'share':
-      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M18 16a3 3 0 0 1-2.82-4H9.82a3 3 0 1 1 0-2h5.36a3 3 0 1 1 2.82 4Zm0-10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm-12 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm12 6a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/></svg>`;
+      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M13.4 2 4 14h5.5L8.6 22 20 8h-5.5L13.4 2Z"/></svg>`;
     default:
       return '';
   }
@@ -62,12 +133,54 @@ function createCard({ id, label, href, icon, color }) {
     <span class="landing-card-label">${label}</span>
     <span class="landing-card-arrow" aria-hidden="true">&rarr;</span>
   `;
-  a.addEventListener('click', () => emitAnalytics('card_click', { card_id: id, label, url: href }));
+  a.addEventListener('click', () => {
+    const payload = { card_id: id, label, url: href };
+    emitAnalytics('card_click', payload);
+    const specificEvent = ['card_click', sanitizeEventKey(id || label)].filter(Boolean).join('_');
+    if (specificEvent && specificEvent !== 'card_click') {
+      emitAnalytics(specificEvent, { ...payload, event_name_specific: specificEvent });
+    }
+  });
   return a;
+}
+
+function createHeroButton(config, variant = 'primary') {
+  if (!config?.label || !config?.href) return null;
+  const btn = document.createElement('a');
+  btn.className = `landing-hero-btn landing-hero-btn--${variant}`;
+  btn.href = config.href;
+  btn.target = config.href.startsWith('/') ? '_self' : '_blank';
+  btn.rel = 'noopener noreferrer';
+
+  const content = document.createElement('span');
+  if (config.icon) {
+    const icon = document.createElement('span');
+    icon.innerHTML = iconSVG(config.icon);
+    content.appendChild(icon);
+  }
+  const label = document.createElement('span');
+  label.textContent = config.label;
+  content.appendChild(label);
+  btn.appendChild(content);
+
+  btn.addEventListener('click', () => {
+    emitAnalytics('hero_cta_click', {
+      cta_id: config.id || config.analyticsId || sanitizeEventKey(config.label),
+      label: config.label,
+      url: config.href,
+      variant
+    });
+  });
+
+  return btn;
 }
 
 function applyThemeFlags(flags) {
   const root = document.documentElement;
+  if (!root) return;
+  Array.from(root.classList).forEach(cls => {
+    if (cls.startsWith('flag-')) root.classList.remove(cls);
+  });
   (flags || []).forEach(f => root.classList.add('flag-' + f));
 }
 
@@ -150,6 +263,44 @@ function createHero(hero) {
     section.appendChild(tagline);
   }
 
+  if (Array.isArray(hero.highlights) && hero.highlights.length) {
+    const highlights = document.createElement('div');
+    highlights.className = 'landing-hero-highlights';
+    hero.highlights.slice(0, 3).forEach(item => {
+      if (!item) return;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'landing-hero-highlight';
+      const value = document.createElement('span');
+      value.className = 'landing-hero-highlight-value';
+      value.textContent = item.value || '';
+      const label = document.createElement('span');
+      label.className = 'landing-hero-highlight-label';
+      label.textContent = item.label || '';
+      if (item.value) wrapper.appendChild(value);
+      if (item.label) wrapper.appendChild(label);
+      if (wrapper.childElementCount) highlights.appendChild(wrapper);
+    });
+    if (highlights.childElementCount) section.appendChild(highlights);
+  }
+
+  const heroActions = [];
+  if (hero.cta) heroActions.push({ cfg: hero.cta, variant: 'primary' });
+  if (hero.secondaryCta) heroActions.push({ cfg: hero.secondaryCta, variant: 'secondary' });
+  if (Array.isArray(hero.extraCtas)) {
+    hero.extraCtas.forEach((cta, idx) => {
+      heroActions.push({ cfg: cta, variant: cta?.variant || (idx === 0 ? 'secondary' : 'link') });
+    });
+  }
+  if (heroActions.length) {
+    const actionsWrap = document.createElement('div');
+    actionsWrap.className = 'landing-hero-actions';
+    heroActions.forEach(action => {
+      const btn = createHeroButton(action.cfg, action.variant || 'secondary');
+      if (btn) actionsWrap.appendChild(btn);
+    });
+    if (actionsWrap.childElementCount) section.appendChild(actionsWrap);
+  }
+
   return section;
 }
 
@@ -164,6 +315,44 @@ function formatDateLabel(dateish) {
   } catch {
     return null;
   }
+}
+
+function createBandSocialProof(band) {
+  const items = Array.isArray(band?.socialProof) ? band.socialProof.filter(Boolean) : [];
+  if (!items.length) return null;
+  const wrap = document.createElement('div');
+  wrap.className = 'landing-band-social';
+  const title = document.createElement('span');
+  title.className = 'landing-band-social-title';
+  const sparkle = document.createElement('span');
+  sparkle.setAttribute('aria-hidden', 'true');
+  sparkle.textContent = '*';
+  const label = document.createElement('span');
+  label.textContent = band.socialProofTitle || 'Community love';
+  title.appendChild(sparkle);
+  title.appendChild(label);
+  wrap.appendChild(title);
+
+  const list = document.createElement('div');
+  list.className = 'landing-band-social-items';
+  items.slice(0, 3).forEach(item => {
+    const itemWrap = document.createElement('div');
+    itemWrap.className = 'landing-band-social-item';
+    const quoteWrap = document.createElement('blockquote');
+    quoteWrap.className = 'landing-band-social-quote';
+    quoteWrap.textContent = item.quote || '';
+    itemWrap.appendChild(quoteWrap);
+    if (item.source) {
+      const source = document.createElement('cite');
+      source.className = 'landing-band-social-source';
+      source.textContent = item.source;
+      itemWrap.appendChild(source);
+    }
+    if (itemWrap.childElementCount) list.appendChild(itemWrap);
+  });
+  if (!list.childElementCount) return null;
+  wrap.appendChild(list);
+  return wrap;
 }
 
 function createBandSection(band, shareUrl) {
@@ -236,7 +425,11 @@ function createBandSection(band, shareUrl) {
     if (navigator.share) {
       try {
         await navigator.share(payload);
-        emitAnalytics('band_share', { band_id: band.id, method: 'navigator.share' });
+        emitBandAnalytics('band_share', band, 'navigator', {
+          method: 'navigator.share',
+          share_method: 'navigator.share',
+          share_url: payload.url
+        });
         return;
       } catch (err) {
         if (err && err.name === 'AbortError') return;
@@ -245,16 +438,27 @@ function createBandSection(band, shareUrl) {
     try {
       await navigator.clipboard.writeText(payload.url);
       shareBtn.dataset.copied = 'true';
-      emitAnalytics('band_share', { band_id: band.id, method: 'clipboard' });
+      emitBandAnalytics('band_share', band, 'clipboard', {
+        method: 'clipboard',
+        share_method: 'clipboard',
+        share_url: payload.url
+      });
       setTimeout(() => { delete shareBtn.dataset.copied; }, 1500);
     } catch {
       window.open(payload.url, '_blank');
-      emitAnalytics('band_share', { band_id: band.id, method: 'window.open' });
+      emitBandAnalytics('band_share', band, 'window_open', {
+        method: 'window.open',
+        share_method: 'window.open',
+        share_url: payload.url
+      });
     }
   });
   top.appendChild(shareBtn);
 
   section.appendChild(top);
+
+  const bandSocial = createBandSocialProof(band);
+  if (bandSocial) section.appendChild(bandSocial);
 
   const content = document.createElement('div');
   content.className = 'landing-band-content';
@@ -275,7 +479,12 @@ function createBandSection(band, shareUrl) {
         <span class="landing-link-icon" style="color:${link.color || accent}">${iconSVG(link.icon)}</span>
         <span class="landing-link-label">${link.label || ''}</span>
       `;
-      a.addEventListener('click', () => emitAnalytics('band_stream_click', { band_id: band.id, stream_id: link.id, label: link.label, url: link.href }));
+    a.addEventListener('click', () => emitBandAnalytics('band_stream_click', band, [link.id, link.label], {
+      stream_id: link.id,
+      label: link.label,
+      stream_label: link.label,
+      url: link.href
+    }));
       list.appendChild(a);
     });
     content.appendChild(list);
@@ -376,7 +585,10 @@ function createBandSection(band, shareUrl) {
             ctrl.audio.pause();
           }
         });
-        emitAnalytics('band_sample_play', { band_id: band.id, sample_title: sample.title, url: sample.src });
+        emitBandAnalytics('band_sample_play', band, [sample?.title || 'sample'], {
+          sample_title: sample.title,
+          url: sample.src
+        });
         updateState();
       });
       audio.addEventListener('pause', updateState);
@@ -422,7 +634,12 @@ function createBandSection(band, shareUrl) {
         <span class="landing-connect-icon" style="color:${extra.color || accent}">${iconSVG(extra.icon)}</span>
         <span>${extra.label || ''}</span>
       `;
-      a.addEventListener('click', () => emitAnalytics('band_extra_click', { band_id: band.id, action_id: extra.id, label: extra.label, url: extra.href }));
+    a.addEventListener('click', () => emitBandAnalytics('band_extra_click', band, [extra.id, extra.label], {
+      action_id: extra.id,
+      label: extra.label,
+      action_label: extra.label,
+      url: extra.href
+    }));
       list.appendChild(a);
     });
     wrap.appendChild(list);
@@ -452,10 +669,100 @@ function createActionsSection(cards, titleText) {
   return section;
 }
 
+function createSubscribeSection(subscribeCfg) {
+  const cfg = subscribeCfg || {};
+  if (cfg.enabled === false) return null;
+  const formAction = cfg.formAction || 'https://othersoriented.us4.list-manage.com/subscribe/post?u=8430d870f739578cd7ecdd61f&id=2daa907931&f_id=00b576eaf0';
+  if (!formAction) return null;
+
+  const section = document.createElement('section');
+  section.className = 'landing-subscribe';
+
+  const title = document.createElement('h2');
+  title.textContent = cfg.title || 'Join the Collective';
+  section.appendChild(title);
+
+  if (cfg.description || cfg.copy) {
+    const copy = document.createElement('p');
+    copy.textContent = cfg.description || cfg.copy;
+    section.appendChild(copy);
+  }
+
+  const form = document.createElement('form');
+  form.className = 'landing-subscribe-form';
+  form.action = formAction;
+  form.method = 'post';
+  form.target = '_blank';
+  form.setAttribute('novalidate', 'novalidate');
+
+  const field = document.createElement('div');
+  field.className = 'landing-subscribe-field';
+  const label = document.createElement('label');
+  label.setAttribute('for', 'mc-email');
+  label.textContent = cfg.emailLabel || 'Email address';
+  const input = document.createElement('input');
+  input.type = 'email';
+  input.name = cfg.emailField || 'EMAIL';
+  input.id = 'mc-email';
+  input.placeholder = cfg.emailPlaceholder || 'you@example.com';
+  input.required = true;
+  field.appendChild(label);
+  field.appendChild(input);
+  form.appendChild(field);
+
+  const hiddenFields = Array.isArray(cfg.hiddenFields) ? cfg.hiddenFields : [
+    { name: 'f_id', value: '00b576eaf0' }
+  ];
+  hiddenFields.forEach(hidden => {
+    if (!hidden?.name) return;
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = hidden.name;
+    if (hidden.value != null) hiddenInput.value = hidden.value;
+    form.appendChild(hiddenInput);
+  });
+
+  const honeyWrap = document.createElement('div');
+  honeyWrap.style.position = 'absolute';
+  honeyWrap.style.left = '-5000px';
+  honeyWrap.setAttribute('aria-hidden', 'true');
+  const honey = document.createElement('input');
+  honey.type = 'text';
+  honey.name = cfg.honeypotName || 'b_8430d870f739578cd7ecdd61f_2daa907931';
+  honey.tabIndex = -1;
+  honey.value = '';
+  honeyWrap.appendChild(honey);
+  form.appendChild(honeyWrap);
+
+  const button = document.createElement('button');
+  button.type = 'submit';
+  button.textContent = cfg.ctaLabel || 'Subscribe';
+  form.appendChild(button);
+
+  form.addEventListener('submit', () => {
+    emitAnalytics('subscribe_submit', {
+      form_id: cfg.formId || 'mailchimp_collective',
+      location: cfg.analyticsLocation || 'landing_midpage'
+    });
+  });
+
+  section.appendChild(form);
+
+  if (cfg.disclaimer) {
+    const disclaimer = document.createElement('p');
+    disclaimer.className = 'landing-subscribe-disclaimer';
+    disclaimer.innerHTML = cfg.disclaimer;
+    section.appendChild(disclaimer);
+  }
+
+  return section;
+}
+
 function mountLanding(cfg) {
   const app = document.getElementById('app');
   if (!app) return;
 
+  updateHeadMetadata(cfg);
   ensureBackgroundVideo(cfg.backgroundVideo);
   app.innerHTML = '';
   sampleControllers.clear();
@@ -472,6 +779,8 @@ function mountLanding(cfg) {
     const hero = createHero(heroSource);
     if (hero) app.appendChild(hero);
   }
+
+  const subscribeSection = createSubscribeSection(cfg.subscribe);
 
   const bands = Array.isArray(cfg.bands) ? cfg.bands.filter(Boolean) : [];
   const bandWrap = document.createElement('section');
@@ -501,6 +810,8 @@ function mountLanding(cfg) {
   const actions = createActionsSection(cards, cfg.cardsTitle || cfg.cardsHeading);
   if (actions) app.appendChild(actions);
 
+  if (subscribeSection) app.appendChild(subscribeSection);
+
   if (window.anime) {
     const tl = window.anime.timeline({ easing: 'easeOutQuad' });
     tl.add({ targets: '.landing-hero', opacity: [0, 1], translateY: [-12, 0], duration: 420 });
@@ -521,45 +832,31 @@ async function boot() {
       kicker: "Christian AI Music Collective",
       title: "Lost Boy Found + The Great Reunion",
       subtitle: "Two original AI-assisted worship projects releasing new songs weekly.",
-      avatar: "/logo.png",
-      tagline: "Trying to redeem AI by spinning up more edifying Christian music | 150+ songs | New every week!"
+      avatar: "/assets/bands/tgr/logo.png",
+      tagline: "Trying to redeem AI by spinning up more edifying Christian music | 200+ songs | New every week!",
+      cta: {
+        id: 'hero_stream_tgr',
+        label: 'Stream The Great Reunion',
+        href: 'https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ',
+        icon: 'spotify'
+      },
+      secondaryCta: {
+        id: 'hero_stream_lbf',
+        label: 'Stream Lost Boy Found',
+        href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc',
+        icon: 'spotify'
+      },
+      highlights: [
+        { value: '200+', label: 'Edifying AI-crafted songs' },
+        { value: '2', label: 'Active projects' },
+        { value: 'Monthly', label: 'New releases' }
+      ]
     },
     flags: [],
     backgroundVideo: {
       src: "/assets/video/background.mp4"
     },
     bands: [
-      {
-        id: 'lost-boy-found',
-        name: 'Lost Boy Found',
-        tagline: 'Christian AI Pop-Punk / Rock',
-        description: 'Neon-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.',
-        accent: '#39FF14',
-        logo: "/assets/bands/lbf/logo.png",
-        latestRelease: {
-          title: 'Hymns Vol. 8',
-          subtitle: 'Hit play to catch the freshest drop.',
-          image: "/assets/bands/lbf/releases/hymns-viii-remixes.png",
-          releaseDate: '2025-09-12'
-        },
-        sample: {
-          title: 'Sample: Hymns VIII Remix',
-          src: '/assets/audio/lbf-sample.mp3'
-        },
-        releaseDate: '2025-09-12',
-        links: [
-          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc', color: '#1DB954' },
-          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/lost-boy-found/1763501707', color: '#0F0F0F' },
-          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg', color: '#FF0000' },
-          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found', color: '#00A8E1' },
-          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://pandora.app.link/R4jc6mU0jNb', color: '#1F7CF0' },
-          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw', color: '#FF0000' }
-        ],
-        extras: [
-          { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/christianaiband/', color: '#E1306C' },
-          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@christianaiband', color: '#000000' }
-        ]
-      },
       {
         id: 'the-great-reunion',
         name: 'The Great Reunion',
@@ -578,6 +875,11 @@ async function boot() {
           src: '/assets/audio/tgr-sample.mp3'
         },
         releaseDate: '2025-12-10',
+        socialProofTitle: 'Stories from the community',
+        socialProof: [
+          { quote: '"Gentle folk hymns that feel like a fireside prayer meeting."', source: 'KLove small group leader' },
+          { quote: '"Perfect for quiet time playlists and reflective moments."', source: 'Shepherds & Saints Blog' }
+        ],
         links: [
           { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ', color: '#1DB954' },
           { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/the-great-reunion/1846862216', color: '#0F0F0F' },
@@ -590,8 +892,52 @@ async function boot() {
           { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/thegreatreunionmusic/', color: '#E1306C' },
           { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@thegreatreunionmusic', color: '#000000' }
         ]
+      },
+      {
+        id: 'lost-boy-found',
+        name: 'Lost Boy Found',
+        tagline: 'Christian AI Pop-Punk / Rock',
+        description: 'Neon-drenched, high-energy praise anthems pointing kids (and the kid-at-heart) back to Jesus.',
+        accent: '#39FF14',
+        logo: "/assets/bands/lbf/logo.png",
+        latestRelease: {
+          title: 'Hymns Vol. 8',
+          subtitle: 'Hit play to catch the freshest drop.',
+          image: "/assets/bands/lbf/releases/hymns-viii-remixes.png",
+          releaseDate: '2025-09-12'
+        },
+        sample: {
+          title: 'Sample: Hymns VIII Remix',
+          src: '/assets/audio/lbf-sample.mp3'
+        },
+        releaseDate: '2025-09-12',
+        socialProofTitle: 'What listeners say',
+        socialProof: [
+          { quote: '"Sounds like Blink-182 found Jesus all over again."', source: 'Youth Pastor Dan' },
+          { quote: '"My kids have this on loop during family devos."', source: 'Aubrey, homeschool mom' }
+        ],
+        links: [
+          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc', color: '#1DB954' },
+          { id: 'apple', icon: 'apple', label: 'Apple Music', href: 'https://music.apple.com/us/artist/lost-boy-found/1763501707', color: '#0F0F0F' },
+          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg', color: '#FF0000' },
+          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found', color: '#00A8E1' },
+          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://pandora.app.link/R4jc6mU0jNb', color: '#1F7CF0' },
+          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw', color: '#FF0000' }
+        ],
+        extras: [
+          { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/christianaiband/', color: '#E1306C' },
+          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@christianaiband', color: '#000000' }
+        ]
       }
     ],
+    subscribe: {
+      enabled: true,
+      title: 'Get new drops first',
+      description: 'Join the email list for fresh releases, lyric devotionals, and behind-the-scenes updates.',
+      ctaLabel: 'Subscribe',
+      analyticsLocation: 'midpage',
+      disclaimer: 'We send 1–2 thoughtful emails a month. Unsubscribe anytime.'
+    },
     shareUrl: 'https://christianaiband.com',
     cardsTitle: 'Arcade + Extras',
     featured: ['game'],
@@ -638,9 +984,3 @@ async function boot() {
 }
 
 document.addEventListener('DOMContentLoaded', boot);
-
-
-
-
-
-

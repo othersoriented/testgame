@@ -14,6 +14,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Christian AI Music</title>
   <meta name="description" content="Music + arcade. Follow, listen, and play. Pop-punk neon vibes." />
+  <link rel="icon" type="image/png" href="/assets/bands/tgr/logo.png?v=2" />
   <meta name="theme-color" content="#0b0b12" />
   <base href="/" />
   <!-- Anime.js for playful motion -->
@@ -70,6 +71,11 @@
       flex-direction:column;
       gap:clamp(18px,4vw,32px);
     }
+    #app{
+      display:flex;
+      flex-direction:column;
+      gap:clamp(26px,6vw,48px);
+    }
     .landing-hero{
       text-align:center;
       padding:clamp(26px,6vw,42px);
@@ -111,6 +117,94 @@
       max-width:60ch;
       font-size:clamp(13px,3.4vw,16px);
       line-height:1.6;
+    }
+    .landing-hero-actions{
+      margin:clamp(18px,4vw,24px) auto 0;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:12px;
+    }
+    .landing-hero-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px 22px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:15px;
+      letter-spacing:0.01em;
+      text-decoration:none;
+      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+      border:1px solid transparent;
+    }
+    .landing-hero-btn span{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .landing-hero-btn svg{
+      width:18px;
+      height:18px;
+    }
+    .landing-hero-btn--primary{
+      background:var(--ink);
+      color:#ffffff;
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-hero-btn--primary:hover{
+      transform:translateY(-2px);
+      box-shadow:0 16px 32px rgba(19,22,36,0.24);
+    }
+    .landing-hero-btn--secondary{
+      background:#ffffff;
+      color:var(--ink);
+      border-color:rgba(19,22,36,0.12);
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-hero-btn--secondary:hover{
+      transform:translateY(-2px);
+      border-color:rgba(19,22,36,0.22);
+      box-shadow:0 16px 32px rgba(19,22,36,0.16);
+    }
+    .landing-hero-btn--link{
+      background:transparent;
+      color:var(--ink);
+      border-color:transparent;
+      box-shadow:none;
+      padding:0;
+    }
+    .landing-hero-btn--link:hover{
+      transform:none;
+      color:#0b5cff;
+    }
+    .landing-hero-highlights{
+      margin:clamp(18px,4vw,28px) auto 0;
+      padding:18px clamp(14px,3vw,20px);
+      border-radius:var(--radius-md);
+      background:rgba(244,246,252,0.7);
+      border:1px solid rgba(19,22,36,0.08);
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:clamp(12px,4vw,18px);
+    }
+    .landing-hero-highlight{
+      min-width:160px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      text-align:center;
+    }
+    .landing-hero-highlight-value{
+      font-size:clamp(18px,4.5vw,24px);
+      font-weight:700;
+      letter-spacing:-0.01em;
+    }
+    .landing-hero-highlight-label{
+      font-size:13px;
+      color:var(--muted);
     }
     .landing-bands{
       display:flex;
@@ -413,6 +507,42 @@
       place-items:center;
       color:currentColor;
     }
+    .landing-band-social{
+      display:grid;
+      gap:12px;
+      padding:18px clamp(14px,3vw,20px);
+      border-radius:var(--radius-md);
+      background:linear-gradient(135deg, rgba(57,255,20,0.12) 0%, rgba(0,177,255,0.08) 100%);
+      border:1px solid rgba(19,22,36,0.06);
+    }
+    .landing-band-social-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:0.14em;
+      color:var(--muted);
+    }
+    .landing-band-social-items{
+      display:grid;
+      gap:10px;
+    }
+    .landing-band-social-item{
+      display:grid;
+      gap:6px;
+      text-align:left;
+    }
+    .landing-band-social-quote{
+      font-size:15px;
+      line-height:1.6;
+    }
+    .landing-band-social-source{
+      font-size:13px;
+      font-weight:600;
+      color:var(--muted);
+      letter-spacing:0.02em;
+    }
     .landing-actions-wrap{
       display:flex;
       flex-direction:column;
@@ -465,6 +595,89 @@
     .landing-hero,
     .landing-band,
     .landing-card{opacity:0}
+    .landing-subscribe{
+      padding:clamp(26px,5vw,38px);
+      border-radius:var(--radius-lg);
+      background:linear-gradient(135deg,#ffffff 0%,rgba(244,246,252,0.92) 100%);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-lg);
+      display:grid;
+      gap:clamp(16px,4vw,22px);
+      justify-items:center;
+      text-align:center;
+    }
+    .landing-subscribe h2{
+      margin:0;
+      font-size:clamp(22px,5vw,30px);
+      font-weight:700;
+      letter-spacing:-0.01em;
+    }
+    .landing-subscribe p{
+      margin:0;
+      max-width:62ch;
+      color:var(--muted);
+      font-size:clamp(14px,3.4vw,16px);
+      line-height:1.6;
+    }
+    .landing-subscribe-form{
+      width:100%;
+      max-width:480px;
+      display:grid;
+      gap:14px;
+    }
+    .landing-subscribe-field{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:6px;
+      text-align:left;
+    }
+    .landing-subscribe-field label{
+      font-size:13px;
+      font-weight:600;
+      color:var(--muted);
+    }
+    .landing-subscribe-field input[type="email"]{
+      width:100%;
+      padding:14px 16px;
+      border-radius:12px;
+      border:1px solid rgba(19,22,36,0.12);
+      font-size:15px;
+      font-family:inherit;
+      background:#ffffff;
+      color:var(--ink);
+      transition:border-color .16s ease, box-shadow .16s ease;
+    }
+    .landing-subscribe-field input[type="email"]:focus{
+      outline:none;
+      border-color:var(--ink);
+      box-shadow:0 0 0 2px rgba(19,22,36,0.08);
+    }
+    .landing-subscribe button{
+      appearance:none;
+      border:none;
+      border-radius:999px;
+      background:var(--ink);
+      color:#ffffff;
+      font-weight:600;
+      font-size:15px;
+      padding:14px 24px;
+      cursor:pointer;
+      transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-subscribe button:hover{
+      transform:translateY(-2px);
+      box-shadow:0 16px 32px rgba(19,22,36,0.24);
+    }
+    .landing-subscribe-disclaimer{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .landing-subscribe-disclaimer a{
+      color:inherit;
+      text-decoration:underline;
+    }
     .landing-auth{
       display:flex;
       flex-wrap:wrap;

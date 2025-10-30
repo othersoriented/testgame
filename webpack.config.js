@@ -1,12 +1,9 @@
 // webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const fs = require('fs');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-// Optional favicon helper (avoid build error if logo.png is missing)
-const FAVICON_PATH = path.resolve(__dirname, 'logo.png');
-const faviconOpts = fs.existsSync(FAVICON_PATH) ? { favicon: FAVICON_PATH } : {};
+const faviconOpts = {}; // templates now manage favicon manually
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
