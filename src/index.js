@@ -27,27 +27,162 @@ function sanitizeEventKey(value) {
     .replace(/^_+|_+$/g, '');
 }
 
+function toBandAcronym(source) {
+  if (!source) return '';
+  const cleaned = String(source)
+    .replace(/[^a-zA-Z0-9]+/g, ' ')
+    .trim();
+  if (!cleaned) return '';
+  const tokens = cleaned.split(/\s+/).filter(Boolean);
+  if (tokens.length >= 2) {
+    return tokens.map(token => token[0]).join('').toLowerCase();
+  }
+  return tokens[0].slice(0, 3).toLowerCase();
+}
+
+function getBandAnalyticsCode(band) {
+  if (!band) return '';
+  const explicit =
+    band.analyticsCode ||
+    band.analyticsId ||
+    band.analytics?.code ||
+    band.analytics?.id ||
+    band.code;
+  if (explicit) return sanitizeEventKey(explicit);
+  const fromId = band.id || band.slug;
+  if (fromId) {
+    const acronym = toBandAcronym(fromId);
+    if (acronym) return sanitizeEventKey(acronym);
+  }
+  const fromName = band.name;
+  if (fromName) {
+    const acronym = toBandAcronym(fromName);
+    if (acronym) return sanitizeEventKey(acronym);
+  }
+  return sanitizeEventKey(fromId || fromName || '');
+}
+
+function inferBandCodeFromEventId(value) {
+  if (!value) return '';
+  const sanitized = sanitizeEventKey(value);
+  if (!sanitized) return '';
+  if (sanitized.includes('tgr')) return 'tgr';
+  if (sanitized.includes('lbf')) return 'lbf';
+  return '';
+}
+
 function emitBandAnalytics(baseEventName, band, suffixParts, detail) {
   const normalizedBase = sanitizeEventKey(baseEventName) || 'band_event';
   const bandId = band?.id || null;
   const bandName = band?.name || null;
+  const bandCode = getBandAnalyticsCode(band);
   const basePayload = {
-    band_id: bandId,
-    band_name: bandName,
+    ...(bandId != null ? { band_id: bandId } : {}),
+    ...(bandName ? { band_name: bandName } : {}),
+    ...(bandCode ? { band_code: bandCode } : {}),
     ...(detail || {})
   };
   emitAnalytics(normalizedBase, basePayload);
+  emitRecommendedBandAnalytics(normalizedBase, band, basePayload);
 
   const parts = Array.isArray(suffixParts) ? suffixParts : (suffixParts ? [suffixParts] : []);
   const flatParts = parts.flatMap(part => Array.isArray(part) ? part : [part]);
   const specificParts = [
     sanitizeEventKey(normalizedBase),
-    sanitizeEventKey(bandId),
+    sanitizeEventKey(bandCode) || sanitizeEventKey(bandId) || sanitizeEventKey(bandName),
     ...flatParts.map(sanitizeEventKey)
   ].filter(Boolean);
   const specificEvent = specificParts.join('_');
   if (specificEvent && specificEvent !== normalizedBase) {
     emitAnalytics(specificEvent, { ...basePayload, event_name_specific: specificEvent });
+  }
+}
+
+function emitRecommendedBandAnalytics(baseEventName, band, payload) {
+  const bandName = payload?.band_name || band?.name || '';
+  const bandId = payload?.band_id || band?.id || '';
+  const bandCode = payload?.band_code || getBandAnalyticsCode(band);
+  const common = {
+    band_id: bandId || undefined,
+    band_name: bandName || undefined,
+    band_code: bandCode || undefined
+  };
+
+  if (baseEventName === 'band_stream_click') {
+    const streamId = payload?.stream_id || payload?.action_id;
+    const label = payload?.label || payload?.stream_label;
+    const url = payload?.url;
+    const itemId = streamId || url || label || (bandCode ? `${bandCode}_stream` : '');
+    const item = {
+      item_category: 'Band',
+      item_category2: 'Stream'
+    };
+    if (itemId) item.item_id = itemId;
+    if (label) item.item_name = label;
+    if (bandName) item.item_brand = bandName;
+    if (bandCode && itemId) item.item_variant = `${bandCode}_${sanitizeEventKey(itemId)}`;
+    const selectPayload = {
+      ...common,
+      content_type: 'band_stream',
+      link_url: url || undefined
+    };
+    if (itemId) selectPayload.item_id = itemId;
+    const items = Object.keys(item).length > 0 ? [item] : [];
+    if (items.length) selectPayload.items = items;
+    emitAnalytics('select_content', selectPayload);
+    return;
+  }
+
+  if (baseEventName === 'band_extra_click') {
+    const actionId = payload?.action_id || payload?.stream_id;
+    const label = payload?.label || payload?.action_label;
+    const url = payload?.url;
+    const itemId = actionId || label || url || (bandCode ? `${bandCode}_connect` : '');
+    const item = {
+      item_category: 'Band',
+      item_category2: 'Connect'
+    };
+    if (itemId) item.item_id = itemId;
+    if (label) item.item_name = label;
+    if (bandName) item.item_brand = bandName;
+    if (bandCode && itemId) item.item_variant = `${bandCode}_${sanitizeEventKey(itemId)}`;
+    const selectPayload = {
+      ...common,
+      content_type: 'band_connect',
+      link_url: url || undefined
+    };
+    if (itemId) selectPayload.item_id = itemId;
+    const items = Object.keys(item).length > 0 ? [item] : [];
+    if (items.length) selectPayload.items = items;
+    emitAnalytics('select_content', selectPayload);
+    return;
+  }
+
+  if (baseEventName === 'band_share') {
+    const shareMethod = payload?.share_method || payload?.method;
+    const link = payload?.share_url || payload?.url;
+    const sharePayload = {
+      ...common,
+      content_type: 'band',
+      method: shareMethod || undefined,
+      link_url: link || undefined
+    };
+    if (bandCode) sharePayload.item_id = `${bandCode}_share`;
+    if (bandName) sharePayload.item_name = bandName;
+    emitAnalytics('share', sharePayload);
+    return;
+  }
+
+  if (baseEventName === 'band_sample_play') {
+    const title = payload?.sample_title || payload?.label || 'sample';
+    const mediaPayload = {
+      ...common,
+      content_type: 'band_sample',
+      item_name: title || undefined,
+      item_id: (bandCode && title) ? `${bandCode}_${sanitizeEventKey(title)}` : undefined,
+      media_url: payload?.url || undefined
+    };
+    emitAnalytics('play', mediaPayload);
   }
 }
 
@@ -164,11 +299,24 @@ function createHeroButton(config, variant = 'primary') {
   btn.appendChild(content);
 
   btn.addEventListener('click', () => {
-    emitAnalytics('hero_cta_click', {
-      cta_id: config.id || config.analyticsId || sanitizeEventKey(config.label),
+    const ctaId = config.id || config.analyticsId || sanitizeEventKey(config.label);
+    const inferredBandSource = config.band || (config.analyticsBand ? { id: config.analyticsBand } : null);
+    const heroBandCodeRaw = config.bandCode || config.analyticsBandCode || (inferredBandSource ? getBandAnalyticsCode(inferredBandSource) : '') || inferBandCodeFromEventId(ctaId);
+    const heroBandCode = heroBandCodeRaw ? sanitizeEventKey(heroBandCodeRaw) : '';
+    const payload = {
+      cta_id: ctaId,
       label: config.label,
       url: config.href,
       variant
+    };
+    if (heroBandCode) payload.band_code = heroBandCode;
+    emitAnalytics('hero_cta_click', payload);
+    emitAnalytics('select_content', {
+      content_type: 'hero_cta',
+      item_id: ctaId,
+      item_name: config.label,
+      link_url: config.href,
+      band_code: heroBandCode || undefined
     });
   });
 
