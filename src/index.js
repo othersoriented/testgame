@@ -68,6 +68,8 @@ function inferBandCodeFromEventId(value) {
   if (!sanitized) return '';
   if (sanitized.includes('tgr')) return 'tgr';
   if (sanitized.includes('lbf')) return 'lbf';
+  if (sanitized.includes('spr')) return 'spr';
+  if (sanitized.includes('sprinkld')) return 'spr';
   return '';
 }
 
@@ -379,11 +381,29 @@ function createHero(hero) {
   const section = document.createElement('section');
   section.className = 'landing-hero';
 
-  const avatar = document.createElement('img');
-  avatar.className = 'landing-hero-avatar';
-  avatar.src = hero.avatar || '/logo.png';
-  avatar.alt = hero.title || hero.name || 'logo';
-  section.appendChild(avatar);
+  const avatarSources = Array.isArray(hero.avatars) ? hero.avatars.filter(Boolean) : [];
+  if (avatarSources.length > 1) {
+    const avatarGroup = document.createElement('div');
+    avatarGroup.className = 'landing-hero-avatars';
+    avatarGroup.style.display = 'flex';
+    avatarGroup.style.alignItems = 'center';
+    avatarGroup.style.justifyContent = 'center';
+    avatarGroup.style.gap = '12px';
+    avatarSources.forEach((src, idx) => {
+      const avatar = document.createElement('img');
+      avatar.className = 'landing-hero-avatar';
+      avatar.src = src;
+      avatar.alt = `${hero.title || hero.name || 'logo'} ${idx + 1}`;
+      avatarGroup.appendChild(avatar);
+    });
+    section.appendChild(avatarGroup);
+  } else {
+    const avatar = document.createElement('img');
+    avatar.className = 'landing-hero-avatar';
+    avatar.src = avatarSources[0] || hero.avatar || '/logo.png';
+    avatar.alt = hero.title || hero.name || 'logo';
+    section.appendChild(avatar);
+  }
 
   if (hero.kicker) {
     const kicker = document.createElement('div');
@@ -539,6 +559,24 @@ function createBandSection(band, shareUrl) {
 
   const info = document.createElement('div');
   info.className = 'landing-band-info';
+  const isNew = band.badge || band.isNew;
+  if (isNew) {
+    const badge = document.createElement('span');
+    badge.className = 'landing-band-badge';
+    badge.textContent = band.badge || 'New';
+    badge.style.display = 'inline-flex';
+    badge.style.alignItems = 'center';
+    badge.style.gap = '6px';
+    badge.style.padding = '4px 10px';
+    badge.style.borderRadius = '999px';
+    badge.style.fontSize = '12px';
+    badge.style.fontWeight = '700';
+    badge.style.backgroundColor = accentSoft;
+    badge.style.color = accent;
+    badge.style.border = `1px solid ${accent}`;
+    badge.dataset.state = 'new';
+    info.appendChild(badge);
+  }
   if (band.tagline) {
     const tag = document.createElement('p');
     tag.className = 'landing-band-tag';
@@ -817,24 +855,109 @@ function createActionsSection(cards, titleText) {
   return section;
 }
 
+const MAILCHIMP_CLASSIC_EMBED = `
+<div id="mc_embed_shell">
+  <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css">
+  <style type="text/css">
+    #mc_embed_signup{background:#fff; false;clear:left; font:14px Helvetica,Arial,sans-serif; width: 600px;}
+  </style>
+  <div id="mc_embed_signup">
+    <form action="https://othersoriented.us4.list-manage.com/subscribe/post?u=8430d870f739578cd7ecdd61f&amp;id=2daa907931&amp;f_id=00b576eaf0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+      <div id="mc_embed_signup_scroll">
+        <h2>Subscribe</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+        <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required value></div>
+        <div class="mc-field-group"><label for="mce-FNAME">First Name </label><input type="text" name="FNAME" class=" text" id="mce-FNAME" value></div>
+        <div class="mc-address-group">
+          <div class="mc-field-group"><label for="mce-ADDRESS-addr1">Address </label><input type="text" maxlength="70" name="ADDRESS[addr1]" id="mce-ADDRESS-addr1" class value></div>
+          <div class="mc-field-group"><label for="mce-ADDRESS-addr2">Address Line 2</label><input type="text" maxlength="70" name="ADDRESS[addr2]" id="mce-ADDRESS-addr2" value></div>
+          <div class="mc-address-fields-group">
+            <div class="mc-field-group"><label for="mce-ADDRESS-city">City</label><input type="text" maxlength="40" name="ADDRESS[city]" id="mce-ADDRESS-city" class value></div>
+            <div class="mc-field-group"><label for="mce-ADDRESS-state">State/Province/Region</label><input type="text" maxlength="20" name="ADDRESS[state]" id="mce-ADDRESS-state" class value></div>
+            <div class="mc-field-group"><label for="mce-ADDRESS-zip">Postal / Zip Code</label><input type="text" maxlength="10" name="ADDRESS[zip]" id="mce-ADDRESS-zip" class value></div>
+          </div>
+          <div class="mc-field-group"><label for="mce-ADDRESS-country">Country</label><select name="ADDRESS[country]" id="mce-ADDRESS-country" class><option value="Albania">Albania</option><option value="Algeria">Algeria</option><option value="Andorra">Andorra</option><option value="Angola">Angola</option><option value="Argentina">Argentina</option><option value="Armenia">Armenia</option><option value="Australia">Australia</option><option value="Austria">Austria</option><option value="Azerbaijan">Azerbaijan</option><option value="Bahamas">Bahamas</option><option value="Bahrain">Bahrain</option><option value="Bangladesh">Bangladesh</option><option value="Barbados">Barbados</option><option value="Belarus">Belarus</option><option value="Belgium">Belgium</option><option value="Belize">Belize</option><option value="Benin">Benin</option><option value="Bermuda">Bermuda</option><option value="Bhutan">Bhutan</option><option value="Bolivia">Bolivia</option><option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option><option value="Botswana">Botswana</option><option value="Brazil">Brazil</option><option value="Bulgaria">Bulgaria</option><option value="Burkina Faso">Burkina Faso</option><option value="Burundi">Burundi</option><option value="Cambodia">Cambodia</option><option value="Cameroon">Cameroon</option><option value="Canada">Canada</option><option value="Cape Verde">Cape Verde</option><option value="Cayman Islands">Cayman Islands</option><option value="Central African Republic">Central African Republic</option><option value="Chad">Chad</option><option value="Chile">Chile</option><option value="China">China</option><option value="Colombia">Colombia</option><option value="Congo">Congo</option><option value="Croatia">Croatia</option><option value="Cyprus">Cyprus</option><option value="Czech Republic">Czech Republic</option><option value="Denmark">Denmark</option><option value="Djibouti">Djibouti</option><option value="Ecuador">Ecuador</option><option value="Egypt">Egypt</option><option value="El Salvador">El Salvador</option><option value="Equatorial Guinea">Equatorial Guinea</option><option value="Eritrea">Eritrea</option><option value="Estonia">Estonia</option><option value="Ethiopia">Ethiopia</option><option value="Fiji">Fiji</option><option value="Finland">Finland</option><option value="France">France</option><option value="Gabon">Gabon</option><option value="Gambia">Gambia</option><option value="Georgia">Georgia</option><option value="Germany">Germany</option><option value="Ghana">Ghana</option><option value="Greece">Greece</option><option value="Guam">Guam</option><option value="Guinea">Guinea</option><option value="Guinea-Bissau">Guinea-Bissau</option><option value="Guyana">Guyana</option><option value="Honduras">Honduras</option><option value="Hong Kong">Hong Kong</option><option value="Hungary">Hungary</option><option value="Iceland">Iceland</option><option value="India">India</option><option value="Indonesia">Indonesia</option><option value="Ireland">Ireland</option><option value="Israel">Israel</option><option value="Italy">Italy</option><option value="Japan">Japan</option><option value="Jordan">Jordan</option><option value="Kazakhstan">Kazakhstan</option><option value="Kenya">Kenya</option><option value="Kuwait">Kuwait</option><option value="Kyrgyzstan">Kyrgyzstan</option><option value="Lao People's Democratic Republic">Lao People's Democratic Republic</option><option value="Latvia">Latvia</option><option value="Lebanon">Lebanon</option><option value="Lesotho">Lesotho</option><option value="Liberia">Liberia</option><option value="Liechtenstein">Liechtenstein</option><option value="Lithuania">Lithuania</option><option value="Luxembourg">Luxembourg</option><option value="Macedonia">Macedonia</option><option value="Madagascar">Madagascar</option><option value="Malawi">Malawi</option><option value="Malaysia">Malaysia</option><option value="Maldives">Maldives</option><option value="Mali">Mali</option><option value="Malta">Malta</option><option value="Mauritania">Mauritania</option><option value="Mexico">Mexico</option><option value="Moldova">Moldova</option><option value="Monaco">Monaco</option><option value="Mongolia">Mongolia</option><option value="Morocco">Morocco</option><option value="Mozambique">Mozambique</option><option value="Namibia">Namibia</option><option value="Nepal">Nepal</option><option value="Netherlands">Netherlands</option><option value="Netherlands Antilles">Netherlands Antilles</option><option value="New Zealand">New Zealand</option><option value="Nicaragua">Nicaragua</option><option value="Niger">Niger</option><option value="Nigeria">Nigeria</option><option value="Norway">Norway</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="Panama">Panama</option><option value="Paraguay">Paraguay</option><option value="Peru">Peru</option><option value="Philippines">Philippines</option><option value="Poland">Poland</option><option value="Portugal">Portugal</option><option value="Qatar">Qatar</option><option value="Reunion">Reunion</option><option value="Romania">Romania</option><option value="Russia">Russia</option><option value="Rwanda">Rwanda</option><option value="Samoa (Independent)">Samoa (Independent)</option><option value="Saudi Arabia">Saudi Arabia</option><option value="Senegal">Senegal</option><option value="Seychelles">Seychelles</option><option value="Sierra Leone">Sierra Leone</option><option value="Singapore">Singapore</option><option value="Slovakia">Slovakia</option><option value="Slovenia">Slovenia</option><option value="Somalia">Somalia</option><option value="South Africa">South Africa</option><option value="South Korea">South Korea</option><option value="Spain">Spain</option><option value="Sri Lanka">Sri Lanka</option><option value="Suriname">Suriname</option><option value="Swaziland">Swaziland</option><option value="Sweden">Sweden</option><option value="Switzerland">Switzerland</option><option value="Taiwan">Taiwan</option><option value="Tanzania">Tanzania</option><option value="Thailand">Thailand</option><option value="Togo">Togo</option><option value="Tunisia">Tunisia</option><option value="Turkiye">Turkiye</option><option value="Turkmenistan">Turkmenistan</option><option value="Uganda">Uganda</option><option value="Ukraine">Ukraine</option><option value="United Arab Emirates">United Arab Emirates</option><option value="Uruguay">Uruguay</option><option value="USA" selected>USA</option><option value="Uzbekistan">Uzbekistan</option><option value="Vatican City State (Holy See)">Vatican City State (Holy See)</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option><option value="Virgin Islands (British)">Virgin Islands (British)</option><option value="Yemen">Yemen</option><option value="Zambia">Zambia</option><option value="Zimbabwe">Zimbabwe</option><option value="Antigua And Barbuda">Antigua And Barbuda</option><option value="Anguilla">Anguilla</option><option value="American Samoa">American Samoa</option><option value="Aruba">Aruba</option><option value="Brunei Darussalam">Brunei Darussalam</option><option value="Bouvet Island">Bouvet Island</option><option value="Cook Islands">Cook Islands</option><option value="Christmas Island">Christmas Island</option><option value="Dominican Republic">Dominican Republic</option><option value="Western Sahara">Western Sahara</option><option value="Falkland Islands">Falkland Islands</option><option value="Faroe Islands">Faroe Islands</option><option value="Grenada">Grenada</option><option value="French Guiana">French Guiana</option><option value="Gibraltar">Gibraltar</option><option value="Greenland">Greenland</option><option value="Guadeloupe">Guadeloupe</option><option value="Guatemala">Guatemala</option><option value="Haiti">Haiti</option><option value="Jamaica">Jamaica</option><option value="Kiribati">Kiribati</option><option value="Comoros">Comoros</option><option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option><option value="Saint Lucia">Saint Lucia</option><option value="Marshall Islands">Marshall Islands</option><option value="Macau">Macau</option><option value="Martinique">Martinique</option><option value="Mauritius">Mauritius</option><option value="New Caledonia">New Caledonia</option><option value="Norfolk Island">Norfolk Island</option><option value="Nauru">Nauru</option><option value="Niue">Niue</option><option value="Papua New Guinea">Papua New Guinea</option><option value="Pitcairn">Pitcairn</option><option value="Palau">Palau</option><option value="Solomon Islands">Solomon Islands</option><option value="Svalbard and Jan Mayen Islands">Svalbard and Jan Mayen Islands</option><option value="San Marino">San Marino</option><option value="Tonga">Tonga</option><option value="Timor-Leste">Timor-Leste</option><option value="Trinidad and Tobago">Trinidad and Tobago</option><option value="Tuvalu">Tuvalu</option><option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option><option value="Virgin Islands (U.S.)">Virgin Islands (U.S.)</option><option value="Vanuatu">Vanuatu</option><option value="Mayotte">Mayotte</option><option value="Myanmar">Myanmar</option><option value="Sao Tome and Principe">Sao Tome and Principe</option><option value="South Georgia and the South Sandwich Islands">South Georgia and the South Sandwich Islands</option><option value="Tajikistan">Tajikistan</option><option value="United Kingdom">United Kingdom</option><option value="Costa Rica">Costa Rica</option><option value="Guernsey">Guernsey</option><option value="North Korea">North Korea</option><option value="Afghanistan">Afghanistan</option><option value="Cote D'Ivoire">Cote D'Ivoire</option><option value="Cuba">Cuba</option><option value="French Polynesia">French Polynesia</option><option value="Iran">Iran</option><option value="Iraq">Iraq</option><option value="Libya">Libya</option><option value="Palestine">Palestine</option><option value="Syria">Syria</option><option value="Aaland Islands">Aaland Islands</option><option value="Turks & Caicos Islands">Turks & Caicos Islands</option><option value="Jersey  (Channel Islands)">Jersey  (Channel Islands)</option><option value="Dominica">Dominica</option><option value="Montenegro">Montenegro</option><option value="Sudan">Sudan</option><option value="Montserrat">Montserrat</option><option value="Curacao">Curacao</option><option value="Sint Maarten">Sint Maarten</option><option value="South Sudan">South Sudan</option><option value="Republic of Kosovo">Republic of Kosovo</option><option value="Congo, Democratic Republic of the">Congo, Democratic Republic of the</option><option value="Isle of Man">Isle of Man</option><option value="Saint Martin">Saint Martin</option><option value="Bonaire, Saint Eustatius and Saba">Bonaire, Saint Eustatius and Saba</option><option value="Serbia">Serbia</option></select></div>
+        </div>
+        <div class="mc-field-group"><label for="mce-PHONE">Phone Number </label><input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value></div>
+        <div id="mce-responses" class="clear">
+          <div class="response" id="mce-error-response" style="display: none;"></div>
+          <div class="response" id="mce-success-response" style="display: none;"></div>
+        </div>
+        <div aria-hidden="true" style="position: absolute; left: -5000px;"><input type="text" name="b_8430d870f739578cd7ecdd61f_2daa907931" tabindex=-1 value></div>
+        <div class="clear"><input type="submit" name="subscribe" id="mc-embedded-subscribe" class="button" value="Subscribe"></div>
+      </div>
+    </form>
+  </div>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
+<script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[2]='LNAME';ftypes[2]='text';fnames[5]='BIRTHDAY';ftypes[5]='birthday';fnames[6]='COMPANY';ftypes[6]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+`;
 function createSubscribeSection(subscribeCfg) {
   const cfg = subscribeCfg || {};
   if (cfg.enabled === false) return null;
-  const formAction = cfg.formAction || 'https://othersoriented.us4.list-manage.com/subscribe/post?u=8430d870f739578cd7ecdd61f&id=2daa907931&f_id=00b576eaf0';
-  if (!formAction) return null;
+  const embedHtml = cfg.embedHtml || (cfg.embedTemplate === 'mailchimp-classic' ? MAILCHIMP_CLASSIC_EMBED : '');
 
   const section = document.createElement('section');
   section.className = 'landing-subscribe';
+  section.style.textAlign = 'center';
+
+  const titleText = cfg.title || 'Get new drops first';
+  const descText = cfg.description || cfg.copy || 'Join the email list for updates on fresh releases.';
+  const disclaimerText = cfg.disclaimer || 'We send 1–2 thoughtful emails a month. Unsubscribe anytime.';
 
   const title = document.createElement('h2');
-  title.textContent = cfg.title || 'Join the Collective';
+  title.textContent = titleText;
   section.appendChild(title);
 
-  if (cfg.description || cfg.copy) {
+  if (descText) {
     const copy = document.createElement('p');
-    copy.textContent = cfg.description || cfg.copy;
+    copy.textContent = descText;
     section.appendChild(copy);
   }
+
+  if (embedHtml) {
+    const embedWrap = document.createElement('div');
+    embedWrap.className = 'landing-subscribe-embed';
+    embedWrap.innerHTML = embedHtml;
+    embedWrap.style.width = '100%';
+    embedWrap.style.maxWidth = '720px';
+    embedWrap.style.margin = '20px auto';
+    embedWrap.style.padding = '18px';
+    embedWrap.style.background = '#ffffff';
+    embedWrap.style.borderRadius = '18px';
+    embedWrap.style.boxShadow = '0 14px 40px rgba(0,0,0,0.08)';
+    embedWrap.style.boxSizing = 'border-box';
+    embedWrap.style.overflow = 'hidden';
+    section.appendChild(embedWrap);
+
+    const embedContainer = embedWrap.querySelector('#mc_embed_signup');
+    if (embedContainer) {
+      embedContainer.style.maxWidth = '100%';
+      embedContainer.style.margin = '0 auto';
+    }
+
+    const embedForm = embedWrap.querySelector('form');
+    if (embedForm) {
+      embedForm.addEventListener('submit', () => {
+        emitAnalytics('subscribe_submit', {
+          form_id: cfg.formId || 'mailchimp_collective',
+          location: cfg.analyticsLocation || 'landing_midpage'
+        });
+      });
+    }
+
+    if (disclaimerText) {
+      const disclaimer = document.createElement('p');
+      disclaimer.className = 'landing-subscribe-disclaimer';
+      disclaimer.textContent = disclaimerText;
+      section.appendChild(disclaimer);
+    }
+
+    return section;
+  }
+
+  const formAction = cfg.formAction || 'https://othersoriented.us4.list-manage.com/subscribe/post?u=8430d870f739578cd7ecdd61f&id=2daa907931&f_id=00b576eaf0';
+  if (!formAction) return null;
 
   const form = document.createElement('form');
   form.className = 'landing-subscribe-form';
@@ -978,9 +1101,10 @@ async function boot() {
   const fallback = {
     hero: {
       kicker: "Christian AI Music Collective",
-      title: "Lost Boy Found + The Great Reunion",
-      subtitle: "Two original AI-assisted worship projects releasing new songs weekly.",
+      title: "The Great Reunion + Lost Boy Found + SPRINKLD",
+      subtitle: "Three original AI-assisted worship projects releasing new songs weekly.",
       avatar: "/assets/bands/tgr/logo.png",
+      avatars: ["/assets/bands/tgr/logo.png", "/assets/bands/lbf/logo.png", "/assets/bands/sprinkld/logo.png"],
       tagline: "Trying to redeem AI by spinning up more edifying Christian music | 200+ songs | New every week!",
       cta: {
         id: 'hero_stream_tgr',
@@ -994,9 +1118,18 @@ async function boot() {
         href: 'https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc',
         icon: 'spotify'
       },
+      extraCtas: [
+        {
+          id: 'hero_stream_sprinkld',
+          label: 'Stream SPRINKLD',
+          href: 'https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X',
+          icon: 'spotify',
+          variant: 'secondary'
+        }
+      ],
       highlights: [
         { value: '200+', label: 'Edifying AI-crafted songs' },
-        { value: '2', label: 'Active projects' },
+        { value: '3', label: 'Active projects' },
         { value: 'Monthly', label: 'New releases' }
       ]
     },
@@ -1076,16 +1209,50 @@ async function boot() {
           { id: 'instagram', icon: 'instagram', label: 'Instagram', href: 'https://www.instagram.com/christianaiband/', color: '#E1306C' },
           { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@christianaiband', color: '#000000' }
         ]
+      },
+      {
+        id: 'sprinkld',
+        name: 'SPRINKLD',
+        tagline: 'Christian AI EDM / Future Bass',
+        description: 'High-energy Christian EDM with future bass drops and Scripture-centered hooks.',
+        accent: '#FF5FB7',
+        logo: "/assets/bands/sprinkld/logo.png",
+        badge: 'New',
+        latestRelease: {
+          title: "'Tis My Happiness Below",
+          subtitle: 'New EP out now.',
+          image: "/assets/bands/sprinkld/releases/tis-my-happiness-below.png",
+          releaseDate: '2025-11-15'
+        },
+        sample: {
+          title: "Sample: 'Tis My Happiness Below",
+          src: '/assets/audio/sprinkld-sample.mp3'
+        },
+        releaseDate: '2025-11-15',
+        socialProofTitle: 'Stories from the community',
+        socialProof: [
+          { quote: '"This is perfect for working out."', source: 'Julia D.' },
+          { quote: '"It helps drive one core truth with super fun energy."', source: 'Jonathan D.' }
+        ],
+        links: [
+          { id: 'spotify', icon: 'spotify', label: 'Spotify', href: 'https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X', color: '#1DB954' },
+          { id: 'apple', icon: 'apple', label: 'Apple Music (coming soon)', href: '#', color: '#0F0F0F' },
+          { id: 'amazon', icon: 'amazon', label: 'Amazon Music', href: 'https://music.amazon.com/artists/B0G2K2XXGL/sprinkld', color: '#00A8E1' },
+          { id: 'pandora', icon: 'pandora', label: 'Pandora', href: 'https://www.pandora.com/artist/sprinkld/ARgXpppVwXlrqZ6', color: '#1F7CF0' },
+          { id: 'ytm', icon: 'youtubemusic', label: 'YouTube Music', href: 'https://music.youtube.com/channel/UCzCEi0pehN9xS73DNgl-JHg', color: '#FF0000' },
+          { id: 'youtube', icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/channel/UCqLBHMbLHh1djqo06Xn5ZBQ', color: '#FF0000' }
+        ],
+        extras: [
+          { id: 'instagram', icon: 'instagram', label: 'Instagram (coming soon)', href: '#', color: '#E1306C' },
+          { id: 'tiktok', icon: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@sprinkldmusic', color: '#000000' }
+        ]
       }
     ],
-    subscribe: {
-      enabled: true,
-      title: 'Get new drops first',
-      description: 'Join the email list for fresh releases, lyric devotionals, and behind-the-scenes updates.',
-      ctaLabel: 'Subscribe',
-      analyticsLocation: 'midpage',
-      disclaimer: 'We send 1–2 thoughtful emails a month. Unsubscribe anytime.'
-    },
+  subscribe: {
+    enabled: true,
+    embedTemplate: 'mailchimp-classic',
+    analyticsLocation: 'midpage'
+  },
     shareUrl: 'https://christianaiband.com',
     cardsTitle: 'Arcade + Extras',
     featured: ['game'],

@@ -1,10 +1,15 @@
 {
     "hero":  {
                  "kicker":  "Christian AI Music Collective",
-                 "title":  "The Great Reunion + Lost Boy Found",
+                 "title":  "The Great Reunion + Lost Boy Found + SPRINKLD",
                  "subtitle":  "The days are evil. Your music should edify you.",
                  "avatar":  "/assets/bands/tgr/logo.png",
-                 "tagline":  "Two original AI generated music projects | Always releasing new songs",
+                 "avatars":  [
+                                  "/assets/bands/tgr/logo.png",
+                                  "/assets/bands/lbf/logo.png",
+                                  "/assets/bands/sprinkld/logo.png"
+                              ],
+                 "tagline":  "Three original AI generated music projects | Always releasing new songs",
                  "cta":  {
                      "id":  "hero_stream_tgr",
                      "label":  "Stream The Great Reunion",
@@ -17,13 +22,22 @@
                      "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
                      "icon":  "spotify"
                  },
+                 "extraCtas":  [
+                                   {
+                                       "id":  "hero_stream_sprinkld",
+                                       "label":  "Stream SPRINKLD",
+                                       "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
+                                       "icon":  "spotify",
+                                       "variant":  "secondary"
+                                   }
+                               ],
                  "highlights":  [
                      {
                          "value":  "200+",
                          "label":  "AI-crafted songs"
                      },
                      {
-                         "value":  "2",
+                         "value":  "3",
                          "label":  "Active projects"
                      },
                      {
@@ -219,16 +233,106 @@
                                          "color":  "#000000"
                                      }
                                  ]
+                  },
+                  {
+                      "id":  "sprinkld",
+                      "name":  "SPRINKLD",
+                      "tagline":  "Christian AI EDM / Future Bass",
+                      "description":  "High-energy Christian EDM with future bass drops and Scripture-centered hooks.",
+                      "accent":  "#FF5FB7",
+                      "logo":  "/assets/bands/sprinkld/logo.png",
+                      "badge":  "New",
+                      "latestRelease":  {
+                                            "title":  "'Tis My Happiness Below",
+                                            "subtitle":  "New EP out now.",
+                                            "cta":  "Stream the EP",
+                                            "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
+                                            "image":  "/assets/bands/sprinkld/releases/tis-my-happiness-below.png",
+                                            "releaseDate":  "2025-11-15"
+                                        },
+                      "sample":  {
+                                     "title":  "Sample: 'Tis My Happiness Below",
+                                     "src":  "/assets/audio/sprinkld-sample.mp3"
+                                 },
+                      "releaseDate":  "2025-11-15",
+                      "socialProofTitle":  "Stories from the community",
+                      "socialProof":  [
+                                          {
+                                              "quote":  "\"This is perfect for working out.\"",
+                                              "source":  "Julia D."
+                                          },
+                                          {
+                                              "quote":  "\"It helps drive one core truth with super fun energy.\"",
+                                              "source":  "Jonathan D."
+                                          }
+                                      ],
+                      "links":  [
+                                    {
+                                        "id":  "spotify",
+                                        "icon":  "spotify",
+                                        "label":  "Spotify",
+                                        "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
+                                        "color":  "#1DB954"
+                                    },
+                                    {
+                                        "id":  "apple",
+                                        "icon":  "apple",
+                                        "label":  "Apple Music (coming soon)",
+                                        "href":  "#",
+                                        "color":  "#0F0F0F"
+                                    },
+                                    {
+                                        "id":  "amazon",
+                                        "icon":  "amazon",
+                                        "label":  "Amazon Music",
+                                        "href":  "https://music.amazon.com/artists/B0G2K2XXGL/sprinkld",
+                                        "color":  "#00A8E1"
+                                    },
+                                    {
+                                        "id":  "pandora",
+                                        "icon":  "pandora",
+                                        "label":  "Pandora",
+                                        "href":  "https://www.pandora.com/artist/sprinkld/ARgXpppVwXlrqZ6",
+                                        "color":  "#1F7CF0"
+                                    },
+                                    {
+                                        "id":  "ytm",
+                                        "icon":  "youtubemusic",
+                                        "label":  "YouTube Music",
+                                        "href":  "https://music.youtube.com/channel/UCzCEi0pehN9xS73DNgl-JHg",
+                                        "color":  "#FF0000"
+                                    },
+                                    {
+                                        "id":  "youtube",
+                                        "icon":  "youtube",
+                                        "label":  "YouTube",
+                                        "href":  "https://www.youtube.com/channel/UCqLBHMbLHh1djqo06Xn5ZBQ",
+                                        "color":  "#FF0000"
+                                    }
+                                ],
+                      "extras":  [
+                                     {
+                                         "id":  "instagram",
+                                         "icon":  "instagram",
+                                         "label":  "Instagram (coming soon)",
+                                         "href":  "#",
+                                         "color":  "#E1306C"
+                                     },
+                                     {
+                                         "id":  "tiktok",
+                                         "icon":  "tiktok",
+                                         "label":  "TikTok",
+                                         "href":  "https://www.tiktok.com/@sprinkldmusic",
+                                         "color":  "#000000"
+                                     }
+                                 ]
                   }
               ],
     "cardsTitle":  "Arcade + Extras",
     "subscribe":  {
                       "enabled":  true,
-                      "title":  "Get new drops first",
-                      "description":  "Join the email list for updates on fresh releases.",
-                      "ctaLabel":  "Subscribe",
-                      "analyticsLocation":  "midpage",
-                      "disclaimer":  "We send 1-2 thoughtful emails a month. Unsubscribe anytime."
+                      "embedTemplate":  "mailchimp-classic",
+                      "analyticsLocation":  "midpage"
                   },
     "shareUrl":  "https://christianaiband.com",
     "backgroundVideo":  {
