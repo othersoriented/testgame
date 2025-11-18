@@ -63,7 +63,8 @@
                                             "cta":  "Explore now",
                                             "href":  "https://music.apple.com/us/artist/the-great-reunion/1846862216",
                                             "image":  "/assets/bands/tgr/releases/christmas-vol1.png",
-                                            "releaseDate":  "2025-12-01"
+                                            "releaseDate":  "2025-12-01",
+                                            "eyebrow":  "Featured Release"
                                         },
                       "sample":  {
                                      "title":  "Sample: Christmas Vol. 1",
@@ -81,6 +82,32 @@
                                               "source":  "Karen - TikTok"
                                           }
                                       ],
+                      "albums":  [
+                                     {
+                                         "title":  "Hymns Volume 1 (AI)",
+                                         "releaseDate":  "2025-10-16",
+                                         "href":  "https://open.spotify.com/album/0YIq1OOyQkJmY1B1OhUJlo?si=JJ8JWifQSCyp6L-UlMWwYA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/tgr/albums/hymns-vol1.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Christmas Volume 1 (AI)",
+                                         "releaseDate":  "2025-10-25",
+                                         "href":  "https://open.spotify.com/album/2ucLYXQFEqF7SCJpjU3lA5?si=Wt7e-P-GQrOih9jJj3x2OA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/tgr/albums/christmas-vol1.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Christmas Volume 2 (AI)",
+                                         "releaseDate":  "2025-11-13",
+                                         "href":  "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/tgr/albums/christmas-vol2.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     }
+                                 ],
                       "links":  [
                                     {
                                         "id":  "spotify",
@@ -155,7 +182,8 @@
                                             "cta":  "Listen now",
                                             "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
                                             "image":  "/assets/bands/lbf/releases/hymns-viii-remixes.png",
-                                            "releaseDate":  "2025-09-12"
+                                            "releaseDate":  "2025-09-12",
+                                            "eyebrow":  "Featured Release"
                                         },
                       "sample":  {
                                      "title":  "Sample: Hymns VIII Remix",
@@ -232,6 +260,144 @@
                                          "href":  "https://www.tiktok.com/@lostboyfoundofficial",
                                          "color":  "#000000"
                                      }
+                                 ],
+                      "albums":  [
+                                     {
+                                         "title":  "b(ai)ble songs vol. 1",
+                                         "releaseDate":  "2024-08-24",
+                                         "href":  "https://open.spotify.com/album/5JITvUv8gqmFv5S9unXoxT?si=2mfHjQnyRDi1H5iiHipIeg",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-vol1.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "b(ai)ble songs: Christmas",
+                                         "releaseDate":  "2024-09-20",
+                                         "href":  "https://open.spotify.com/album/1vjJ4SUQiiBx1JvA5A9K3M?si=87RGMpi2SJiucyoYV3R_qQ",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-christmas.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "b(ai)ble songs vol. 2",
+                                         "releaseDate":  "2024-09-09",
+                                         "href":  "https://open.spotify.com/album/3sgPgEvRGziuUtJJInQYPZ?si=gY6bKvskSGiZEaSgJjAlLA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-vol2.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "b(ai)ble songs vol. 3",
+                                         "releaseDate":  "2024-10-08",
+                                         "href":  "https://open.spotify.com/album/6uenmiH3aUYMAZU7Xo4VVY?si=RO2pTsTORgOpn3xbzlaE3Q",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-vol3.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "b(ai)ble songs: The Passion Pt. 1",
+                                         "releaseDate":  "2025-03-05",
+                                         "href":  "https://open.spotify.com/album/1uS80eRz8a3nQP36D4aDrV?si=oXAEvF3LRW-KiFm_KOw8Lw",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-passion-pt1.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "b(ai)ble songs: The Passion Pt. 2",
+                                         "releaseDate":  "2025-03-29",
+                                         "href":  "https://open.spotify.com/album/4RRc7ID3OCyQlHARg6O0ym?si=dU6cRKN1Qe6hp2CVnZrPOQ",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-passion-pt2.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "b(ai)ble songs: The Passion Pt. 3",
+                                         "releaseDate":  "2025-04-18",
+                                         "href":  "https://open.spotify.com/album/0jeaBC4Eipxx6r2tjRQvZG?si=rUMNunKoSrunL0L10taolA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/baible-songs-passion-pt3.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 1",
+                                         "releaseDate":  "2025-05-13",
+                                         "href":  "https://open.spotify.com/album/00hqsKTo0YVpY9FylrExo9?si=Dz8ubs6tSxaCjdFp6QygAg",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol1.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 2",
+                                         "releaseDate":  "2025-06-07",
+                                         "href":  "https://open.spotify.com/album/63Xt3nulRUI7bkTO8ENJ6L?si=_eZWN07zSxmPsHwYGeiO_g",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol2.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 3",
+                                         "releaseDate":  "2025-06-21",
+                                         "href":  "https://open.spotify.com/album/41u6mAM3fExtl0ayUgSKEg?si=3IoCG-mDQbmseJK6Vs9fzQ",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol3.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 4",
+                                         "releaseDate":  "2025-07-05",
+                                         "href":  "https://open.spotify.com/album/6ojDnJtQSRXsLZ6Ri6VGw9?si=etgLgDgrQ6OsSk8qqbdkHw",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol4.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 5",
+                                         "releaseDate":  "2025-08-07",
+                                         "href":  "https://open.spotify.com/album/35jHOkqCGhLdTeavy4cTgB?si=P720mJS5RJGjZ0esFDmdHw",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol5.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 6",
+                                         "releaseDate":  "2025-09-11",
+                                         "href":  "https://open.spotify.com/album/2EgtLLT4m8DK38sMsKClfS?si=qqNydCcNR7uh-eXaxUwHUg",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol6.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 7",
+                                         "releaseDate":  "2025-10-09",
+                                         "href":  "https://open.spotify.com/album/6fD0WK86QSnDtnIKGoXUYJ?si=DgLBqMDcSn-DrbDeeDZ4qA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol7.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th Vol. 8",
+                                         "releaseDate":  "2025-10-13",
+                                         "href":  "https://open.spotify.com/album/5hd8AFbqtLUnnh5adHwhOG?si=ipDdtffiRb-oIzL0qRmCXw",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol8.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th: Christmas Vol. 2",
+                                         "releaseDate":  "2025-11-15",
+                                         "href":  "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                     {
+                                         "title":  "Hymns of the F(ai)th: Christmas Vol. 2 (Alt)",
+                                         "releaseDate":  "2025-11-06",
+                                         "href":  "https://open.spotify.com/album/1zaLcPivZ65sv1lsSbDWoB?si=EPIxl2KWS7GIf0GSkcPlTg",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     }
                                  ]
                   },
                   {
@@ -248,7 +414,8 @@
                                             "cta":  "Stream the EP",
                                             "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
                                             "image":  "/assets/bands/sprinkld/releases/tis-my-happiness-below.png",
-                                            "releaseDate":  "2025-11-15"
+                                            "releaseDate":  "2025-11-15",
+                                            "eyebrow":  "Featured Release"
                                         },
                       "sample":  {
                                      "title":  "Sample: 'Tis My Happiness Below",
@@ -324,6 +491,16 @@
                                          "label":  "TikTok",
                                          "href":  "https://www.tiktok.com/@sprinkldmusic",
                                          "color":  "#000000"
+                                     }
+                                 ],
+                      "albums":  [
+                                     {
+                                         "title":  "Tis My Happiness Below",
+                                         "releaseDate":  "2025-11-15",
+                                         "href":  "https://open.spotify.com/album/12oi765RkQIuCrhzL8OuBb?si=sgFnMdrzQ7uoKlK6syJltA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/sprinkld/albums/tis-my-happiness-below.png",
+                                         "ctaLabel":  "Listen on Spotify"
                                      }
                                  ]
                   }

@@ -523,6 +523,139 @@ function createBandSocialProof(band) {
   return wrap;
 }
 
+function createAlbumCarousel(band, accent, accentSoft) {
+  const albums = Array.isArray(band.albums) ? band.albums.filter(Boolean) : [];
+  if (!albums.length) return null;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'landing-band-albums';
+  wrap.style.marginTop = '16px';
+
+  const title = document.createElement('div');
+  title.className = 'landing-band-albums-title';
+  title.textContent = 'Albums';
+  title.style.fontWeight = '700';
+  title.style.marginBottom = '8px';
+  wrap.appendChild(title);
+
+  const list = document.createElement('div');
+  list.className = 'landing-band-albums-list';
+  list.style.display = 'flex';
+  list.style.gap = '12px';
+  list.style.overflowX = 'auto';
+  list.style.scrollSnapType = 'x mandatory';
+  list.style.paddingBottom = '4px';
+
+  const sortedAlbums = [...albums].sort((a, b) => {
+    const da = a?.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+    const db = b?.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+    return db - da;
+  });
+
+  sortedAlbums.forEach((album, idx) => {
+    const card = document.createElement('a');
+    card.className = 'landing-album';
+    card.href = album.href || '#';
+    card.target = album.href?.startsWith('/') ? '_self' : '_blank';
+    card.rel = 'noopener noreferrer';
+    card.dataset.bandId = band.id || '';
+    card.dataset.albumIdx = String(idx);
+    card.style.display = 'flex';
+    card.style.flexDirection = 'column';
+    card.style.width = '180px';
+    card.style.minWidth = '170px';
+    card.style.minHeight = '260px';
+    card.style.scrollSnapAlign = 'start';
+    card.style.background = 'rgba(255,255,255,0.7)';
+    card.style.border = `1px solid ${accentSoft || 'rgba(0,0,0,0.08)'}`;
+    card.style.borderRadius = '14px';
+    card.style.padding = '10px';
+    card.style.boxSizing = 'border-box';
+    card.style.boxShadow = '0 6px 20px rgba(0,0,0,0.08)';
+    card.style.textDecoration = 'none';
+    card.style.color = 'inherit';
+    card.style.transition = 'transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease';
+    card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 10px 24px rgba(0,0,0,0.12)'; card.style.borderColor = accent || '#111'; });
+    card.addEventListener('mouseleave', () => { card.style.transform = 'none'; card.style.boxShadow = '0 6px 20px rgba(0,0,0,0.08)'; card.style.borderColor = accentSoft || 'rgba(0,0,0,0.08)'; });
+
+    if (album.image) {
+      const img = document.createElement('div');
+      img.className = 'landing-album-art';
+      img.style.width = '100%';
+      img.style.aspectRatio = '1 / 1';
+      img.style.borderRadius = '10px';
+      img.style.backgroundSize = 'cover';
+      img.style.backgroundPosition = 'center';
+      img.style.backgroundImage = `url('${album.image}')`;
+      img.style.marginBottom = '8px';
+      card.appendChild(img);
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'landing-album-meta';
+    meta.style.display = 'flex';
+    meta.style.flexDirection = 'column';
+    meta.style.flexGrow = '1';
+    meta.style.gap = '4px';
+
+    const name = document.createElement('div');
+    name.className = 'landing-album-title';
+    name.textContent = album.title || 'Album';
+    name.style.fontWeight = '700';
+    name.style.fontSize = '14px';
+    name.style.display = '-webkit-box';
+    name.style.webkitLineClamp = '2';
+    name.style.webkitBoxOrient = 'vertical';
+    name.style.overflow = 'hidden';
+    meta.appendChild(name);
+
+    const details = document.createElement('div');
+    details.className = 'landing-album-details';
+    details.style.fontSize = '12px';
+    details.style.color = '#444';
+    const parts = [];
+    if (album.tracks) parts.push(`${album.tracks} songs`);
+    const releaseLabel = formatDateLabel(album.releaseDate);
+    if (releaseLabel) parts.push(`Released ${releaseLabel}`);
+    details.textContent = parts.join(' • ');
+    meta.appendChild(details);
+
+    const cta = document.createElement('span');
+    cta.className = 'landing-album-cta';
+    cta.textContent = album.ctaLabel || 'Listen on Spotify';
+    cta.style.display = 'inline-flex';
+    cta.style.alignItems = 'center';
+    cta.style.justifyContent = 'center';
+    cta.style.padding = '8px 12px';
+    cta.style.marginTop = 'auto';
+    cta.style.borderRadius = '999px';
+    cta.style.border = `1px solid ${accent || '#111'}`;
+    cta.style.background = accent || '#111';
+    cta.style.color = '#fff';
+    cta.style.fontSize = '12px';
+    cta.style.fontWeight = '700';
+    cta.style.boxShadow = '0 2px 8px rgba(0,0,0,0.16)';
+    cta.style.textAlign = 'center';
+    cta.style.width = '100%';
+    cta.style.boxSizing = 'border-box';
+    meta.appendChild(cta);
+
+    card.appendChild(meta);
+
+    card.addEventListener('click', () => emitBandAnalytics('band_stream_click', band, [album.title, 'album'], {
+      stream_id: sanitizeEventKey(album.title || `album_${idx}`),
+      label: album.title,
+      stream_label: album.title,
+      url: album.href
+    }));
+
+    list.appendChild(card);
+  });
+
+  wrap.appendChild(list);
+  return wrap;
+}
+
 function createBandSection(band, shareUrl) {
   if (!band) return null;
   const section = document.createElement('section');
@@ -695,7 +828,7 @@ function createBandSection(band, shareUrl) {
     info.className = 'landing-band-release-info';
     const eyebrow = document.createElement('span');
     eyebrow.className = 'landing-band-release-eyebrow';
-    eyebrow.textContent = release?.eyebrow || 'Latest Release';
+    eyebrow.textContent = release?.eyebrow || 'Featured Release';
     info.appendChild(eyebrow);
     const title = document.createElement('h3');
     title.className = 'landing-band-release-title';
@@ -792,6 +925,9 @@ function createBandSection(band, shareUrl) {
 
     content.appendChild(card);
   }
+
+  const albums = createAlbumCarousel(band, accent, accentSoft);
+  if (albums) content.appendChild(albums);
 
   if (content.childElementCount) {
     section.appendChild(content);
