@@ -363,6 +363,27 @@ function ensureBackgroundVideo(videoCfg) {
   }
 }
 
+function applyFlair(el, flairCfg) {
+  if (!el || !flairCfg?.image) return;
+  if (!el.style.position || el.style.position === 'static') {
+    el.style.position = 'relative';
+  }
+  const img = document.createElement('img');
+  img.className = 'seasonal-flair';
+  img.src = flairCfg.image;
+  img.alt = '';
+  img.setAttribute('aria-hidden', 'true');
+  img.style.position = 'absolute';
+  img.style.top = `${flairCfg.offsetY ?? 8}px`;
+  img.style.right = `${flairCfg.offsetX ?? 8}px`;
+  const size = flairCfg.size != null ? flairCfg.size : 88;
+  img.style.width = typeof size === 'number' ? `${size}px` : size;
+  img.style.height = typeof size === 'number' ? `${size}px` : size;
+  img.style.opacity = flairCfg.opacity != null ? flairCfg.opacity : 1;
+  img.style.pointerEvents = 'none';
+  el.appendChild(img);
+}
+
 function hexToRgba(hex, alpha) {
   if (!hex) return '';
   const normalized = String(hex).replace('#', '');
@@ -376,7 +397,7 @@ function hexToRgba(hex, alpha) {
   return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
 }
 
-function createHero(hero) {
+function createHero(hero, flair) {
   if (!hero) return null;
   const section = document.createElement('section');
   section.className = 'landing-hero';
@@ -468,6 +489,8 @@ function createHero(hero) {
     });
     if (actionsWrap.childElementCount) section.appendChild(actionsWrap);
   }
+
+  applyFlair(section, flair);
 
   return section;
 }
@@ -656,7 +679,7 @@ function createAlbumCarousel(band, accent, accentSoft) {
   return wrap;
 }
 
-function createBandSection(band, shareUrl) {
+function createBandSection(band, shareUrl, flair) {
   if (!band) return null;
   const section = document.createElement('section');
   section.className = 'landing-band';
@@ -933,6 +956,8 @@ function createBandSection(band, shareUrl) {
     section.appendChild(content);
   }
 
+  applyFlair(section, flair);
+
   const extras = Array.isArray(band.extras) ? band.extras.filter(Boolean) : [];
   if (extras.length) {
     const wrap = document.createElement('div');
@@ -1028,7 +1053,7 @@ const MAILCHIMP_CLASSIC_EMBED = `
 <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
 <script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[2]='LNAME';ftypes[2]='text';fnames[5]='BIRTHDAY';ftypes[5]='birthday';fnames[6]='COMPANY';ftypes[6]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
 `;
-function createSubscribeSection(subscribeCfg) {
+function createSubscribeSection(subscribeCfg, flair) {
   const cfg = subscribeCfg || {};
   if (cfg.enabled === false) return null;
   const embedHtml = cfg.embedHtml || (cfg.embedTemplate === 'mailchimp-classic' ? MAILCHIMP_CLASSIC_EMBED : '');
@@ -1089,6 +1114,7 @@ function createSubscribeSection(subscribeCfg) {
       section.appendChild(disclaimer);
     }
 
+    applyFlair(section, flair);
     return section;
   }
 
@@ -1162,6 +1188,7 @@ function createSubscribeSection(subscribeCfg) {
     section.appendChild(disclaimer);
   }
 
+  applyFlair(section, flair);
   return section;
 }
 
@@ -1183,11 +1210,11 @@ function mountLanding(cfg) {
   } : null);
 
   if (heroSource && (heroSource.title || heroSource.subtitle || heroSource.tagline)) {
-    const hero = createHero(heroSource);
+    const hero = createHero(heroSource, cfg.flair);
     if (hero) app.appendChild(hero);
   }
 
-  const subscribeSection = createSubscribeSection(cfg.subscribe);
+  const subscribeSection = createSubscribeSection(cfg.subscribe, cfg.flair);
 
   const bands = Array.isArray(cfg.bands) ? cfg.bands.filter(Boolean) : [];
   const bandWrap = document.createElement('section');
@@ -1195,7 +1222,7 @@ function mountLanding(cfg) {
 
   const shareUrl = cfg.shareUrl || 'https://christianaiband.com';
   bands.forEach(band => {
-    const bandSection = createBandSection(band, shareUrl);
+    const bandSection = createBandSection(band, shareUrl, cfg.flair);
     if (bandSection) bandWrap.appendChild(bandSection);
   });
 
@@ -1396,7 +1423,8 @@ async function boot() {
       { id: 'game', icon: 'game', label: 'Play Flappy Praise', href: '/game.html', color: '#39FF14' },
       { id: 'ninja', icon: 'game', label: 'Play Praise Ninja', href: '/ninja/', color: '#00E5FF' },
       { id: 'merch', icon: 'merch', label: 'Official Merch', href: 'https://othersoriented.creator-spring.com/', color: '#39FF14' }
-    ]
+    ],
+    flair: null
   };
 
   const cfg = await fetchJSON('/content/landing.json') || fallback;

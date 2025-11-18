@@ -49,6 +49,13 @@
     "flags":  [
 
               ],
+    "flair":  {
+                 "image":  "/assets/flair/seasonal.png",
+                 "size":  88,
+                 "offsetX":  12,
+                 "offsetY":  12,
+                 "opacity":  0.95
+             },
     "bands":  [
                   {
                       "id":  "the-great-reunion",
