@@ -501,6 +501,22 @@
                                      }
                                  ],
                       "albums":  [
+                                    {
+                                         "title":  "Sometimes a Light Surprises",
+                                         "releaseDate":  "2025-11-19",
+                                         "href":  "https://open.spotify.com/album/0jX2xBAfxcX4Z63r3eWjeo?si=0F_48drlRzyU_08kIQGRXA",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/sprinkld/albums/sometimes-a-light-surprises.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
+                                    {
+                                         "title":  "Let Me But Hear My Savior Say",
+                                         "releaseDate":  "2025-11-19",
+                                         "href":  "https://open.spotify.com/album/5bm11rmiQekwBmggQXcL26?si=217arqVQS5i66o4zH7KmKg",
+                                         "tracks":  null,
+                                         "image":  "/assets/bands/sprinkld/albums/let-me-but-hear-my-savior-say.png",
+                                         "ctaLabel":  "Listen on Spotify"
+                                     },
                                      {
                                          "title":  "Tis My Happiness Below",
                                          "releaseDate":  "2025-11-15",
