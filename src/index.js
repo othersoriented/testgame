@@ -1053,6 +1053,47 @@ const MAILCHIMP_CLASSIC_EMBED = `
 <script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script>
 <script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[2]='LNAME';ftypes[2]='text';fnames[5]='BIRTHDAY';ftypes[5]='birthday';fnames[6]='COMPANY';ftypes[6]='text';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
 `;
+function createMerchSection(merchCfg, flair) {
+  const cfg = merchCfg || {};
+  if (cfg.enabled === false) return null;
+  const embedHtml = cfg.embedHtml || cfg.html;
+  if (!embedHtml) return null;
+
+  const section = document.createElement('section');
+  section.className = 'landing-merch';
+  section.style.textAlign = 'center';
+
+  if (cfg.eyebrow) {
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'landing-merch-eyebrow';
+    eyebrow.textContent = cfg.eyebrow;
+    section.appendChild(eyebrow);
+  }
+
+  const titleText = cfg.title || 'Shop the Merch';
+  if (titleText) {
+    const title = document.createElement('h2');
+    title.textContent = titleText;
+    section.appendChild(title);
+  }
+
+  const descText = cfg.description || cfg.copy;
+  if (descText) {
+    const copy = document.createElement('p');
+    copy.textContent = descText;
+    section.appendChild(copy);
+  }
+
+  const embedWrap = document.createElement('div');
+  embedWrap.className = 'landing-merch-embed';
+  embedWrap.innerHTML = embedHtml;
+  section.appendChild(embedWrap);
+
+  applyFlair(section, flair);
+
+  return section;
+}
+
 function createSubscribeSection(subscribeCfg, flair) {
   const cfg = subscribeCfg || {};
   if (cfg.enabled === false) return null;
@@ -1215,6 +1256,7 @@ function mountLanding(cfg) {
   }
 
   const subscribeSection = createSubscribeSection(cfg.subscribe, cfg.flair);
+  const merchSection = createMerchSection(cfg.merchShowcase || cfg.merchEmbed, cfg.flair);
 
   const bands = Array.isArray(cfg.bands) ? cfg.bands.filter(Boolean) : [];
   const bandWrap = document.createElement('section');
@@ -1244,6 +1286,7 @@ function mountLanding(cfg) {
   const actions = createActionsSection(cards, cfg.cardsTitle || cfg.cardsHeading);
   if (actions) app.appendChild(actions);
 
+  if (merchSection) app.appendChild(merchSection);
   if (subscribeSection) app.appendChild(subscribeSection);
 
   if (window.anime) {
