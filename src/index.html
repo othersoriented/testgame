@@ -430,6 +430,49 @@
       outline-offset:4px;
     }
     .landing-band-release-audio{display:none}
+    .landing-band-merch{
+      display:grid;
+      gap:12px;
+      padding:20px;
+      border-radius:var(--radius-md);
+      background:linear-gradient(135deg,#ffffff 0%,rgba(246,248,253,0.95) 100%);
+      border:1px solid rgba(19,22,36,0.08);
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-band-merch-eyebrow{
+      margin:0;
+      font-size:12px;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      font-weight:600;
+      color:var(--muted);
+    }
+    .landing-band-merch h3{
+      margin:0;
+      font-size:clamp(18px,4.5vw,24px);
+      font-weight:700;
+      letter-spacing:-0.01em;
+    }
+    .landing-band-merch p{
+      margin:0;
+      color:var(--muted);
+      font-size:clamp(14px,3.2vw,16px);
+      line-height:1.6;
+    }
+    .landing-band-merch-embed{
+      width:100%;
+      border-radius:20px;
+      overflow:hidden;
+      border:1px solid rgba(19,22,36,0.08);
+      background:#ffffff;
+      box-shadow:0 16px 40px rgba(19,22,36,0.12);
+    }
+    .landing-band-merch-embed iframe{
+      width:100%;
+      border:0;
+      height:clamp(320px, 110vw, 520px);
+      display:block;
+    }
     .landing-share-btn{
       display:inline-flex;
       align-items:center;
@@ -595,53 +638,6 @@
     .landing-hero,
     .landing-band,
     .landing-card{opacity:0}
-    .landing-merch{
-      padding:clamp(24px,5vw,36px);
-      border-radius:var(--radius-lg);
-      background:linear-gradient(135deg,#ffffff 0%,rgba(244,246,252,0.94) 100%);
-      border:1px solid var(--line);
-      box-shadow:var(--shadow-lg);
-      display:grid;
-      justify-items:center;
-      gap:16px;
-      text-align:center;
-    }
-    .landing-merch-eyebrow{
-      margin:0;
-      font-size:12px;
-      letter-spacing:0.12em;
-      text-transform:uppercase;
-      font-weight:600;
-      color:var(--muted);
-    }
-    .landing-merch h2{
-      margin:0;
-      font-size:clamp(22px,5vw,30px);
-      font-weight:700;
-      letter-spacing:-0.01em;
-    }
-    .landing-merch p{
-      margin:0;
-      max-width:62ch;
-      color:var(--muted);
-      font-size:clamp(14px,3.4vw,16px);
-      line-height:1.6;
-    }
-    .landing-merch-embed{
-      width:100%;
-      max-width:960px;
-      border-radius:24px;
-      overflow:hidden;
-      background:#ffffff;
-      border:1px solid rgba(19,22,36,0.08);
-      box-shadow:0 20px 50px rgba(19,22,36,0.14);
-    }
-    .landing-merch-embed iframe{
-      width:100%;
-      border:0;
-      min-height:640px;
-      display:block;
-    }
     .landing-subscribe{
       padding:clamp(26px,5vw,38px);
       border-radius:var(--radius-lg);

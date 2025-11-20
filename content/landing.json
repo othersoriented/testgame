@@ -526,16 +526,38 @@
                                          "ctaLabel":  "Listen on Spotify"
                                      }
                                  ]
+                  },
+                  {
+                      "id":  "othersoriented-merch",
+                      "name":  "Others Oriented Merch",
+                      "tagline":  "Limited drops to support the music",
+                      "description":  "Pick up playful tees, hoodies, and posters that help fund more Gospel-centered AI music experiments.",
+                      "accent":  "#FF8A3C",
+                      "links":  [
+                                    {
+                                        "id":  "shop-main",
+                                        "icon":  "merch",
+                                        "label":  "Open full store",
+                                        "href":  "https://othersoriented.creator-spring.com/",
+                                        "color":  "#FF8A3C"
+                                    },
+                                    {
+                                        "id":  "spring-follow",
+                                        "icon":  "instagram",
+                                        "label":  "Follow @othersoriented",
+                                        "href":  "https://www.instagram.com/othersoriented/",
+                                        "color":  "#E1306C"
+                                    }
+                                ],
+                      "merch":  {
+                                    "eyebrow":  "Fresh Threads",
+                                    "title":  "Shop Others Oriented Merch",
+                                    "description":  "Just for fun—browse and snag a cozy gift.",
+                                    "embedHtml":  "<iframe style='border-radius:24px;border:none' src='https://embed.creator-spring.com/widget?slug=othersoriented&per=20&currency=&page=1&layout=carousel-small&theme=light' title='othersoriented Merch store powered by Spring' width='100%' height='420' data-reactroot=''></iframe>"
+                                }
                   }
               ],
     "cardsTitle":  "Arcade + Extras",
-    "merchShowcase":  {
-                          "enabled":  true,
-                          "eyebrow":  "Fresh Threads",
-                          "title":  "Shop Others Oriented Merch",
-                          "description":  "Grab a tee or hoodie to help spark more Gospel-centered AI music.",
-                          "embedHtml":  "<iframe style='border-radius:24px;border:none' src='https://embed.creator-spring.com/widget?slug=othersoriented&per=15&currency=&page=1&layout=grid-sm-4&theme=light' title='othersoriented Merch store powered by Spring' width='100%' height='960' data-reactroot=''></iframe>"
-                      },
     "subscribe":  {
                       "enabled":  true,
                       "embedTemplate":  "mailchimp-classic",
