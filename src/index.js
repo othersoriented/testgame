@@ -253,6 +253,12 @@ function iconSVG(name) {
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M15 2h4.1a5.9 5.9 0 0 0 .1 1.3c.3 1.9 1.8 3.4 3.6 3.7V11a8.9 8.9 0 0 1-4-.9v7a5.6 5.6 0 1 1-5.6-5.6h.8V2Zm-1.4 11.9a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 2.9-2.9v-7.5a6.9 6.9 0 0 1-2.9-.9v5.5h-.8Z"/></svg>`;
     case 'share':
       return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M13.4 2 4 14h5.5L8.6 22 20 8h-5.5L13.4 2Z"/></svg>`;
+    case 'play':
+      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M5 3.7a1 1 0 0 1 1.5-.85l12 8.3a1 1 0 0 1 0 1.7l-12 8.3A1 1 0 0 1 5 20.3V3.7Z"/></svg>`;
+    case 'star':
+      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M12 3.6 14.7 9l6 .9-4.4 4.4 1 6-5.3-2.9L6.7 20l1-6L3.3 9.9l6-.9L12 3.6Z"/></svg>`;
+    case 'mail':
+      return `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="${fill}" d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v.2l8 4.8 8-4.8V7H4Zm0 10h16V9.6l-7.4 4.4a2 2 0 0 1-2.2 0L4 9.6V17Z"/></svg>`;
     default:
       return '';
   }
@@ -300,7 +306,15 @@ function createHeroButton(config, variant = 'primary') {
   content.appendChild(label);
   btn.appendChild(content);
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', (event) => {
+    const isAnchor = config.href?.startsWith('#');
+    if (isAnchor) {
+      const target = document.querySelector(config.href);
+      if (target && typeof target.scrollIntoView === 'function') {
+        event.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
     const ctaId = config.id || config.analyticsId || sanitizeEventKey(config.label);
     const inferredBandSource = config.band || (config.analyticsBand ? { id: config.analyticsBand } : null);
     const heroBandCodeRaw = config.bandCode || config.analyticsBandCode || (inferredBandSource ? getBandAnalyticsCode(inferredBandSource) : '') || inferBandCodeFromEventId(ctaId);
@@ -496,6 +510,282 @@ function createHero(hero, flair) {
 }
 
 
+
+function createSeasonalBanner(banner, flair) {
+  if (!banner || banner.enabled === false) return null;
+  const section = document.createElement('section');
+  section.className = 'landing-seasonal';
+  section.id = banner.id || 'seasonal';
+  const accent = banner.accent || '#0b5cff';
+  section.style.setProperty('--seasonal-accent', accent);
+  section.style.setProperty('--seasonal-accent-soft', hexToRgba(accent, 0.16) || 'rgba(11,92,255,0.16)');
+
+  const kicker = document.createElement('p');
+  kicker.className = 'landing-seasonal-kicker';
+  kicker.textContent = banner.eyebrow || banner.kicker || 'Featured Collection';
+  section.appendChild(kicker);
+
+  const title = document.createElement('h2');
+  title.className = 'landing-seasonal-title';
+  title.textContent = banner.title || banner.headline || 'Seasonal spotlight';
+  section.appendChild(title);
+
+  if (banner.subtitle) {
+    const sub = document.createElement('p');
+    sub.className = 'landing-seasonal-subtitle';
+    sub.textContent = banner.subtitle;
+    section.appendChild(sub);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'landing-seasonal-actions';
+
+  const createBtn = (cfg, variant = 'primary') => {
+    if (!cfg?.href || !cfg?.label) return null;
+    const btn = document.createElement('a');
+    btn.className = `landing-seasonal-btn landing-seasonal-btn--${variant}`;
+    btn.href = cfg.href;
+    btn.target = cfg.href.startsWith('/') || cfg.href.startsWith('#') ? '_self' : '_blank';
+    btn.rel = 'noopener noreferrer';
+    const icon = document.createElement('span');
+    icon.className = 'landing-seasonal-btn-icon';
+    icon.innerHTML = iconSVG(cfg.icon || (variant === 'secondary' ? 'share' : 'star'));
+    const label = document.createElement('span');
+    label.textContent = cfg.label;
+    btn.appendChild(icon);
+    btn.appendChild(label);
+    btn.addEventListener('click', () => {
+      emitAnalytics('seasonal_click', {
+        collection_id: banner.id || 'seasonal',
+        cta_id: cfg.id || sanitizeEventKey(cfg.label),
+        label: cfg.label,
+        url: cfg.href,
+        variant
+      });
+    });
+    return btn;
+  };
+
+  const primary = createBtn(banner.cta || banner.primaryCta, 'primary');
+  const secondary = createBtn(banner.secondaryCta, 'secondary');
+  if (primary) actions.appendChild(primary);
+  if (secondary) actions.appendChild(secondary);
+  if (actions.childElementCount) section.appendChild(actions);
+
+  applyFlair(section, flair);
+  return section;
+}
+
+function createAnnouncement(announcement) {
+  if (!announcement || announcement.enabled === false) return null;
+  const bar = document.createElement('div');
+  bar.className = 'landing-announcement';
+  const text = document.createElement('span');
+  text.className = 'landing-announcement-text';
+  text.textContent = announcement.text || '';
+  bar.appendChild(text);
+
+  if (announcement.cta?.label && announcement.cta?.href) {
+    const btn = document.createElement('a');
+    btn.className = 'landing-announcement-btn';
+    btn.href = announcement.cta.href;
+    btn.target = announcement.cta.href.startsWith('/') || announcement.cta.href.startsWith('#') ? '_self' : '_blank';
+    btn.rel = 'noopener noreferrer';
+    btn.innerHTML = `${iconSVG(announcement.cta.icon || 'play')}<span>${announcement.cta.label}</span>`;
+    btn.addEventListener('click', () => {
+      emitAnalytics('announcement_click', {
+        announcement_id: announcement.id || 'announcement',
+        cta_id: announcement.cta.id || sanitizeEventKey(announcement.cta.label),
+        label: announcement.cta.label,
+        url: announcement.cta.href
+      });
+    });
+    bar.appendChild(btn);
+  }
+
+  return bar;
+}
+
+function createMoodSection(moodCfg, flair) {
+  const items = Array.isArray(moodCfg?.items)
+    ? moodCfg.items.filter(Boolean)
+    : Array.isArray(moodCfg) ? moodCfg.filter(Boolean) : [];
+  if (!items.length) return null;
+
+  const section = document.createElement('section');
+  section.className = 'landing-moods';
+  section.id = moodCfg?.id || 'moods';
+
+  const heading = document.createElement('div');
+  heading.className = 'landing-moods-heading';
+  const title = document.createElement('h2');
+  title.textContent = moodCfg?.title || 'Choose Your Mood';
+  heading.appendChild(title);
+  if (moodCfg?.subtitle) {
+    const subtitle = document.createElement('p');
+    subtitle.textContent = moodCfg.subtitle;
+    heading.appendChild(subtitle);
+  }
+  section.appendChild(heading);
+
+  const grid = document.createElement('div');
+  grid.className = 'landing-mood-grid';
+
+  items.forEach(item => {
+    const tile = document.createElement('a');
+    tile.className = 'landing-mood';
+    tile.href = item.href;
+    tile.target = item.href?.startsWith('/') || item.href?.startsWith('#') ? '_self' : '_blank';
+    tile.rel = 'noopener noreferrer';
+    tile.dataset.moodId = item.id || '';
+    const accent = item.accent || '#111';
+    tile.style.setProperty('--mood-accent', accent);
+
+    const label = document.createElement('div');
+    label.className = 'landing-mood-label';
+    label.textContent = item.label || '';
+    tile.appendChild(label);
+
+    if (item.image || item.bandLine) {
+      const top = document.createElement('div');
+      top.className = 'landing-mood-top';
+      if (item.image) {
+        const cover = document.createElement('div');
+        cover.className = 'landing-mood-cover';
+        cover.style.backgroundImage = `url('${item.image}')`;
+        cover.setAttribute('role', 'img');
+        cover.setAttribute('aria-label', item.imageAlt || `${item.label || 'Album cover'}`);
+        top.appendChild(cover);
+      }
+      if (item.bandLine) {
+        const bandLine = document.createElement('p');
+        bandLine.className = 'landing-mood-band';
+        bandLine.textContent = item.bandLine;
+        top.appendChild(bandLine);
+      }
+      tile.appendChild(top);
+    }
+
+    if (item.description) {
+      const desc = document.createElement('p');
+      desc.className = 'landing-mood-description';
+      desc.textContent = item.description;
+      tile.appendChild(desc);
+    }
+
+    const cta = document.createElement('span');
+    cta.className = 'landing-mood-cta';
+    cta.innerHTML = `${iconSVG(item.icon || 'play')}<span>${item.ctaLabel || 'Play on Spotify'}</span>`;
+    tile.appendChild(cta);
+
+    tile.addEventListener('click', () => {
+      emitAnalytics('mood_click', {
+        mood_id: item.id || sanitizeEventKey(item.label),
+        label: item.label,
+        url: item.href,
+        band_id: item.band || item.bandId,
+        mood_category: item.description
+      });
+    });
+
+    grid.appendChild(tile);
+  });
+
+  section.appendChild(grid);
+  applyFlair(section, flair);
+  return section;
+}
+
+function createCollectionSection(collection, flair) {
+  if (!collection || collection.enabled === false) return null;
+  const items = Array.isArray(collection.items) ? collection.items.filter(Boolean) : [];
+  if (!items.length && !collection.cta) return null;
+
+  const section = document.createElement('section');
+  section.className = 'landing-collection';
+  if (collection.id) section.id = collection.id;
+
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'landing-collection-eyebrow';
+  eyebrow.textContent = collection.eyebrow || 'Featured Collection';
+  section.appendChild(eyebrow);
+
+  const title = document.createElement('h2');
+  title.textContent = collection.title || collection.name || '';
+  section.appendChild(title);
+
+  if (collection.subtitle) {
+    const subtitle = document.createElement('p');
+    subtitle.className = 'landing-collection-subtitle';
+    subtitle.textContent = collection.subtitle;
+    section.appendChild(subtitle);
+  }
+
+  if (collection.cta?.label && collection.cta?.href) {
+    const cta = document.createElement('a');
+    cta.className = 'landing-collection-cta';
+    cta.href = collection.cta.href;
+    cta.target = collection.cta.href.startsWith('#') || collection.cta.href.startsWith('/') ? '_self' : '_blank';
+    cta.rel = 'noopener noreferrer';
+    cta.innerHTML = `${iconSVG(collection.cta.icon || 'play')}<span>${collection.cta.label}</span>`;
+    cta.addEventListener('click', () => {
+      emitAnalytics('collection_click', {
+        collection_id: collection.id || sanitizeEventKey(collection.title),
+        item_id: collection.cta.id || 'main_cta',
+        label: collection.cta.label,
+        url: collection.cta.href
+      });
+    });
+    section.appendChild(cta);
+  }
+
+  if (items.length) {
+    const list = document.createElement('div');
+    list.className = 'landing-collection-items';
+    items.forEach(item => {
+      const card = document.createElement('a');
+      card.className = 'landing-collection-item';
+      card.href = item.href;
+      card.target = item.href?.startsWith('/') || item.href?.startsWith('#') ? '_self' : '_blank';
+      card.rel = 'noopener noreferrer';
+      card.dataset.collectionId = collection.id || '';
+      card.dataset.itemId = item.id || '';
+      if (item.accent) card.style.setProperty('--collection-accent', item.accent);
+
+      const label = document.createElement('div');
+      label.className = 'landing-collection-item-title';
+      label.textContent = item.title || item.label || '';
+      card.appendChild(label);
+
+      if (item.description) {
+        const desc = document.createElement('p');
+        desc.className = 'landing-collection-item-description';
+        desc.textContent = item.description;
+        card.appendChild(desc);
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'landing-collection-item-meta';
+      meta.innerHTML = `${iconSVG(item.icon || 'spotify')}<span>${item.ctaLabel || 'Open on Spotify'}</span>`;
+      card.appendChild(meta);
+
+      card.addEventListener('click', () => {
+        emitAnalytics('collection_click', {
+          collection_id: collection.id || sanitizeEventKey(collection.title),
+          item_id: item.id || sanitizeEventKey(item.title),
+          label: item.title || item.label,
+          url: item.href
+        });
+      });
+
+      list.appendChild(card);
+    });
+    section.appendChild(list);
+  }
+
+  applyFlair(section, flair);
+  return section;
+}
 
 function formatDateLabel(dateish) {
   if (!dateish) return null;
@@ -805,33 +1095,6 @@ function createBandSection(band, shareUrl, flair) {
   const content = document.createElement('div');
   content.className = 'landing-band-content';
 
-  const links = Array.isArray(band.links) ? band.links.filter(Boolean) : [];
-  if (links.length) {
-    const list = document.createElement('div');
-    list.className = 'landing-band-links';
-    links.forEach(link => {
-      const a = document.createElement('a');
-      a.className = 'landing-link';
-      a.href = link.href;
-      a.target = link.href?.startsWith('/') ? '_self' : '_blank';
-      a.rel = 'noopener noreferrer';
-      a.dataset.bandId = band.id || '';
-      a.dataset.linkId = link.id || '';
-      a.innerHTML = `
-        <span class="landing-link-icon" style="color:${link.color || accent}">${iconSVG(link.icon)}</span>
-        <span class="landing-link-label">${link.label || ''}</span>
-      `;
-    a.addEventListener('click', () => emitBandAnalytics('band_stream_click', band, [link.id, link.label], {
-      stream_id: link.id,
-      label: link.label,
-      stream_label: link.label,
-      url: link.href
-    }));
-      list.appendChild(a);
-    });
-    content.appendChild(list);
-  }
-
   const release = band.latestRelease || band.release || null;
   const sample = band.sample || null;
   if ((release && (release.title || release.image || release.subtitle || release.href)) || (sample && sample.src)) {
@@ -1048,26 +1311,12 @@ const MAILCHIMP_CLASSIC_EMBED = `
 <div id="mc_embed_shell">
   <link href="//cdn-images.mailchimp.com/embedcode/classic-061523.css" rel="stylesheet" type="text/css">
   <style type="text/css">
-    #mc_embed_signup{background:#fff; false;clear:left; font:14px Helvetica,Arial,sans-serif; width: 600px;}
+    #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif; width: 600px;}
   </style>
   <div id="mc_embed_signup">
-    <form action="https://othersoriented.us4.list-manage.com/subscribe/post?u=8430d870f739578cd7ecdd61f&amp;id=2daa907931&amp;f_id=00b576eaf0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
+    <form action="https://othersoriented.us4.list-manage.com/subscribe/post?u=8430d870f739578cd7ecdd61f&amp;id=2daa907931&amp;f_id=00bf76eaf0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank">
       <div id="mc_embed_signup_scroll">
-        <h2>Subscribe</h2>
-        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
-        <div class="mc-field-group"><label for="mce-EMAIL">Email Address <span class="asterisk">*</span></label><input type="email" name="EMAIL" class="required email" id="mce-EMAIL" required value></div>
-        <div class="mc-field-group"><label for="mce-FNAME">First Name </label><input type="text" name="FNAME" class=" text" id="mce-FNAME" value></div>
-        <div class="mc-address-group">
-          <div class="mc-field-group"><label for="mce-ADDRESS-addr1">Address </label><input type="text" maxlength="70" name="ADDRESS[addr1]" id="mce-ADDRESS-addr1" class value></div>
-          <div class="mc-field-group"><label for="mce-ADDRESS-addr2">Address Line 2</label><input type="text" maxlength="70" name="ADDRESS[addr2]" id="mce-ADDRESS-addr2" value></div>
-          <div class="mc-address-fields-group">
-            <div class="mc-field-group"><label for="mce-ADDRESS-city">City</label><input type="text" maxlength="40" name="ADDRESS[city]" id="mce-ADDRESS-city" class value></div>
-            <div class="mc-field-group"><label for="mce-ADDRESS-state">State/Province/Region</label><input type="text" maxlength="20" name="ADDRESS[state]" id="mce-ADDRESS-state" class value></div>
-            <div class="mc-field-group"><label for="mce-ADDRESS-zip">Postal / Zip Code</label><input type="text" maxlength="10" name="ADDRESS[zip]" id="mce-ADDRESS-zip" class value></div>
-          </div>
-          <div class="mc-field-group"><label for="mce-ADDRESS-country">Country</label><select name="ADDRESS[country]" id="mce-ADDRESS-country" class><option value="Albania">Albania</option><option value="Algeria">Algeria</option><option value="Andorra">Andorra</option><option value="Angola">Angola</option><option value="Argentina">Argentina</option><option value="Armenia">Armenia</option><option value="Australia">Australia</option><option value="Austria">Austria</option><option value="Azerbaijan">Azerbaijan</option><option value="Bahamas">Bahamas</option><option value="Bahrain">Bahrain</option><option value="Bangladesh">Bangladesh</option><option value="Barbados">Barbados</option><option value="Belarus">Belarus</option><option value="Belgium">Belgium</option><option value="Belize">Belize</option><option value="Benin">Benin</option><option value="Bermuda">Bermuda</option><option value="Bhutan">Bhutan</option><option value="Bolivia">Bolivia</option><option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option><option value="Botswana">Botswana</option><option value="Brazil">Brazil</option><option value="Bulgaria">Bulgaria</option><option value="Burkina Faso">Burkina Faso</option><option value="Burundi">Burundi</option><option value="Cambodia">Cambodia</option><option value="Cameroon">Cameroon</option><option value="Canada">Canada</option><option value="Cape Verde">Cape Verde</option><option value="Cayman Islands">Cayman Islands</option><option value="Central African Republic">Central African Republic</option><option value="Chad">Chad</option><option value="Chile">Chile</option><option value="China">China</option><option value="Colombia">Colombia</option><option value="Congo">Congo</option><option value="Croatia">Croatia</option><option value="Cyprus">Cyprus</option><option value="Czech Republic">Czech Republic</option><option value="Denmark">Denmark</option><option value="Djibouti">Djibouti</option><option value="Ecuador">Ecuador</option><option value="Egypt">Egypt</option><option value="El Salvador">El Salvador</option><option value="Equatorial Guinea">Equatorial Guinea</option><option value="Eritrea">Eritrea</option><option value="Estonia">Estonia</option><option value="Ethiopia">Ethiopia</option><option value="Fiji">Fiji</option><option value="Finland">Finland</option><option value="France">France</option><option value="Gabon">Gabon</option><option value="Gambia">Gambia</option><option value="Georgia">Georgia</option><option value="Germany">Germany</option><option value="Ghana">Ghana</option><option value="Greece">Greece</option><option value="Guam">Guam</option><option value="Guinea">Guinea</option><option value="Guinea-Bissau">Guinea-Bissau</option><option value="Guyana">Guyana</option><option value="Honduras">Honduras</option><option value="Hong Kong">Hong Kong</option><option value="Hungary">Hungary</option><option value="Iceland">Iceland</option><option value="India">India</option><option value="Indonesia">Indonesia</option><option value="Ireland">Ireland</option><option value="Israel">Israel</option><option value="Italy">Italy</option><option value="Japan">Japan</option><option value="Jordan">Jordan</option><option value="Kazakhstan">Kazakhstan</option><option value="Kenya">Kenya</option><option value="Kuwait">Kuwait</option><option value="Kyrgyzstan">Kyrgyzstan</option><option value="Lao People's Democratic Republic">Lao People's Democratic Republic</option><option value="Latvia">Latvia</option><option value="Lebanon">Lebanon</option><option value="Lesotho">Lesotho</option><option value="Liberia">Liberia</option><option value="Liechtenstein">Liechtenstein</option><option value="Lithuania">Lithuania</option><option value="Luxembourg">Luxembourg</option><option value="Macedonia">Macedonia</option><option value="Madagascar">Madagascar</option><option value="Malawi">Malawi</option><option value="Malaysia">Malaysia</option><option value="Maldives">Maldives</option><option value="Mali">Mali</option><option value="Malta">Malta</option><option value="Mauritania">Mauritania</option><option value="Mexico">Mexico</option><option value="Moldova">Moldova</option><option value="Monaco">Monaco</option><option value="Mongolia">Mongolia</option><option value="Morocco">Morocco</option><option value="Mozambique">Mozambique</option><option value="Namibia">Namibia</option><option value="Nepal">Nepal</option><option value="Netherlands">Netherlands</option><option value="Netherlands Antilles">Netherlands Antilles</option><option value="New Zealand">New Zealand</option><option value="Nicaragua">Nicaragua</option><option value="Niger">Niger</option><option value="Nigeria">Nigeria</option><option value="Norway">Norway</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="Panama">Panama</option><option value="Paraguay">Paraguay</option><option value="Peru">Peru</option><option value="Philippines">Philippines</option><option value="Poland">Poland</option><option value="Portugal">Portugal</option><option value="Qatar">Qatar</option><option value="Reunion">Reunion</option><option value="Romania">Romania</option><option value="Russia">Russia</option><option value="Rwanda">Rwanda</option><option value="Samoa (Independent)">Samoa (Independent)</option><option value="Saudi Arabia">Saudi Arabia</option><option value="Senegal">Senegal</option><option value="Seychelles">Seychelles</option><option value="Sierra Leone">Sierra Leone</option><option value="Singapore">Singapore</option><option value="Slovakia">Slovakia</option><option value="Slovenia">Slovenia</option><option value="Somalia">Somalia</option><option value="South Africa">South Africa</option><option value="South Korea">South Korea</option><option value="Spain">Spain</option><option value="Sri Lanka">Sri Lanka</option><option value="Suriname">Suriname</option><option value="Swaziland">Swaziland</option><option value="Sweden">Sweden</option><option value="Switzerland">Switzerland</option><option value="Taiwan">Taiwan</option><option value="Tanzania">Tanzania</option><option value="Thailand">Thailand</option><option value="Togo">Togo</option><option value="Tunisia">Tunisia</option><option value="Turkiye">Turkiye</option><option value="Turkmenistan">Turkmenistan</option><option value="Uganda">Uganda</option><option value="Ukraine">Ukraine</option><option value="United Arab Emirates">United Arab Emirates</option><option value="Uruguay">Uruguay</option><option value="USA" selected>USA</option><option value="Uzbekistan">Uzbekistan</option><option value="Vatican City State (Holy See)">Vatican City State (Holy See)</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option><option value="Virgin Islands (British)">Virgin Islands (British)</option><option value="Yemen">Yemen</option><option value="Zambia">Zambia</option><option value="Zimbabwe">Zimbabwe</option><option value="Antigua And Barbuda">Antigua And Barbuda</option><option value="Anguilla">Anguilla</option><option value="American Samoa">American Samoa</option><option value="Aruba">Aruba</option><option value="Brunei Darussalam">Brunei Darussalam</option><option value="Bouvet Island">Bouvet Island</option><option value="Cook Islands">Cook Islands</option><option value="Christmas Island">Christmas Island</option><option value="Dominican Republic">Dominican Republic</option><option value="Western Sahara">Western Sahara</option><option value="Falkland Islands">Falkland Islands</option><option value="Faroe Islands">Faroe Islands</option><option value="Grenada">Grenada</option><option value="French Guiana">French Guiana</option><option value="Gibraltar">Gibraltar</option><option value="Greenland">Greenland</option><option value="Guadeloupe">Guadeloupe</option><option value="Guatemala">Guatemala</option><option value="Haiti">Haiti</option><option value="Jamaica">Jamaica</option><option value="Kiribati">Kiribati</option><option value="Comoros">Comoros</option><option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option><option value="Saint Lucia">Saint Lucia</option><option value="Marshall Islands">Marshall Islands</option><option value="Macau">Macau</option><option value="Martinique">Martinique</option><option value="Mauritius">Mauritius</option><option value="New Caledonia">New Caledonia</option><option value="Norfolk Island">Norfolk Island</option><option value="Nauru">Nauru</option><option value="Niue">Niue</option><option value="Papua New Guinea">Papua New Guinea</option><option value="Pitcairn">Pitcairn</option><option value="Palau">Palau</option><option value="Solomon Islands">Solomon Islands</option><option value="Svalbard and Jan Mayen Islands">Svalbard and Jan Mayen Islands</option><option value="San Marino">San Marino</option><option value="Tonga">Tonga</option><option value="Timor-Leste">Timor-Leste</option><option value="Trinidad and Tobago">Trinidad and Tobago</option><option value="Tuvalu">Tuvalu</option><option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option><option value="Virgin Islands (U.S.)">Virgin Islands (U.S.)</option><option value="Vanuatu">Vanuatu</option><option value="Mayotte">Mayotte</option><option value="Myanmar">Myanmar</option><option value="Sao Tome and Principe">Sao Tome and Principe</option><option value="South Georgia and the South Sandwich Islands">South Georgia and the South Sandwich Islands</option><option value="Tajikistan">Tajikistan</option><option value="United Kingdom">United Kingdom</option><option value="Costa Rica">Costa Rica</option><option value="Guernsey">Guernsey</option><option value="North Korea">North Korea</option><option value="Afghanistan">Afghanistan</option><option value="Cote D'Ivoire">Cote D'Ivoire</option><option value="Cuba">Cuba</option><option value="French Polynesia">French Polynesia</option><option value="Iran">Iran</option><option value="Iraq">Iraq</option><option value="Libya">Libya</option><option value="Palestine">Palestine</option><option value="Syria">Syria</option><option value="Aaland Islands">Aaland Islands</option><option value="Turks & Caicos Islands">Turks & Caicos Islands</option><option value="Jersey  (Channel Islands)">Jersey  (Channel Islands)</option><option value="Dominica">Dominica</option><option value="Montenegro">Montenegro</option><option value="Sudan">Sudan</option><option value="Montserrat">Montserrat</option><option value="Curacao">Curacao</option><option value="Sint Maarten">Sint Maarten</option><option value="South Sudan">South Sudan</option><option value="Republic of Kosovo">Republic of Kosovo</option><option value="Congo, Democratic Republic of the">Congo, Democratic Republic of the</option><option value="Isle of Man">Isle of Man</option><option value="Saint Martin">Saint Martin</option><option value="Bonaire, Saint Eustatius and Saba">Bonaire, Saint Eustatius and Saba</option><option value="Serbia">Serbia</option></select></div>
         </div>
-        <div class="mc-field-group"><label for="mce-PHONE">Phone Number </label><input type="text" name="PHONE" class="REQ_CSS" id="mce-PHONE" value></div>
         <div id="mce-responses" class="clear">
           <div class="response" id="mce-error-response" style="display: none;"></div>
           <div class="response" id="mce-success-response" style="display: none;"></div>
@@ -1090,9 +1339,9 @@ function createSubscribeSection(subscribeCfg, flair) {
   section.className = 'landing-subscribe';
   section.style.textAlign = 'center';
 
-  const titleText = cfg.title || 'Get new drops first';
-  const descText = cfg.description || cfg.copy || 'Join the email list for updates on fresh releases.';
-  const disclaimerText = cfg.disclaimer || 'We send 1–2 thoughtful emails a month. Unsubscribe anytime.';
+  const titleText = cfg.title || 'Get the Scripture Memory Starter Pack (Free)';
+  const descText = cfg.description || cfg.copy || 'We will send our top 5 family-favorite tracks plus simple ways to fill your home with the Word.';
+  const disclaimerText = cfg.disclaimer || '1-2 thoughtful emails a month. No spam, just music and ideas that help your kids love Scripture.';
 
   const title = document.createElement('h2');
   title.textContent = titleText;
@@ -1171,6 +1420,7 @@ function createSubscribeSection(subscribeCfg, flair) {
   field.appendChild(input);
   form.appendChild(field);
 
+
   const hiddenFields = Array.isArray(cfg.hiddenFields) ? cfg.hiddenFields : [
     { name: 'f_id', value: '00b576eaf0' }
   ];
@@ -1197,7 +1447,7 @@ function createSubscribeSection(subscribeCfg, flair) {
 
   const button = document.createElement('button');
   button.type = 'submit';
-  button.textContent = cfg.ctaLabel || 'Subscribe';
+  button.textContent = cfg.ctaLabel || 'Send Me the Starter Pack';
   form.appendChild(button);
 
   form.addEventListener('submit', () => {
@@ -1209,10 +1459,14 @@ function createSubscribeSection(subscribeCfg, flair) {
 
   section.appendChild(form);
 
-  if (cfg.disclaimer) {
+  if (disclaimerText) {
     const disclaimer = document.createElement('p');
     disclaimer.className = 'landing-subscribe-disclaimer';
-    disclaimer.innerHTML = cfg.disclaimer;
+    if (cfg.disclaimer) {
+      disclaimer.innerHTML = cfg.disclaimer;
+    } else {
+      disclaimer.textContent = disclaimerText;
+    }
     section.appendChild(disclaimer);
   }
 
@@ -1229,6 +1483,8 @@ function mountLanding(cfg) {
   app.innerHTML = '';
   sampleControllers.clear();
 
+  const announcement = createAnnouncement(cfg.announcement);
+
   const heroSource = cfg.hero || (cfg.brand ? {
     avatar: cfg.brand.avatar,
     title: cfg.brand.name,
@@ -1236,19 +1492,23 @@ function mountLanding(cfg) {
     tagline: cfg.brand.tagline,
     kicker: cfg.hero?.kicker || cfg.brand.kicker
   } : null);
+  const hero = (heroSource && (heroSource.title || heroSource.subtitle || heroSource.tagline))
+    ? createHero(heroSource, cfg.flair)
+    : null;
 
-  if (heroSource && (heroSource.title || heroSource.subtitle || heroSource.tagline)) {
-    const hero = createHero(heroSource, cfg.flair);
-    if (hero) app.appendChild(hero);
-  }
+  const moodSection = createMoodSection(cfg.moods, cfg.flair);
 
   const subscribeSection = createSubscribeSection(cfg.subscribe, cfg.flair);
+
+  if (announcement) app.appendChild(announcement);
+  if (hero) app.appendChild(hero);
+  if (moodSection) app.appendChild(moodSection);
 
   const bands = Array.isArray(cfg.bands) ? cfg.bands.filter(Boolean) : [];
   const bandWrap = document.createElement('section');
   bandWrap.className = 'landing-bands';
 
-  const shareUrl = cfg.shareUrl || 'https://christianaiband.com';
+  const shareUrl = cfg.shareUrl || 'https://edifai.me';
   bands.forEach(band => {
     const bandSection = createBandSection(band, shareUrl, cfg.flair);
     if (bandSection) bandWrap.appendChild(bandSection);
@@ -1276,11 +1536,14 @@ function mountLanding(cfg) {
 
   if (window.anime) {
     const tl = window.anime.timeline({ easing: 'easeOutQuad' });
-    tl.add({ targets: '.landing-hero', opacity: [0, 1], translateY: [-12, 0], duration: 420 });
+    if (announcement) tl.add({ targets: '.landing-announcement', opacity: [0, 1], translateY: [-6, 0], duration: 260 });
+    if (hero) tl.add({ targets: '.landing-hero', opacity: [0, 1], translateY: [-12, 0], duration: 420 }, announcement ? '-=120' : undefined);
+    if (moodSection) tl.add({ targets: '.landing-moods', opacity: [0, 1], translateY: [-8, 0], duration: 320 }, '-=200');
     tl.add({ targets: '.landing-band', opacity: [0, 1], translateY: [16, 0], delay: window.anime.stagger(120), duration: 380 }, '-=200');
     tl.add({ targets: '.landing-card', opacity: [0, 1], translateY: [12, 0], delay: window.anime.stagger(60), duration: 320 }, '-=200');
+    tl.add({ targets: '.landing-subscribe', opacity: [0, 1], translateY: [8, 0], duration: 320 }, '-=200');
   } else {
-    document.querySelectorAll('.landing-hero, .landing-band, .landing-card').forEach(el => {
+    document.querySelectorAll('.landing-announcement, .landing-hero, .landing-moods, .landing-band, .landing-card, .landing-subscribe').forEach(el => {
       el.style.opacity = '1';
       el.style.transform = 'none';
     });
@@ -1444,7 +1707,7 @@ async function boot() {
     embedTemplate: 'mailchimp-classic',
     analyticsLocation: 'midpage'
   },
-    shareUrl: 'https://christianaiband.com',
+    shareUrl: 'https://edifai.me',
     cardsTitle: 'Arcade + Extras',
     featured: ['game'],
     cards: [

@@ -206,6 +206,156 @@
       font-size:13px;
       color:var(--muted);
     }
+    .landing-announcement{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:linear-gradient(135deg, rgba(227,39,39,0.08), rgba(23,128,68,0.08));
+      border:1px solid rgba(19,22,36,0.1);
+      box-shadow:0 6px 18px rgba(19,22,36,0.08);
+      font-size:14px;
+      max-width:100%;
+    }
+    .landing-announcement-text{
+      flex:1 1 auto;
+      color:var(--ink);
+      font-weight:600;
+      line-height:1.4;
+    }
+    .landing-announcement-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:#ffffff;
+      border:1px solid rgba(19,22,36,0.12);
+      font-weight:650;
+      text-decoration:none;
+      color:var(--ink);
+      box-shadow:var(--shadow-sm);
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      white-space:normal;
+      justify-content:flex-start;
+    }
+    .landing-announcement-btn svg{width:18px; height:18px;}
+    .landing-announcement-btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(19,22,36,0.2);
+      box-shadow:0 14px 30px rgba(19,22,36,0.14);
+    }
+    @media (max-width: 640px){
+      .landing-announcement{
+        border-radius:12px;
+        gap:8px;
+      }
+      .landing-announcement-text{
+        font-size:13px;
+        line-height:1.5;
+      }
+      .landing-announcement-btn{
+        width:100%;
+      }
+    }
+    @media (min-width: 800px){
+      .landing-announcement{
+        flex-direction:row;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        padding:12px 16px;
+      }
+      .landing-announcement-text{
+        font-size:14px;
+      }
+      .landing-announcement-btn{
+        width:auto;
+      }
+    }
+    .landing-moods{
+      padding:clamp(18px,3vw,26px);
+      border-radius:var(--radius-lg);
+      background:#ffffff;
+      border:1px solid var(--line);
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-moods-heading h2{
+      margin:0;
+      font-size:22px;
+    }
+    .landing-moods-heading p{
+      margin:6px 0 16px;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .landing-mood-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+      gap:12px;
+    }
+    .landing-mood{
+      padding:16px;
+      border-radius:var(--radius-md);
+      border:1px solid rgba(19,22,36,0.1);
+      background:linear-gradient(180deg, rgba(244,246,252,0.9) 0%, #ffffff 100%);
+      text-decoration:none;
+      color:inherit;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-mood:hover{
+      transform:translateY(-2px);
+      border-color:var(--mood-accent, var(--ink));
+      box-shadow:0 12px 24px rgba(19,22,36,0.12);
+    }
+    .landing-mood-top{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:100%;
+    }
+    .landing-mood-cover{
+      width:72px;
+      height:72px;
+      border-radius:12px;
+      background-size:cover;
+      background-position:center;
+      border:1px solid rgba(19,22,36,0.12);
+      box-shadow:var(--shadow-sm);
+    }
+    .landing-mood-label{
+      margin:0;
+      font-weight:700;
+      font-size:17px;
+      letter-spacing:-0.01em;
+    }
+    .landing-mood-band{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+    }
+    .landing-mood-description{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.5;
+    }
+    .landing-mood-cta{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-weight:650;
+      color:var(--mood-accent, var(--ink));
+      margin-top:auto;
+    }
+    .landing-mood-cta svg{width:18px; height:18px;}
     .landing-bands{
       display:flex;
       flex-direction:column;

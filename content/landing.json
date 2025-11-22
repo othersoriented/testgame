@@ -1,589 +1,492 @@
 {
-    "hero":  {
-                 "kicker":  "A father's experiment in family edification",
-                 "title":  "The Great Reunion + Lost Boy Found + SPRINKLD",
-                 "subtitle":  "Merry Christmas! Listen to carols about Christ this season!",
-                 "avatar":  "/assets/bands/tgr/logo.png",
-                 "avatars":  [
-                                  "/assets/bands/tgr/logo.png",
-                                  "/assets/bands/lbf/logo.png",
-                                  "/assets/bands/sprinkld/logo.png"
-                              ],
-                 "tagline":  "The days are evil. Your music should edify you in Christ.",
-                 "cta":  {
-                     "id":  "hero_stream_tgr",
-                     "label":  "Stream The Great Reunion",
-                     "href":  "https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ",
-                     "icon":  "spotify"
-                 },
-                 "secondaryCta":  {
-                     "id":  "hero_stream_lbf",
-                     "label":  "Stream Lost Boy Found",
-                     "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
-                     "icon":  "spotify"
-                 },
-                 "extraCtas":  [
-                                   {
-                                       "id":  "hero_stream_sprinkld",
-                                       "label":  "Stream SPRINKLD",
-                                       "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
-                                       "icon":  "spotify",
-                                       "variant":  "secondary"
-                                   }
-                               ],
-                 "highlights":  [
-                     {
-                         "value":  "250+",
-                         "label":  "Edif(AI)ing songs"
-                     },
-                     {
-                         "value":  "3",
-                         "label":  "Active projects"
-                     },
-                     {
-                         "value":  "Monthly",
-                         "label":  "New releases"
-                     }
-                 ]
-             },
-    "flags":  [
-
-              ],
-    "flair":  {
-                 "image":  "/assets/flair/seasonal.png",
-                 "size":  170,
-                 "offsetX":  -30,
-                 "offsetY":  -30,
-                 "opacity":  0.95
-             },
-    "bands":  [
-                  {
-                      "id":  "the-great-reunion",
-                      "name":  "The Great Reunion",
-                      "tagline":  "Christian AI Indie-Folk / Indie Rock",
-                      "description":  "Unique indie-folk AI Christian music with warm, reflective hymns.",
-                      "accent":  "#6AD7E5",
-                      "logo":  "/assets/bands/tgr/logo.png",
-                      "latestRelease":  {
-                                            "title":  "Christmas Volume 1",
-                                            "subtitle":  "Edify yourself this season!",
-                                            "cta":  "Explore now",
-                                            "href":  "https://music.apple.com/us/artist/the-great-reunion/1846862216",
-                                            "image":  "/assets/bands/tgr/releases/christmas-vol1.png",
-                                            "releaseDate":  "2025-11-14",
-                                            "eyebrow":  "Featured Release"
-                                        },
-                      "sample":  {
-                                     "title":  "Sample: Christmas Vol. 1",
-                                     "src":  "/assets/audio/tgr-sample.mp3"
-                                 },
-                      "releaseDate":  "2025-12-01",
-                      "socialProofTitle":  "Stories from the community",
-                      "socialProof":  [
-                                          {
-                                              "quote":  "\"This is gorgeous, instant add on Spotify! Thank you for being clear about using AI.\"",
-                                              "source":  "Russell W. - TikTok"
-                                          },
-                                          {
-                                              "quote":  "\"You know what, heck yeah! God can use anything to reach His people!\"",
-                                              "source":  "Karen - TikTok"
-                                          }
-                                      ],
-                      "albums":  [
-                                     {
-                                         "title":  "Hymns Volume 1 (AI)",
-                                         "releaseDate":  "2025-10-16",
-                                         "href":  "https://open.spotify.com/album/0YIq1OOyQkJmY1B1OhUJlo?si=JJ8JWifQSCyp6L-UlMWwYA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/tgr/albums/hymns-vol1.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Christmas Volume 1 (AI)",
-                                         "releaseDate":  "2025-10-25",
-                                         "href":  "https://open.spotify.com/album/2ucLYXQFEqF7SCJpjU3lA5?si=Wt7e-P-GQrOih9jJj3x2OA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/tgr/albums/christmas-vol1.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Christmas Volume 2 (AI)",
-                                         "releaseDate":  "2025-11-13",
-                                         "href":  "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/tgr/albums/christmas-vol2.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     }
-                                 ],
-                      "links":  [
-                                    {
-                                        "id":  "spotify",
-                                        "icon":  "spotify",
-                                        "label":  "Spotify",
-                                        "href":  "https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ",
-                                        "color":  "#1DB954"
-                                    },
-                                    {
-                                        "id":  "apple",
-                                        "icon":  "apple",
-                                        "label":  "Apple Music",
-                                        "href":  "https://music.apple.com/us/artist/the-great-reunion/1846862216",
-                                        "color":  "#0F0F0F"
-                                    },
-                                    {
-                                        "id":  "ytm",
-                                        "icon":  "youtubemusic",
-                                        "label":  "YouTube Music",
-                                        "href":  "https://music.youtube.com/channel/UCF750lcrGvPrwLF2rELwrhw",
-                                        "color":  "#FF0000"
-                                    },
-                                    {
-                                        "id":  "amazon",
-                                        "icon":  "amazon",
-                                        "label":  "Amazon Music",
-                                        "href":  "https://music.amazon.com/artists/B0FWTZYP96/the-great-reunion",
-                                        "color":  "#00A8E1"
-                                    },
-                                    {
-                                        "id":  "pandora",
-                                        "icon":  "pandora",
-                                        "label":  "Pandora",
-                                        "href":  "https://www.pandora.com/artist/the-great-reunion/ARpwqxg9bwwjpJ9",
-                                        "color":  "#1F7CF0"
-                                    },
-                                    {
-                                        "id":  "youtube",
-                                        "icon":  "youtube",
-                                        "label":  "YouTube",
-                                        "href":  "https://www.youtube.com/@thegreatreunion",
-                                        "color":  "#FF0000"
-                                    }
-                                ],
-                      "extras":  [
-                                     {
-                                         "id":  "instagram",
-                                         "icon":  "instagram",
-                                         "label":  "Instagram",
-                                         "href":  "https://www.instagram.com/thegreatreunionmusic/",
-                                         "color":  "#E1306C"
-                                     },
-                                     {
-                                         "id":  "tiktok",
-                                         "icon":  "tiktok",
-                                         "label":  "TikTok",
-                                         "href":  "https://www.tiktok.com/@thegreatreunionmusic",
-                                         "color":  "#000000"
-                                     }
-                                 ]
-                  },
-                  {
-                      "id":  "lost-boy-found",
-                      "name":  "Lost Boy Found",
-                      "tagline":  "Christian AI Pop-Punk / Rock",
-                      "description":  "High-energy AI Christian pop-punk music with hymns and Scripture songs.",
-                      "accent":  "#39FF14",
-                      "logo":  "/assets/bands/lbf/logo.png",
-                      "latestRelease":  {
-                                            "title":  "Hymns Vol. 8",
-                                            "subtitle":  "There's not a friend like Jesus.",
-                                            "cta":  "Listen now",
-                                            "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
-                                            "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
-                                            "releaseDate":  "2025-11-16",
-                                            "eyebrow":  "Featured Release"
-                                        },
-                      "sample":  {
-                                     "title":  "Sample: Hymns VIII Remix",
-                                     "src":  "/assets/audio/lbf-sample.mp3"
-                                 },
-                      "releaseDate":  "2025-10-14",
-                      "socialProofTitle":  "What listeners say",
-                      "socialProof":  [
-                                          {
-                                              "quote":  "\"The sound is great! Really brings me back to my high school days. But more importantly, they are close to Scripture and they definitely draw me back to His Word and help me to remember the verses.\"",
-                                              "source":  "Cordell G."
-                                          },
-                                          {
-                                              "quote":  "\"Bro, if your 'band' ever needs a drummer, hmu\"",
-                                              "source":  "Daniel R."
-                                          }
-                                      ],
-                      "links":  [
-                                    {
-                                        "id":  "spotify",
-                                        "icon":  "spotify",
-                                        "label":  "Spotify",
-                                        "href":  "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
-                                        "color":  "#1DB954"
-                                    },
-                                    {
-                                        "id":  "apple",
-                                        "icon":  "apple",
-                                        "label":  "Apple Music",
-                                        "href":  "https://music.apple.com/us/artist/lost-boy-found/1763501707",
-                                        "color":  "#0F0F0F"
-                                    },
-                                    {
-                                        "id":  "ytm",
-                                        "icon":  "youtubemusic",
-                                        "label":  "YouTube Music",
-                                        "href":  "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg",
-                                        "color":  "#FF0000"
-                                    },
-                                    {
-                                        "id":  "amazon",
-                                        "icon":  "amazon",
-                                        "label":  "Amazon Music",
-                                        "href":  "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found",
-                                        "color":  "#00A8E1"
-                                    },
-                                    {
-                                        "id":  "pandora",
-                                        "icon":  "pandora",
-                                        "label":  "Pandora",
-                                        "href":  "https://pandora.app.link/R4jc6mU0jNb",
-                                        "color":  "#1F7CF0"
-                                    },
-                                    {
-                                        "id":  "youtube",
-                                        "icon":  "youtube",
-                                        "label":  "YouTube",
-                                        "href":  "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw",
-                                        "color":  "#FF0000"
-                                    }
-                                ],
-                      "extras":  [
-                                     {
-                                         "id":  "instagram",
-                                         "icon":  "instagram",
-                                         "label":  "Instagram",
-                                         "href":  "https://www.instagram.com/christianaiband/",
-                                         "color":  "#E1306C"
-                                     },
-                                     {
-                                         "id":  "tiktok",
-                                         "icon":  "tiktok",
-                                         "label":  "TikTok",
-                                         "href":  "https://www.tiktok.com/@lostboyfoundofficial",
-                                         "color":  "#000000"
-                                     }
-                                 ],
-                      "albums":  [
-                                     {
-                                         "title":  "b(ai)ble songs vol. 1",
-                                         "releaseDate":  "2024-08-24",
-                                         "href":  "https://open.spotify.com/album/5JITvUv8gqmFv5S9unXoxT?si=2mfHjQnyRDi1H5iiHipIeg",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-vol1.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "b(ai)ble songs: Christmas",
-                                         "releaseDate":  "2024-09-20",
-                                         "href":  "https://open.spotify.com/album/1vjJ4SUQiiBx1JvA5A9K3M?si=87RGMpi2SJiucyoYV3R_qQ",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-christmas.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "b(ai)ble songs vol. 2",
-                                         "releaseDate":  "2024-09-09",
-                                         "href":  "https://open.spotify.com/album/3sgPgEvRGziuUtJJInQYPZ?si=gY6bKvskSGiZEaSgJjAlLA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-vol2.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "b(ai)ble songs vol. 3",
-                                         "releaseDate":  "2024-10-08",
-                                         "href":  "https://open.spotify.com/album/6uenmiH3aUYMAZU7Xo4VVY?si=RO2pTsTORgOpn3xbzlaE3Q",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-vol3.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "b(ai)ble songs: The Passion Pt. 1",
-                                         "releaseDate":  "2025-03-05",
-                                         "href":  "https://open.spotify.com/album/1uS80eRz8a3nQP36D4aDrV?si=oXAEvF3LRW-KiFm_KOw8Lw",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-passion-pt1.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "b(ai)ble songs: The Passion Pt. 2",
-                                         "releaseDate":  "2025-03-29",
-                                         "href":  "https://open.spotify.com/album/4RRc7ID3OCyQlHARg6O0ym?si=dU6cRKN1Qe6hp2CVnZrPOQ",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-passion-pt2.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "b(ai)ble songs: The Passion Pt. 3",
-                                         "releaseDate":  "2025-04-18",
-                                         "href":  "https://open.spotify.com/album/0jeaBC4Eipxx6r2tjRQvZG?si=rUMNunKoSrunL0L10taolA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/baible-songs-passion-pt3.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 1",
-                                         "releaseDate":  "2025-05-13",
-                                         "href":  "https://open.spotify.com/album/00hqsKTo0YVpY9FylrExo9?si=Dz8ubs6tSxaCjdFp6QygAg",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol1.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 2",
-                                         "releaseDate":  "2025-06-07",
-                                         "href":  "https://open.spotify.com/album/63Xt3nulRUI7bkTO8ENJ6L?si=_eZWN07zSxmPsHwYGeiO_g",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol2.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 3",
-                                         "releaseDate":  "2025-06-21",
-                                         "href":  "https://open.spotify.com/album/41u6mAM3fExtl0ayUgSKEg?si=3IoCG-mDQbmseJK6Vs9fzQ",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol3.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 4",
-                                         "releaseDate":  "2025-07-05",
-                                         "href":  "https://open.spotify.com/album/6ojDnJtQSRXsLZ6Ri6VGw9?si=etgLgDgrQ6OsSk8qqbdkHw",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol4.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 5",
-                                         "releaseDate":  "2025-08-07",
-                                         "href":  "https://open.spotify.com/album/35jHOkqCGhLdTeavy4cTgB?si=P720mJS5RJGjZ0esFDmdHw",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol5.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 6",
-                                         "releaseDate":  "2025-09-11",
-                                         "href":  "https://open.spotify.com/album/2EgtLLT4m8DK38sMsKClfS?si=qqNydCcNR7uh-eXaxUwHUg",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol6.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 7",
-                                         "releaseDate":  "2025-10-09",
-                                         "href":  "https://open.spotify.com/album/6fD0WK86QSnDtnIKGoXUYJ?si=DgLBqMDcSn-DrbDeeDZ4qA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol7.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th Vol. 8",
-                                         "releaseDate":  "2025-10-13",
-                                         "href":  "https://open.spotify.com/album/5hd8AFbqtLUnnh5adHwhOG?si=ipDdtffiRb-oIzL0qRmCXw",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-vol8.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th: Christmas Vol. 2",
-                                         "releaseDate":  "2025-11-15",
-                                         "href":  "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Hymns of the F(ai)th: Christmas Vol. 2 (Alt)",
-                                         "releaseDate":  "2025-11-06",
-                                         "href":  "https://open.spotify.com/album/1zaLcPivZ65sv1lsSbDWoB?si=EPIxl2KWS7GIf0GSkcPlTg",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     }
-                                 ]
-                  },
-                  {
-                      "id":  "sprinkld",
-                      "name":  "SPRINKLD",
-                      "tagline":  "Christian AI EDM / Future Bass",
-                      "description":  "Theologically rich Christian EDM?!",
-                      "accent":  "#FF5FB7",
-                      "logo":  "/assets/bands/sprinkld/logo.png",
-                      "badge":  "New",
-                      "latestRelease":  {
-                                            "title":  "'Tis My Happiness Below",
-                                            "subtitle":  "New EP out now.",
-                                            "cta":  "Stream the EP",
-                                            "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
-                                            "image":  "/assets/bands/sprinkld/releases/tis-my-happiness-below.png",
-                                            "releaseDate":  "2025-11-15",
-                                            "eyebrow":  "Featured Release"
-                                        },
-                      "sample":  {
-                                     "title":  "Sample: 'Tis My Happiness Below",
-                                     "src":  "/assets/audio/sprinkld-sample.mp3"
-                                 },
-                      "releaseDate":  "2025-11-15",
-                      "socialProofTitle":  "Stories from the community",
-                      "socialProof":  [
-                                          {
-                                              "quote":  "\"LOLL! This is perfect for working out.\"",
-                                              "source":  "Julia D."
-                                          },
-                                          {
-                                              "quote":  "\"The simple repetition of EDM helps drive one core truth deep into your heart.\"",
-                                              "source":  "Jonathan D."
-                                          }
-                                      ],
-                      "links":  [
-                                    {
-                                        "id":  "spotify",
-                                        "icon":  "spotify",
-                                        "label":  "Spotify",
-                                        "href":  "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
-                                        "color":  "#1DB954"
-                                    },
-                                    {
-                                        "id":  "apple",
-                                        "icon":  "apple",
-                                        "label":  "Apple Music (coming soon)",
-                                        "href":  "#",
-                                        "color":  "#0F0F0F"
-                                    },
-                                    {
-                                        "id":  "amazon",
-                                        "icon":  "amazon",
-                                        "label":  "Amazon Music",
-                                        "href":  "https://music.amazon.com/artists/B0G2K2XXGL/sprinkld",
-                                        "color":  "#00A8E1"
-                                    },
-                                    {
-                                        "id":  "pandora",
-                                        "icon":  "pandora",
-                                        "label":  "Pandora",
-                                        "href":  "https://www.pandora.com/artist/sprinkld/ARgXpppVwXlrqZ6",
-                                        "color":  "#1F7CF0"
-                                    },
-                                    {
-                                        "id":  "ytm",
-                                        "icon":  "youtubemusic",
-                                        "label":  "YouTube Music",
-                                        "href":  "https://music.youtube.com/channel/UCzCEi0pehN9xS73DNgl-JHg",
-                                        "color":  "#FF0000"
-                                    },
-                                    {
-                                        "id":  "youtube",
-                                        "icon":  "youtube",
-                                        "label":  "YouTube",
-                                        "href":  "https://www.youtube.com/channel/UCqLBHMbLHh1djqo06Xn5ZBQ",
-                                        "color":  "#FF0000"
-                                    }
-                                ],
-                      "extras":  [
-                                     {
-                                         "id":  "instagram",
-                                         "icon":  "instagram",
-                                         "label":  "Instagram (coming soon)",
-                                         "href":  "#",
-                                         "color":  "#E1306C"
-                                     },
-                                     {
-                                         "id":  "tiktok",
-                                         "icon":  "tiktok",
-                                         "label":  "TikTok",
-                                         "href":  "https://www.tiktok.com/@sprinkldmusic",
-                                         "color":  "#000000"
-                                     }
-                                 ],
-                      "albums":  [
-                                    {
-                                         "title":  "Sometimes a Light Surprises",
-                                         "releaseDate":  "2025-11-19",
-                                         "href":  "https://open.spotify.com/album/0jX2xBAfxcX4Z63r3eWjeo?si=0F_48drlRzyU_08kIQGRXA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/sprinkld/albums/sometimes-a-light-surprises.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                    {
-                                         "title":  "Let Me But Hear My Savior Say",
-                                         "releaseDate":  "2025-11-19",
-                                         "href":  "https://open.spotify.com/album/5bm11rmiQekwBmggQXcL26?si=217arqVQS5i66o4zH7KmKg",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/sprinkld/albums/let-me-but-hear-my-savior-say.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     },
-                                     {
-                                         "title":  "Tis My Happiness Below",
-                                         "releaseDate":  "2025-11-15",
-                                         "href":  "https://open.spotify.com/album/12oi765RkQIuCrhzL8OuBb?si=sgFnMdrzQ7uoKlK6syJltA",
-                                         "tracks":  null,
-                                         "image":  "/assets/bands/sprinkld/albums/tis-my-happiness-below.png",
-                                         "ctaLabel":  "Listen on Spotify"
-                                     }
-                                 ]
-                  },
-                  {
-                      "id":  "othersoriented-merch",
-                      "name":  "Others Oriented Merch",
-                      "tagline":  "Limited drops to support the music",
-                      "description":  "Pick up playful tees, hoodies, and posters that help fund more Christ-centered AI music experiments.",
-                      "accent":  "#FF8A3C",
-                      "links":  [
-                                    {
-                                        "id":  "shop-main",
-                                        "icon":  "merch",
-                                        "label":  "Open full store",
-                                        "href":  "https://othersoriented.creator-spring.com/",
-                                        "color":  "#FF8A3C"
-                                    },
-                                    {
-                                        "id":  "spring-follow",
-                                        "icon":  "instagram",
-                                        "label":  "Follow @othersoriented",
-                                        "href":  "#",
-                                        "color":  "#E1306C"
-                                    }
-                                ],
-                      "merch":  {
-                                    "eyebrow":  "Fresh Threads",
-                                    "title":  "Shop Others Oriented Merch",
-                                    "description":  "Just for fun—browse and snag a cozy gift.",
-                                    "embedHtml":  "<iframe style='border-radius:24px;border:none' src='https://embed.creator-spring.com/widget?slug=othersoriented&per=20&currency=&page=1&layout=carousel-small&theme=light' title='othersoriented Merch store powered by Spring' width='100%' height='420' data-reactroot=''></iframe>"
-                                }
-                  }
-              ],
-    "cardsTitle":  "Arcade",
-    "subscribe":  {
-                      "enabled":  true,
-                      "embedTemplate":  "mailchimp-classic",
-                      "analyticsLocation":  "midpage"
-                  },
-    "shareUrl":  "https://christianaiband.com",
-    "backgroundVideo":  {
-                            "src":  "/assets/video/background.mp4"
-                        },
-    "cards":  [
-                  {
-                      "id":  "game",
-                      "icon":  "game",
-                      "label":  "Play Flappy Praise",
-                      "href":  "/game.html",
-                      "color":  "#39FF14"
-                  },
-                  {
-                      "id":  "ninja",
-                      "icon":  "game",
-                      "label":  "Play Praise Ninja",
-                      "href":  "/ninja/",
-                      "color":  "#00E5FF"
-                  }
-              ],
-    "featured":  [
-                     "game"
-                 ]
+    "announcement": {
+        "id": "christmas-banner",
+        "text": "New: The Christmas Collection - pop-punk carols, and indie-folk hymns for Advent & Christmas.",
+        "cta": {
+            "id": "banner_christmas_playlist",
+            "label": "Listen to the Christmas Albums",
+            "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+            "icon": "spotify"
+        }
+    },
+    "hero": {
+        "kicker": "EdifAI Music",
+        "title": "Edifying music for the whole family.",
+        "subtitle": "Pop-punk, indie-folk, and EDM that help you fill your home with the God's Word and encouragement.",
+        "avatar": "/assets/bands/tgr/logo.png",
+        "avatars": [
+            "/assets/bands/tgr/logo.png",
+            "/assets/bands/lbf/logo.png",
+            "/assets/bands/sprinkld/logo.png"
+        ],
+        "tagline": "No cringe. No fluff. Just EDIFYING music in genres you actually love.",
+        "cta": {
+            "id": "hero_start_listening",
+            "label": "Start Listening in 30 Seconds",
+            "href": "#moods",
+            "icon": "play"
+        },
+        "secondaryCta": {
+            "id": "hero_christmas_mix",
+            "label": "Play the Christmas Mix",
+            "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+            "icon": "spotify"
+        },
+        "highlights": [
+            {
+                "value": "3 moods",
+                "label": "Pop-punk, indie-folk, EDM"
+            },
+            {
+                "value": "Family-first",
+                "label": "Bible Songs & Ancient Hymns"
+            },
+            {
+                "value": "New drops",
+                "label": "Fresh music monthly"
+            }
+        ]
+    },
+    "moods": {
+        "id": "moods",
+        "title": "Choose Your Mood",
+        "subtitle": "Pick a vibe and start listening in 30 seconds.",
+        "items": [
+            {
+                "id": "mood-high-energy",
+                "label": "High-Energy (Pop-Punk)",
+                "bandLine": "AI Pop-punk Bible songs and Hymns",
+                "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
+                "description": "High-energy pop-punk with ancient lyrics and others pulled straight from Scripture.",
+                "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+                "ctaLabel": "Play lost boy found on Spotify",
+                "icon": "spotify",
+                "accent": "#39FF14",
+                "band": "lost-boy-found"
+            },
+            {
+                "id": "mood-chill",
+                "label": "Chill (Indie-Folk)",
+                "bandLine": "AI Indie-folk hymns remixes",
+                "image": "/assets/bands/tgr/albums/christmas-vol2.png",
+                "description": "Warm, reflective indie-folk to help your family meditate on the Word in a calm environment.",
+                "href": "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
+                "ctaLabel": "Play The Great Reunion on Spotify",
+                "icon": "spotify",
+                "accent": "#6AD7E5",
+                "band": "the-great-reunion"
+            },
+            {
+                "id": "mood-modern",
+                "label": "Modern Vibe (EDM)",
+                "bandLine": "AI Christian EDM / future bass",
+                "image": "/assets/bands/sprinkld/albums/tis-my-happiness-below.png",
+                "description": "Theologically rich EDM and future bass remixes that keep edification on loop.",
+                "href": "https://open.spotify.com/album/12oi765RkQIuCrhzL8OuBb?si=sgFnMdrzQ7uoKlK6syJltA",
+                "ctaLabel": "Play SPRINKLD on Spotify",
+                "icon": "spotify",
+                "accent": "#FF5FB7",
+                "band": "sprinkld"
+            }
+        ]
+    },
+    "flags": [],
+    "flair": {
+        "image": "/assets/flair/seasonal.png",
+        "size": 170,
+        "offsetX": -30,
+        "offsetY": -30,
+        "opacity": 0.95
+    },
+    "bands": [
+        {
+            "id": "the-great-reunion",
+            "name": "The Great Reunion",
+            "tagline": "Indie-folk hymns & Scripture songs",
+            "description": "Warm, reflective indie-folk to encourage your family.",
+            "accent": "#6AD7E5",
+            "logo": "/assets/bands/tgr/logo.png",
+            "latestRelease": {
+                "title": "Christmas Volume 2",
+                "subtitle": "Indie-folk carols that keep Christ at the center of Christmas.",
+                "cta": "Play on Spotify",
+                "href": "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
+                "image": "/assets/bands/tgr/albums/christmas-vol2.png",
+                "releaseDate": "2025-11-13",
+                "eyebrow": "Featured Album"
+            },
+            "releaseDate": "2025-12-01",
+            "socialProofTitle": "Families say",
+            "socialProof": [
+                {
+                    "quote": "\"You know what, heck yeah! God can use anything to reach His people!\"",
+                    "source": "Karen - TikTok"
+                }
+            ],
+            "albums": [
+                {
+                    "title": "Hymns Volume 1 (AI)",
+                    "releaseDate": "2025-10-16",
+                    "href": "https://open.spotify.com/album/0YIq1OOyQkJmY1B1OhUJlo?si=JJ8JWifQSCyp6L-UlMWwYA",
+                    "tracks": null,
+                    "image": "/assets/bands/tgr/albums/hymns-vol1.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Christmas Volume 1 (AI)",
+                    "releaseDate": "2025-10-25",
+                    "href": "https://open.spotify.com/album/2ucLYXQFEqF7SCJpjU3lA5?si=Wt7e-P-GQrOih9jJj3x2OA",
+                    "tracks": null,
+                    "image": "/assets/bands/tgr/albums/christmas-vol1.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Christmas Volume 2 (AI)",
+                    "releaseDate": "2025-11-13",
+                    "href": "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
+                    "tracks": null,
+                    "image": "/assets/bands/tgr/albums/christmas-vol2.png",
+                    "ctaLabel": "Listen on Spotify"
+                }
+            ],
+            "links": [
+                {
+                    "id": "spotify",
+                    "icon": "spotify",
+                    "label": "Play on Spotify",
+                    "href": "https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ",
+                    "color": "#1DB954"
+                }
+            ],
+            "extras": [
+                {
+                    "id": "instagram",
+                    "icon": "instagram",
+                    "label": "Instagram",
+                    "href": "https://www.instagram.com/thegreatreunionmusic/",
+                    "color": "#E1306C"
+                },
+                {
+                    "id": "tiktok",
+                    "icon": "tiktok",
+                    "label": "TikTok",
+                    "href": "https://www.tiktok.com/@thegreatreunionmusic",
+                    "color": "#000000"
+                }
+            ]
+        },
+        {
+            "id": "lost-boy-found",
+            "name": "Lost Boy Found",
+            "tagline": "High-energy AI pop-punk hymns",
+            "description": "Pop-punk Scripture songs for lively family car rides.",
+            "accent": "#39FF14",
+            "logo": "/assets/bands/lbf/logo.png",
+            "latestRelease": {
+                "title": "Hymns of the F(ai)th: Christmas Vol. 2",
+                "subtitle": "Pop-punk carols with straight-from-Scripture lyrics.",
+                "cta": "Play on Spotify",
+                "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+                "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2.png",
+                "releaseDate": "2025-11-15",
+                "eyebrow": "Featured Album"
+            },
+            "releaseDate": "2025-10-14",
+            "socialProofTitle": "Families say",
+            "socialProof": [
+                {
+                    "quote": "\"...[these] are close to Scripture and...draw me back to His Word and help me to remember...\"",
+                    "source": "Cordell G."
+                }
+            ],
+            "albums": [
+                {
+                    "title": "b(ai)ble songs vol. 1",
+                    "releaseDate": "2024-08-24",
+                    "href": "https://open.spotify.com/album/5JITvUv8gqmFv5S9unXoxT?si=2mfHjQnyRDi1H5iiHipIeg",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-vol1.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "b(ai)ble songs vol. 2",
+                    "releaseDate": "2024-09-09",
+                    "href": "https://open.spotify.com/album/3sgPgEvRGziuUtJJInQYPZ?si=gY6bKvskSGiZEaSgJjAlLA",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-vol2.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "b(ai)ble songs: Christmas",
+                    "releaseDate": "2024-09-20",
+                    "href": "https://open.spotify.com/album/1vjJ4SUQiiBx1JvA5A9K3M?si=87RGMpi2SJiucyoYV3R_qQ",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-christmas.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "b(ai)ble songs vol. 3",
+                    "releaseDate": "2024-10-08",
+                    "href": "https://open.spotify.com/album/6uenmiH3aUYMAZU7Xo4VVY?si=RO2pTsTORgOpn3xbzlaE3Q",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-vol3.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "b(ai)ble songs: The Passion Pt. 1",
+                    "releaseDate": "2025-03-05",
+                    "href": "https://open.spotify.com/album/1uS80eRz8a3nQP36D4aDrV?si=oXAEvF3LRW-KiFm_KOw8Lw",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-passion-pt1.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "b(ai)ble songs: The Passion Pt. 2",
+                    "releaseDate": "2025-03-29",
+                    "href": "https://open.spotify.com/album/4RRc7ID3OCyQlHARg6O0ym?si=dU6cRKN1Qe6hp2CVnZrPOQ",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-passion-pt2.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "b(ai)ble songs: The Passion Pt. 3",
+                    "releaseDate": "2025-04-18",
+                    "href": "https://open.spotify.com/album/0jeaBC4Eipxx6r2tjRQvZG?si=rUMNunKoSrunL0L10taolA",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/baible-songs-passion-pt3.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 1",
+                    "releaseDate": "2025-05-13",
+                    "href": "https://open.spotify.com/album/00hqsKTo0YVpY9FylrExo9?si=Dz8ubs6tSxaCjdFp6QygAg",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol1.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 2",
+                    "releaseDate": "2025-06-07",
+                    "href": "https://open.spotify.com/album/63Xt3nulRUI7bkTO8ENJ6L?si=_eZWN07zSxmPsHwYGeiO_g",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol2.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 3",
+                    "releaseDate": "2025-06-21",
+                    "href": "https://open.spotify.com/album/41u6mAM3fExtl0ayUgSKEg?si=3IoCG-mDQbmseJK6Vs9fzQ",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol3.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 4",
+                    "releaseDate": "2025-07-05",
+                    "href": "https://open.spotify.com/album/6ojDnJtQSRXsLZ6Ri6VGw9?si=etgLgDgrQ6OsSk8qqbdkHw",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol4.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 5",
+                    "releaseDate": "2025-08-07",
+                    "href": "https://open.spotify.com/album/35jHOkqCGhLdTeavy4cTgB?si=P720mJS5RJGjZ0esFDmdHw",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol5.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 6",
+                    "releaseDate": "2025-09-11",
+                    "href": "https://open.spotify.com/album/2EgtLLT4m8DK38sMsKClfS?si=qqNydCcNR7uh-eXaxUwHUg",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol6.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 7",
+                    "releaseDate": "2025-10-09",
+                    "href": "https://open.spotify.com/album/6fD0WK86QSnDtnIKGoXUYJ?si=DgLBqMDcSn-DrbDeeDZ4qA",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol7.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th Vol. 8",
+                    "releaseDate": "2025-10-13",
+                    "href": "https://open.spotify.com/album/5hd8AFbqtLUnnh5adHwhOG?si=ipDdtffiRb-oIzL0qRmCXw",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol8.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th: Christmas Vol. 2",
+                    "releaseDate": "2025-11-15",
+                    "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Hymns of the F(ai)th: Christmas Vol. 2 (Alt)",
+                    "releaseDate": "2025-11-06",
+                    "href": "https://open.spotify.com/album/1zaLcPivZ65sv1lsSbDWoB?si=EPIxl2KWS7GIf0GSkcPlTg",
+                    "tracks": null,
+                    "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
+                    "ctaLabel": "Listen on Spotify"
+                }
+            ],
+            "links": [
+                {
+                    "id": "spotify",
+                    "icon": "spotify",
+                    "label": "Play on Spotify",
+                    "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
+                    "color": "#1DB954"
+                }
+            ],
+            "extras": [
+                {
+                    "id": "instagram",
+                    "icon": "instagram",
+                    "label": "Instagram",
+                    "href": "https://www.instagram.com/christianaiband/",
+                    "color": "#E1306C"
+                },
+                {
+                    "id": "tiktok",
+                    "icon": "tiktok",
+                    "label": "TikTok",
+                    "href": "https://www.tiktok.com/@lostboyfoundofficial",
+                    "color": "#000000"
+                }
+            ]
+        },
+        {
+            "id": "sprinkld",
+            "name": "SPRINKLD",
+            "tagline": "AI Christian EDM / future bass",
+            "description": "Theologically rich EDM and future bass remixes to keep ddification on loop.",
+            "accent": "#FF5FB7",
+            "logo": "/assets/bands/sprinkld/logo.png",
+            "badge": "New",
+            "latestRelease": {
+                "title": "'Tis My Happiness Below",
+                "subtitle": "Future-bass EP built on Puritan lyrics.",
+                "cta": "Play on Spotify",
+                "href": "https://open.spotify.com/album/12oi765RkQIuCrhzL8OuBb?si=sgFnMdrzQ7uoKlK6syJltA",
+                "image": "/assets/bands/sprinkld/releases/tis-my-happiness-below.png",
+                "releaseDate": "2025-11-15",
+                "eyebrow": "Featured EP"
+            },
+            "releaseDate": "2025-11-15",
+            "socialProofTitle": "Listeners say",
+            "socialProof": [
+                {
+                    "quote": "\"This keeps one core truth in my head all day.\"",
+                    "source": "Jonathan D."
+                }
+            ],
+            "albums": [
+                {
+                    "title": "Sometimes a Light Surprises",
+                    "releaseDate": "2025-11-19",
+                    "href": "https://open.spotify.com/album/0jX2xBAfxcX4Z63r3eWjeo?si=0F_48drlRzyU_08kIQGRXA",
+                    "tracks": null,
+                    "image": "/assets/bands/sprinkld/albums/sometimes-a-light-surprises.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "Let Me But Hear My Savior Say",
+                    "releaseDate": "2025-11-19",
+                    "href": "https://open.spotify.com/album/5bm11rmiQekwBmggQXcL26?si=217arqVQS5i66o4zH7KmKg",
+                    "tracks": null,
+                    "image": "/assets/bands/sprinkld/albums/let-me-but-hear-my-savior-say.png",
+                    "ctaLabel": "Listen on Spotify"
+                },
+                {
+                    "title": "'Tis My Happiness Below",
+                    "releaseDate": "2025-11-15",
+                    "href": "https://open.spotify.com/album/12oi765RkQIuCrhzL8OuBb?si=sgFnMdrzQ7uoKlK6syJltA",
+                    "tracks": null,
+                    "image": "/assets/bands/sprinkld/albums/tis-my-happiness-below.png",
+                    "ctaLabel": "Listen on Spotify"
+                }
+            ],
+            "links": [
+                {
+                    "id": "spotify",
+                    "icon": "spotify",
+                    "label": "Play on Spotify",
+                    "href": "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
+                    "color": "#1DB954"
+                }
+            ],
+            "extras": [
+                {
+                    "id": "tiktok",
+                    "icon": "tiktok",
+                    "label": "TikTok",
+                    "href": "https://www.tiktok.com/@sprinkldmusic",
+                    "color": "#000000"
+                }
+            ]
+        },
+        {
+            "id": "othersoriented-merch",
+            "name": "Others Oriented Merch",
+            "tagline": "Limited drops to support the music",
+            "description": "Pick up playful tees, hoodies, and posters that help fund more Christ-centered AI music experiments.",
+            "accent": "#FF8A3C",
+            "links": [
+                {
+                    "id": "shop-main",
+                    "icon": "merch",
+                    "label": "Open full store",
+                    "href": "https://othersoriented.creator-spring.com/",
+                    "color": "#FF8A3C"
+                }
+            ],
+            "merch": {
+                "eyebrow": "Fresh Threads",
+                "title": "Shop Others Oriented Merch",
+                "description": "Just for fun--browse and snag a cozy gift.",
+                "embedHtml": "<iframe style='border-radius:24px;border:none' src='https://embed.creator-spring.com/widget?slug=othersoriented&per=20&currency=&page=1&layout=carousel-small&theme=light' title='othersoriented Merch store powered by Spring' width='100%' height='420' data-reactroot=''></iframe>"
+            }
+        }
+    ],
+    "cardsTitle": "Arcade",
+    "subscribe": {
+        "enabled": true,
+        "includeFirstName": true,
+        "title": "Be the first to know",
+        "description": "We'll let you know whenever we develop more edifying content (of all types).",
+        "ctaLabel": "Sign me up",
+        "disclaimer": "1-2 thoughtful emails a month. No spam, just music and ideas that help your kids love Scripture.",
+        "analyticsLocation": "midpage"
+    },
+    "shareUrl": "https://edifai.me",
+    "backgroundVideo": {
+        "src": "/assets/video/background.mp4"
+    },
+    "cards": [
+        {
+            "id": "game",
+            "icon": "game",
+            "label": "Play Flappy Praise",
+            "href": "/game.html",
+            "color": "#39FF14"
+        },
+        {
+            "id": "ninja",
+            "icon": "game",
+            "label": "Play Praise Ninja",
+            "href": "/ninja/",
+            "color": "#00E5FF"
+        }
+    ],
+    "featured": [
+        "game"
+    ]
 }
