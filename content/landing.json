@@ -153,9 +153,44 @@
                 {
                     "id": "spotify",
                     "icon": "spotify",
-                    "label": "Play on Spotify",
+                    "label": "Spotify",
                     "href": "https://open.spotify.com/artist/4AFA0ADp9dugRrRY3RjbIJ",
                     "color": "#1DB954"
+                },
+                {
+                    "id": "apple",
+                    "icon": "apple",
+                    "label": "Apple Music",
+                    "href": "https://music.apple.com/us/artist/the-great-reunion/1846862216",
+                    "color": "#0F0F0F"
+                },
+                {
+                    "id": "ytm",
+                    "icon": "youtubemusic",
+                    "label": "YouTube Music",
+                    "href": "https://music.youtube.com/channel/UCF750lcrGvPrwLF2rELwrhw",
+                    "color": "#FF0000"
+                },
+                {
+                    "id": "amazon",
+                    "icon": "amazon",
+                    "label": "Amazon Music",
+                    "href": "https://music.amazon.com/artists/B0FWTZYP96/the-great-reunion",
+                    "color": "#00A8E1"
+                },
+                {
+                    "id": "pandora",
+                    "icon": "pandora",
+                    "label": "Pandora",
+                    "href": "https://www.pandora.com/artist/the-great-reunion/ARpwqxg9bwwjpJ9",
+                    "color": "#1F7CF0"
+                },
+                {
+                    "id": "youtube",
+                    "icon": "youtube",
+                    "label": "YouTube",
+                    "href": "https://www.youtube.com/@thegreatreunion",
+                    "color": "#FF0000"
                 }
             ],
             "extras": [
@@ -341,9 +376,44 @@
                 {
                     "id": "spotify",
                     "icon": "spotify",
-                    "label": "Play on Spotify",
+                    "label": "Spotify",
                     "href": "https://open.spotify.com/artist/5blMhZSDPm29S3kPXQceQc",
                     "color": "#1DB954"
+                },
+                {
+                    "id": "apple",
+                    "icon": "apple",
+                    "label": "Apple Music",
+                    "href": "https://music.apple.com/us/artist/lost-boy-found/1763501707",
+                    "color": "#0F0F0F"
+                },
+                {
+                    "id": "ytm",
+                    "icon": "youtubemusic",
+                    "label": "YouTube Music",
+                    "href": "https://music.youtube.com/channel/UCKB4Jk2McXRfAgTrSZs2ljg",
+                    "color": "#FF0000"
+                },
+                {
+                    "id": "amazon",
+                    "icon": "amazon",
+                    "label": "Amazon Music",
+                    "href": "https://music.amazon.com/artists/B0DDJPM36D/lost-boy-found",
+                    "color": "#00A8E1"
+                },
+                {
+                    "id": "pandora",
+                    "icon": "pandora",
+                    "label": "Pandora",
+                    "href": "https://pandora.app.link/R4jc6mU0jNb",
+                    "color": "#1F7CF0"
+                },
+                {
+                    "id": "youtube",
+                    "icon": "youtube",
+                    "label": "YouTube",
+                    "href": "https://www.youtube.com/channel/UCbDWdjXC8S-F02_FlAdTJgw",
+                    "color": "#FF0000"
                 }
             ],
             "extras": [
@@ -418,9 +488,44 @@
                 {
                     "id": "spotify",
                     "icon": "spotify",
-                    "label": "Play on Spotify",
+                    "label": "Spotify",
                     "href": "https://open.spotify.com/artist/3gshwRvglY4DfiFqppuY0X",
                     "color": "#1DB954"
+                },
+                {
+                    "id": "apple",
+                    "icon": "apple",
+                    "label": "Apple Music (coming soon)",
+                    "href": "#",
+                    "color": "#0F0F0F"
+                },
+                {
+                    "id": "amazon",
+                    "icon": "amazon",
+                    "label": "Amazon Music",
+                    "href": "https://music.amazon.com/artists/B0G2K2XXGL/sprinkld",
+                    "color": "#00A8E1"
+                },
+                {
+                    "id": "pandora",
+                    "icon": "pandora",
+                    "label": "Pandora",
+                    "href": "https://www.pandora.com/artist/sprinkld/ARgXpppVwXlrqZ6",
+                    "color": "#1F7CF0"
+                },
+                {
+                    "id": "ytm",
+                    "icon": "youtubemusic",
+                    "label": "YouTube Music",
+                    "href": "https://music.youtube.com/channel/UCzCEi0pehN9xS73DNgl-JHg",
+                    "color": "#FF0000"
+                },
+                {
+                    "id": "youtube",
+                    "icon": "youtube",
+                    "label": "YouTube",
+                    "href": "https://www.youtube.com/channel/UCqLBHMbLHh1djqo06Xn5ZBQ",
+                    "color": "#FF0000"
                 }
             ],
             "extras": [

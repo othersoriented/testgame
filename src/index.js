@@ -1243,6 +1243,33 @@ function createBandSection(band, shareUrl, flair) {
   const albums = createAlbumCarousel(band, accent, accentSoft);
   if (albums) content.appendChild(albums);
 
+  const links = Array.isArray(band.links) ? band.links.filter(Boolean) : [];
+  if (links.length) {
+    const streams = document.createElement('div');
+    streams.className = 'landing-band-streams';
+    links.forEach(link => {
+      const a = document.createElement('a');
+      a.className = 'landing-band-stream';
+      a.href = link.href;
+      a.target = link.href?.startsWith('/') ? '_self' : '_blank';
+      a.rel = 'noopener noreferrer';
+      a.dataset.bandId = band.id || '';
+      a.dataset.linkId = link.id || '';
+      a.title = link.label || '';
+      a.setAttribute('aria-label', link.label || link.id || 'stream link');
+      a.innerHTML = iconSVG(link.icon);
+      a.style.color = link.color || accent;
+      a.addEventListener('click', () => emitBandAnalytics('band_stream_click', band, [link.id, link.label], {
+        stream_id: link.id,
+        label: link.label,
+        stream_label: link.label,
+        url: link.href
+      }));
+      streams.appendChild(a);
+    });
+    content.appendChild(streams);
+  }
+
   if (content.childElementCount) {
     section.appendChild(content);
   }
