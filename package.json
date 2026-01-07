@@ -50,6 +50,8 @@
     "webpack-dev-server": "^4.15.2"
   },
   "dependencies": {
+    "@studio-freight/lenis": "^1.0.35",
+    "gsap": "^3.12.5",
     "phaser": "3.55.2",
     "phaser3-webfont-loader": "^1.0.0",
     "serve": "^14.2.1"

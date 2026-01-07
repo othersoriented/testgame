@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Rest for the Weary | EdifAI</title>
+  <meta name="description" content="An immersive scroll-story about the rest Jesus gives the weary and heavy-laden." />
+  <link rel="icon" type="image/png" href="/assets/bands/tgr/logo.png?v=2" />
+  <base href="/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="rest-body">
+  <div class="progress" aria-hidden="true"></div>
+  <div class="toolbar">
+    <button id="reduce-motion-toggle" class="reduce-motion-toggle" type="button" aria-pressed="false">Reduce Motion</button>
+  </div>
+  <main class="story" id="story">
+    <div class="stage" aria-hidden="true">
+      <div class="stage-media">
+        <video class="stage-video" autoplay muted loop playsinline preload="metadata" poster="/assets/bands/tgr/albums/hymns-vol1.png">
+          <source src="/assets/video/background.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="stage-overlay"></div>
+    </div>
+    <div class="beats" id="beats"></div>
+  </main>
+</body>
+</html>

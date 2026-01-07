@@ -860,6 +860,11 @@ function createAlbumCarousel(band, accent, accentSoft) {
   list.style.paddingBottom = '4px';
 
   const sortedAlbums = [...albums].sort((a, b) => {
+    const seasonalA = (a?.seasonal || '').toString().toLowerCase();
+    const seasonalB = (b?.seasonal || '').toString().toLowerCase();
+    const isSeasonalA = seasonalA === 'christmas';
+    const isSeasonalB = seasonalB === 'christmas';
+    if (isSeasonalA !== isSeasonalB) return isSeasonalA ? 1 : -1;
     const da = a?.releaseDate ? new Date(a.releaseDate).getTime() : 0;
     const db = b?.releaseDate ? new Date(b.releaseDate).getTime() : 0;
     return db - da;

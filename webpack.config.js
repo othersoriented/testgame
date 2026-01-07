@@ -11,6 +11,7 @@ module.exports = {
   entry: {
     main: './src/index.js',
     game: './src/game/game.js',
+    rest: './src/rest.js',
   },
 
   output: {
@@ -30,7 +31,12 @@ module.exports = {
     open: true,
     hot: true,
     client: { overlay: true },
-    historyApiFallback: false,
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/rest\/?$/, to: '/rest/index.html' },
+        { from: /^\/onboarding\/?$/, to: '/onboarding/index.html' },
+      ],
+    },
   },
 
   module: {
@@ -53,6 +59,20 @@ module.exports = {
       filename: 'index.html',
       inject: 'body',
     }, faviconOpts)),
+    // Rest story page -> dist/rest/index.html
+    new HtmlWebpackPlugin(Object.assign({
+      template: './src/rest.html',
+      chunks: ['rest'],
+      filename: 'rest/index.html',
+      inject: 'body',
+    }, faviconOpts)),
+    // Onboarding page -> dist/onboarding/index.html
+    new HtmlWebpackPlugin({
+      template: './src/onboarding.html',
+      chunks: [],
+      filename: 'onboarding/index.html',
+      inject: false,
+    }),
     // Phaser game page → dist/game.html
     new HtmlWebpackPlugin(Object.assign({
       template: './src/game/game.html',

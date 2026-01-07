@@ -1,5 +1,6 @@
 {
     "announcement": {
+        "enabled": false,
         "id": "christmas-banner",
         "text": "New: The Christmas Collection - pop-punk carols, and indie-folk hymns for Advent & Christmas.",
         "cta": {
@@ -26,12 +27,6 @@
             "href": "#moods",
             "icon": "play"
         },
-        "secondaryCta": {
-            "id": "hero_christmas_mix",
-            "label": "Play the Christmas Mix",
-            "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
-            "icon": "spotify"
-        },
         "highlights": [
             {
                 "value": "3 moods",
@@ -56,9 +51,9 @@
                 "id": "mood-high-energy",
                 "label": "High-Energy (Pop-Punk)",
                 "bandLine": "AI Pop-punk Bible songs and Hymns",
-                "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
+                "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol8.png",
                 "description": "High-energy pop-punk with ancient lyrics and others pulled straight from Scripture.",
-                "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
+                "href": "https://open.spotify.com/album/5hd8AFbqtLUnnh5adHwhOG?si=ipDdtffiRb-oIzL0qRmCXw",
                 "ctaLabel": "Play lost boy found on Spotify",
                 "icon": "spotify",
                 "accent": "#39FF14",
@@ -68,9 +63,9 @@
                 "id": "mood-chill",
                 "label": "Chill (Indie-Folk)",
                 "bandLine": "AI Indie-folk hymns remixes",
-                "image": "/assets/bands/tgr/albums/christmas-vol2.png",
+                "image": "/assets/bands/tgr/albums/hymns-vol1.png",
                 "description": "Warm, reflective indie-folk to help your family meditate on the Word in a calm environment.",
-                "href": "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
+                "href": "https://open.spotify.com/album/0YIq1OOyQkJmY1B1OhUJlo?si=JJ8JWifQSCyp6L-UlMWwYA",
                 "ctaLabel": "Play The Great Reunion on Spotify",
                 "icon": "spotify",
                 "accent": "#6AD7E5",
@@ -91,13 +86,7 @@
         ]
     },
     "flags": [],
-    "flair": {
-        "image": "/assets/flair/seasonal.png",
-        "size": 170,
-        "offsetX": -30,
-        "offsetY": -30,
-        "opacity": 0.95
-    },
+    "flair": null,
     "bands": [
         {
             "id": "the-great-reunion",
@@ -107,15 +96,15 @@
             "accent": "#6AD7E5",
             "logo": "/assets/bands/tgr/logo.png",
             "latestRelease": {
-                "title": "Christmas Volume 2",
-                "subtitle": "Indie-folk carols that keep Christ at the center of Christmas.",
+                "title": "Hymns Volume 1",
+                "subtitle": "Indie-folk hymns and Scripture songs for the whole family.",
                 "cta": "Play on Spotify",
-                "href": "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
-                "image": "/assets/bands/tgr/albums/christmas-vol2.png",
-                "releaseDate": "2025-11-13",
+                "href": "https://open.spotify.com/album/0YIq1OOyQkJmY1B1OhUJlo?si=JJ8JWifQSCyp6L-UlMWwYA",
+                "image": "/assets/bands/tgr/albums/hymns-vol1.png",
+                "releaseDate": "2025-10-16",
                 "eyebrow": "Featured Album"
             },
-            "releaseDate": "2025-12-01",
+            "releaseDate": "2025-10-16",
             "socialProofTitle": "Families say",
             "socialProof": [
                 {
@@ -138,7 +127,8 @@
                     "href": "https://open.spotify.com/album/2ucLYXQFEqF7SCJpjU3lA5?si=Wt7e-P-GQrOih9jJj3x2OA",
                     "tracks": null,
                     "image": "/assets/bands/tgr/albums/christmas-vol1.png",
-                    "ctaLabel": "Listen on Spotify"
+                    "ctaLabel": "Listen on Spotify",
+                    "seasonal": "christmas"
                 },
                 {
                     "title": "Christmas Volume 2 (AI)",
@@ -146,7 +136,8 @@
                     "href": "https://open.spotify.com/album/4pJtufDoWBsqh2nUvks2ea?si=0OCSOTjJSxOskZWaFaqnLw",
                     "tracks": null,
                     "image": "/assets/bands/tgr/albums/christmas-vol2.png",
-                    "ctaLabel": "Listen on Spotify"
+                    "ctaLabel": "Listen on Spotify",
+                    "seasonal": "christmas"
                 }
             ],
             "links": [
@@ -218,15 +209,15 @@
             "accent": "#39FF14",
             "logo": "/assets/bands/lbf/logo.png",
             "latestRelease": {
-                "title": "Hymns of the F(ai)th: Christmas Vol. 2",
-                "subtitle": "Pop-punk carols with straight-from-Scripture lyrics.",
+                "title": "Hymns of the F(ai)th Vol. 8",
+                "subtitle": "Pop-punk hymns with straight-from-Scripture lyrics.",
                 "cta": "Play on Spotify",
-                "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
-                "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2.png",
-                "releaseDate": "2025-11-15",
+                "href": "https://open.spotify.com/album/5hd8AFbqtLUnnh5adHwhOG?si=ipDdtffiRb-oIzL0qRmCXw",
+                "image": "/assets/bands/lbf/albums/hymns-of-the-faith-vol8.png",
+                "releaseDate": "2025-10-13",
                 "eyebrow": "Featured Album"
             },
-            "releaseDate": "2025-10-14",
+            "releaseDate": "2025-10-13",
             "socialProofTitle": "Families say",
             "socialProof": [
                 {
@@ -257,7 +248,8 @@
                     "href": "https://open.spotify.com/album/1vjJ4SUQiiBx1JvA5A9K3M?si=87RGMpi2SJiucyoYV3R_qQ",
                     "tracks": null,
                     "image": "/assets/bands/lbf/albums/baible-songs-christmas.png",
-                    "ctaLabel": "Listen on Spotify"
+                    "ctaLabel": "Listen on Spotify",
+                    "seasonal": "christmas"
                 },
                 {
                     "title": "b(ai)ble songs vol. 3",
@@ -361,7 +353,8 @@
                     "href": "https://open.spotify.com/album/4NWerSb2qMIFL6J4uliSZL?si=3lI-HxjsQ6O7Nk9T4mauwQ",
                     "tracks": null,
                     "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2.png",
-                    "ctaLabel": "Listen on Spotify"
+                    "ctaLabel": "Listen on Spotify",
+                    "seasonal": "christmas"
                 },
                 {
                     "title": "Hymns of the F(ai)th: Christmas Vol. 2 (Alt)",
@@ -369,7 +362,8 @@
                     "href": "https://open.spotify.com/album/1zaLcPivZ65sv1lsSbDWoB?si=EPIxl2KWS7GIf0GSkcPlTg",
                     "tracks": null,
                     "image": "/assets/bands/lbf/albums/hymns-of-the-faith-christmas-vol2-alt.png",
-                    "ctaLabel": "Listen on Spotify"
+                    "ctaLabel": "Listen on Spotify",
+                    "seasonal": "christmas"
                 }
             ],
             "links": [

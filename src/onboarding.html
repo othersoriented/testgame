@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Welcome | EdifAI</title>
+  <meta name="description" content="Simple next steps after praying for rest." />
+  <link rel="icon" type="image/png" href="/assets/bands/tgr/logo.png?v=2" />
+  <base href="/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #4b5563;
+      --bg: #f8f3ea;
+      --accent: #22c55e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      font-family: "Work Sans", "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 400px at 10% -10%, rgba(255, 255, 255, 0.7), transparent 60%),
+        linear-gradient(180deg, var(--bg) 0%, #efe4d4 100%);
+      display: grid;
+      place-items: center;
+      padding: clamp(24px, 6vw, 60px);
+    }
+    .card {
+      width: min(70ch, 100%);
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 24px;
+      padding: clamp(24px, 6vw, 48px);
+      box-shadow: 0 24px 50px rgba(15, 23, 42, 0.18);
+    }
+    .kicker {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      margin: 0 0 12px;
+      font-size: clamp(28px, 5vw, 44px);
+    }
+    p {
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--ink);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      background: #ffffff;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+    .btn.primary {
+      background: var(--accent);
+      border-color: transparent;
+      color: #06120c;
+      box-shadow: 0 10px 22px rgba(34, 197, 94, 0.35);
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn:focus-visible {
+      outline: 3px solid rgba(14, 165, 164, 0.6);
+      outline-offset: 3px;
+    }
+    @media (max-width: 640px) {
+      .actions {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="kicker">You are not alone</div>
+    <h1>Thanks for praying.</h1>
+    <p>Take one next step today. Keep it simple and steady.</p>
+    <div class="actions">
+      <a class="btn primary" href="/#moods">Start Listening</a>
+      <a class="btn" href="/#subscribe">Get Encouragement</a>
+      <a class="btn" href="/rest#first-steps">Back to First Steps</a>
+    </div>
+  </main>
+</body>
+</html>
