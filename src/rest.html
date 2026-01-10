@@ -4,28 +4,265 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Rest for the Weary | EdifAI</title>
-  <meta name="description" content="An immersive scroll-story about the rest Jesus gives the weary and heavy-laden." />
+  <meta name="description" content="An immersive scroll story about the rest Jesus gives the weary and heavy-laden." />
   <link rel="icon" type="image/png" href="/assets/bands/tgr/logo.png?v=2" />
   <base href="/" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/rest/realfood-base.css" />
+  <link rel="stylesheet" href="/assets/rest/realfood-theme.css" />
+  <link rel="stylesheet" href="/assets/rest/rest-overrides.css" />
 </head>
-<body class="rest-body">
+<body class="antialiased rest-root">
   <div class="progress" aria-hidden="true"></div>
   <div class="toolbar">
     <button id="reduce-motion-toggle" class="reduce-motion-toggle" type="button" aria-pressed="false">Reduce Motion</button>
   </div>
-  <main class="story" id="story">
-    <div class="stage" aria-hidden="true">
-      <div class="stage-media">
-        <video class="stage-video" autoplay muted loop playsinline preload="metadata" poster="/assets/bands/tgr/albums/hymns-vol1.png">
-          <source src="/assets/video/background.mp4" type="video/mp4" />
-        </video>
+  <div class="intro-animation_overlay___QI3A" aria-hidden="true" role="presentation">
+    <div class="intro-animation_foodsContainer__1RcN0">
+      <div class="intro-animation_broccoli__5JNS9">
+        <img alt="" src="/assets/rest/cross.svg" />
       </div>
-      <div class="stage-overlay"></div>
+      <div class="intro-animation_milk__2i5tG">
+        <img alt="" src="/assets/rest/bible.svg" />
+      </div>
+      <div class="intro-animation_steak__bJFmE">
+        <img alt="" src="/assets/rest/dove.svg" />
+      </div>
     </div>
-    <div class="beats" id="beats"></div>
-  </main>
+  </div>
+  <div class="rest-shell">
+    <header>
+      <div class="usg-banner_banner__aFh3W">
+        <div class="usg-banner_content__F3eFe">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="usg-banner_flag__wVAcp" aria-hidden="true">
+            <path d="M12 2.5v19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M6 7h12l-2 3 2 3H6z" fill="currentColor" />
+          </svg>
+          <div class="usg-banner_text__JpjoM">A quiet place for the weary. <span>Find rest in Jesus.</span></div>
+        </div>
+      </div>
+      <nav class="nav_nav__E77In" style="top:56px">
+        <div class="nav_pill__LWSDc nav_inverted__prz4L">
+          <button class="nav_dot_button__kZB4V" type="button" data-nav-target="intro" aria-label="Rest story intro">
+            <span class="nav_label_container__okVKb"><span class="nav_label__YsHFx">Rest</span></span>
+            <span class="nav_dot__wmsAp"></span>
+          </button>
+          <button class="nav_dot_button__kZB4V" type="button" data-nav-target="problem" aria-label="The weight">
+            <span class="nav_label_container__okVKb"><span class="nav_label__YsHFx">Weight</span></span>
+            <span class="nav_dot__wmsAp"></span>
+          </button>
+          <button class="nav_dot_button__kZB4V" type="button" data-nav-target="solution" aria-label="The gospel">
+            <span class="nav_label_container__okVKb"><span class="nav_label__YsHFx">Gospel</span></span>
+            <span class="nav_dot__wmsAp"></span>
+          </button>
+          <button class="nav_dot_button__kZB4V" type="button" data-nav-target="pyramid" aria-label="The cross">
+            <span class="nav_label_container__okVKb"><span class="nav_label__YsHFx">Cross</span></span>
+            <span class="nav_dot__wmsAp"></span>
+          </button>
+          <button class="nav_dot_button__kZB4V" type="button" data-nav-target="respond" aria-label="Respond">
+            <span class="nav_label_container__okVKb"><span class="nav_label__YsHFx">Respond</span></span>
+            <span class="nav_dot__wmsAp"></span>
+          </button>
+          <button class="nav_dot_button__kZB4V" type="button" data-nav-target="faqs" aria-label="FAQ">
+            <span class="nav_label_container__okVKb"><span class="nav_label__YsHFx">FAQ</span></span>
+            <span class="nav_dot__wmsAp"></span>
+          </button>
+        </div>
+      </nav>
+      <nav class="mobile-nav_nav__DOtPw" style="top:64px">
+        <div class="mobile-nav_pill__nXFj5 mobile-nav_blurred__bhUSS mobile-nav_inverted__Ww1sq">
+          <button class="mobile-nav_header__Myq42" id="mobile-nav-toggle" aria-label="Open menu" aria-expanded="false">
+            <span class="mobile-nav_label___kOug" style="opacity:1;transform:translateY(0)">Rest</span>
+            <div class="mobile-nav_menu_button__tT_V6">
+              <div class="mobile-nav_icon_line__lYolZ"></div>
+              <div class="mobile-nav_icon_line__lYolZ"></div>
+            </div>
+          </button>
+          <div class="mobile-nav_menu__vhaHB" hidden>
+            <div class="mobile-nav_menu_list__W1iFl">
+              <button class="mobile-nav_menu_item__pzL21" type="button" data-nav-target="intro">Rest</button>
+              <button class="mobile-nav_menu_item__pzL21" type="button" data-nav-target="problem">Weight</button>
+              <button class="mobile-nav_menu_item__pzL21" type="button" data-nav-target="solution">Gospel</button>
+              <button class="mobile-nav_menu_item__pzL21" type="button" data-nav-target="pyramid">Cross</button>
+              <button class="mobile-nav_menu_item__pzL21" type="button" data-nav-target="respond">Respond</button>
+              <button class="mobile-nav_menu_item__pzL21" type="button" data-nav-target="faqs">FAQ</button>
+            </div>
+            <button class="mobile-nav_download_button__r4kpp" type="button" data-nav-target="safety">Talk to Someone</button>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <div class="dga_page_start__RnEhf">
+        <div class="rest-theme-wrap">
+          <div id="intro">
+            <section class="dga_hero__AjMaf" aria-label="Introduction">
+              <div class="dga_container__KeUzb">
+                <div class="dga_hero_content__HjaHq rest-hero-content" data-animate="fade">
+                  <div class="dga_hero_title___3Atf">
+                    <h1 id="hero-title"></h1>
+                  </div>
+                  <div class="dga_hero_description__sgZG4">
+                    <p id="hero-sub"></p>
+                  </div>
+                  <div class="rest-hero-actions">
+                    <a class="rest-cta rest-cta-primary" href="#respond" data-cta="find_rest_now">Find Rest Now</a>
+                    <a class="rest-cta rest-cta-secondary" href="#faqs" data-cta="questions">I Have Questions</a>
+                    <a class="rest-cta rest-cta-secondary" href="#safety" data-cta="talk_to_someone">Talk to Someone</a>
+                  </div>
+                  <div class="rest-scripture" id="hero-scripture"></div>
+                </div>
+              </div>
+            </section>
+            <div id="hero-video" class="dga_hero_video__SoTy9" data-animate="fade">
+              <div class="dga_hero_video_glow__Dvekq">
+                <img src="/assets/rest/hero-glow.svg" alt="" class="dga_hero_glow_poster__HymDq" />
+              </div>
+              <div class="video-player-modal_preview__7c11u rest-hero-video" role="button" tabindex="0" aria-label="Hear the invitation">
+                <video class="video-player-modal_previewVideo__vgacp" autoplay muted loop playsinline preload="metadata" poster="/assets/rest/hero-glow.svg">
+                  <source src="/assets/video/background.mp4" type="video/mp4" />
+                </video>
+                <div class="video-player-modal_playOverlay__uPRmM">
+                  <button type="button" class="video-player-modal_playPill__1aUGT" tabindex="-1" aria-hidden="true">
+                    <span class="video-player-modal_playPillText__sgRdU">Hear the Invitation</span>
+                    <div class="video-player-modal_playPillIcon__v6Kku" aria-hidden="true">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play video-player-modal_playIcon__qcyBV" aria-hidden="true">
+                        <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <section id="problem" class="dga_stateOfHealth__5YmNX" aria-labelledby="soh-heading">
+            <div class="dga_soh_animation__Zmouz">
+              <div class="dga_soh_heading_container__luWcl">
+                <h2 id="soh-heading" class="dga_soh_heading__IlLyl">Name the weight</h2>
+              </div>
+              <div class="dga_soh_container__rovjd">
+                <div class="dga_soh_content_sticky__6xgEe" id="soh-sticky"></div>
+                <div id="soh-sentinels"></div>
+                <div class="rest-soh-scriptures" id="soh-scriptures"></div>
+              </div>
+            </div>
+            <div class="dga_percentages__MnbPB">
+              <div class="dga_percentages_sticky__FIFjs" id="soh-percentages"></div>
+            </div>
+          </section>
+        </div>
+        <div class="dga_dark__E4iDO">
+          <section id="solution" class="dga_lineInTheSand__MYFnR">
+            <div class="dga_broken_system_wrapper__OOvVj">
+              <div class="dga_broken_system_sticky__K1eSK">
+                <div class="dga_broken_system_image_container__H9d4u">
+                  <button type="button" class="dga_broken_system_image_button__mJSOV" tabindex="0">
+                    <img alt="The cross" loading="lazy" width="440" height="340" decoding="async" class="dga_broken_system_image__22Ouk" src="/assets/rest/cross-card.svg" />
+                  </button>
+                  <span class="dga_broken_system_caption__XeChf" id="broken-caption"></span>
+                </div>
+                <p class="dga_broken_system_text__c9msC" id="broken-text" data-split="words"></p>
+              </div>
+            </div>
+            <div id="solution-solvable" class="dga_solvable_problem__52Str">
+              <div class="dga_container__KeUzb">
+                <h2 class="dga_disintegrating_text__mGtdY" id="solvable-text" data-split="chars"></h2>
+              </div>
+            </div>
+            <div class="dga_container__KeUzb">
+              <p id="solution-line" data-split="words"></p>
+              <div class="rest-scripture rest-scripture-dark" id="gospel-scripture"></div>
+            </div>
+          </section>
+          <div id="pyramid" class="dga_food_pyramid__ubhSz">
+            <section class="dga_new_food_pyramid__kNv0X">
+              <div class="dga_pyramid_bg_light__v81p0"></div>
+              <div class="dga_pyramid_intro_sticky__6kzDE">
+                <div class="dga_pyramid_intro_stack__J8eNy">
+                  <div class="dga_pyramid_intro_kicker__xBrVa" id="pyramid-kicker"></div>
+                  <h2 class="dga_pyramid_intro_title__EswmV" id="pyramid-title"></h2>
+                </div>
+              </div>
+              <div class="dga_pyramid_content___b2fn">
+                <div class="dga_new_pyramid__zuspN">
+                  <div class="dga_pt_2__cXr7E">
+                    <h2 id="pyramid-center"></h2>
+                  </div>
+                  <div class="dga_food_container__zSiqe">
+                    <div class="dga_pt_tooltips__CaEru" id="pyramid-tooltips"></div>
+                    <div class="dga_triangle_wrapper__pzWEM">
+                      <svg class="dga_triangle__cRNPd" viewBox="-10 -5 120 96.6" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="-0.2" y1="0" x2="100.5" y2="0" stroke="#110000" stroke-width="0.25" stroke-dasharray="100.7" stroke-dashoffset="100.7"></line>
+                        <line x1="34.1108545034642" y1="54.75" x2="70.8891454965358" y2="54.75" stroke="#110000" stroke-width="0.25" stroke-dasharray="36.7782909930716" stroke-dashoffset="36.7782909930716"></line>
+                      </svg>
+                    </div>
+                    <div class="dga_foods__p9Bwb rest-pyramid-icons" id="pyramid-icons"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="pyramid-content"></div>
+            </section>
+          </div>
+          <section id="respond" class="dga_end___VNIF">
+            <div class="dga_container__KeUzb">
+              <p id="respond-line" data-split="words"></p>
+              <div class="rest-respond-card" id="respond-content"></div>
+            </div>
+          </section>
+        </div>
+        <div>
+          <section id="faqs" class="dga_section__k3uwv">
+            <div class="dga_container__KeUzb dga_start__syDbF">
+              <div class="dga_container_xs__vHeFR">
+                <h2 class="h3">FAQ</h2>
+              </div>
+              <div class="dga_faqs__lW8is" role="list" id="faq-list"></div>
+            </div>
+          </section>
+          <section class="dga_resources_section___VAZi" aria-labelledby="resources-heading">
+            <div id="resources" class="dga_resources_anchor__CTOkF"></div>
+            <div class="dga_resources_sticky__EiBuU">
+              <div class="dga_resources__rH7NA">
+                <div class="dga_content__dDbEa">
+                  <h2 id="resources-heading">First Steps</h2>
+                  <p id="resources-summary"></p>
+                  <a href="#respond" class="dga_watch_button__bbPx4 rest-watch" id="resources-cta">
+                    <span>Find Rest Now</span>
+                    <div class="dga_link_icon__kOLOC" aria-hidden="true">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                        <path fill="currentColor" d="m9.242 5.258-3.24-3.24L7.022 1 12 5.979l-4.979 4.979-1.019-1.019 3.24-3.24H0V5.257z" xmlns="http://www.w3.org/2000/svg"></path>
+                      </svg>
+                    </div>
+                  </a>
+                </div>
+                <div class="dga_stack__A9frA">
+                  <div class="dga_docs__XPK4b" id="resource-cards"></div>
+                </div>
+                <div class="dga_doc_links__q3HdS" id="first-steps"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <section id="footer" class="dga_eatReal__hUKXz">
+      <div class="dga_eatReal_content__x6v1A" id="safety">
+        <h2>Do not carry this alone</h2>
+        <div class="dga_cards__vXMHq" id="footer-cards"></div>
+        <p class="dga_h2_food___9BYt" id="footer-verse"></p>
+        <div class="rest-safety">
+          <p>Message a Mentor or find a Bible-teaching church. In crisis: call 988 (U.S.) or your local line now.</p>
+          <div class="rest-safety-actions">
+            <a class="rest-cta rest-cta-primary" href="/onboarding?from=rest&intent=mentor">Message a Mentor</a>
+            <a class="rest-cta rest-cta-secondary" href="#first-steps">Find a Church</a>
+          </div>
+        </div>
+      </div>
+      <footer class="dga_footer__qYjWA">
+        <div class="dga_container__KeUzb">
+          <span class="dga_nds_text__RzD_v">Built for the weary by EdifAI. <a rel="noopener noreferrer" target="_blank" href="https://www.gotquestions.org/content_salvation.html">Credit: GotQuestions.org</a></span>
+        </div>
+      </footer>
+    </section>
+  </div>
 </body>
 </html>

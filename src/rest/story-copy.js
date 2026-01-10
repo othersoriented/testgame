@@ -50,6 +50,10 @@ export const story = {
       },
     ],
   },
+  solvable: {
+    title: 'Jesus carries what you cannot.',
+    line: 'He lived without sin. He died for sinners. He rose again.',
+  },
   whoJesus: {
     title: 'Who Jesus is.',
     lines: [
@@ -131,6 +135,26 @@ export const story = {
       },
     ],
   },
+  pyramid: [
+    {
+      key: 'cross',
+      title: 'The Cross',
+      body: 'Sin against the Holy God demands real payment. The cross paid it.',
+      scripture: '1 Corinthians 15:3-4 (KJV)',
+    },
+    {
+      key: 'tomb',
+      title: 'The Empty Tomb',
+      body: 'The resurrection proved it. Death is swallowed up in victory.',
+      scripture: '1 Corinthians 15:54-55 (KJV)',
+    },
+    {
+      key: 'gift',
+      title: 'The Free Gift',
+      body: 'You cannot earn this. Jesus gives it.',
+      scripture: 'Ephesians 2:8-9 (KJV)',
+    },
+  ],
   respond: {
     title: 'How to respond.',
     sub: 'Turn and trust - right now.',

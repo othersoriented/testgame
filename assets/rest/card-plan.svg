@@ -1,0 +1,10 @@
+<svg width="255" height="330" viewBox="0 0 255 330" xmlns="http://www.w3.org/2000/svg">
+  <rect width="255" height="330" rx="24" fill="#f3f0d6" />
+  <rect x="18" y="18" width="219" height="294" rx="18" fill="#fdfbee" stroke="#110000" stroke-opacity="0.1" />
+  <rect x="40" y="60" width="175" height="12" rx="6" fill="#110000" opacity="0.6" />
+  <rect x="40" y="86" width="130" height="10" rx="5" fill="#110000" opacity="0.3" />
+  <rect x="40" y="120" width="175" height="10" rx="5" fill="#110000" opacity="0.25" />
+  <rect x="40" y="142" width="160" height="10" rx="5" fill="#110000" opacity="0.25" />
+  <text x="40" y="210" font-size="18" font-family="Arial" fill="#110000">Reading Plan</text>
+  <text x="40" y="236" font-size="12" font-family="Arial" fill="#110000" opacity="0.6">Mark - 7 days</text>
+</svg>
